@@ -52,7 +52,6 @@ void User::writer()
     boost::asio::async_write(user_list[i]->socket,boost::asio::buffer(writebuff.getdata(),writebuff.max_length),[](const boost::system::error_code& error, std::size_t)
     {
 //        writer();
-        std::cout<<"wrote here"<<std::endl;
     });
 }
 

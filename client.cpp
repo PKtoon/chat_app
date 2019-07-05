@@ -29,15 +29,16 @@ class Client
     tcp::resolver::results_type endpoints;
     Message writebuff,readbuff;
     std::list<Message> buff;
+    std::thread w_thread;
 public:
     Client(std::string n,boost::asio::io_context& io,tcp::resolver::results_type endpoint):name{n},socket{io},endpoints{endpoint}
     {
         connector();
     }
     void connector();
+    void intro();
     void writer();
     void reader();
-    void intro();
     void printer();
 };
 
@@ -56,6 +57,13 @@ void Client::connector()
         }
     });
 }
+
+void Client::intro()
+{
+    writebuff.makeMsg(name,"server","name init");
+    boost::asio::write(socket,boost::asio::buffer(writebuff.getdata(),Message::max_length));
+}
+
 void Client::writer()
 {
     std::string receiver,msg;
@@ -80,12 +88,6 @@ void Client::reader()
         buff.push_back(readbuff);
         reader();
     });
-}
-
-void Client::intro()
-{
-    writebuff.makeMsg(name,"server","name init");
-    boost::asio::write(socket,boost::asio::buffer(writebuff.getdata(),Message::max_length));
 }
 
 void Client::printer()
