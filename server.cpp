@@ -1,8 +1,6 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <vector>
-#include <boost/lexical_cast.hpp>
-//#include "old/2019-07-01/message.h"
 #include "message_string.h"
 
 using boost::asio::ip::tcp;
@@ -23,7 +21,7 @@ public:
     void run()  { intro(); reader(); }
 };
 
-std::vector<User*> user_list;
+static std::vector<User*> user_list;
 
 void User::intro()
 {
@@ -34,7 +32,7 @@ void User::intro()
 
 void User::reader()
 {
-    boost::asio::async_read(socket,boost::asio::buffer(readbuff.getdata(),readbuff.max_length),[this](const boost::system::error_code& error, std::size_t t)
+    boost::asio::async_read(socket,boost::asio::buffer(readbuff.getdata(),readbuff.max_length),[this](const boost::system::error_code& error, std::size_t)
     {
         writebuff.remakeMsg(readbuff.getdata());
         writer();
@@ -51,13 +49,12 @@ void User::writer()
         writebuff.makeMsg("server",name,msg);
         i=searchUser(name);
     }
-    boost::asio::async_write(user_list[i]->socket,boost::asio::buffer(writebuff.getdata(),writebuff.max_length),[this](const boost::system::error_code& error, std::size_t t)
+    boost::asio::async_write(user_list[i]->socket,boost::asio::buffer(writebuff.getdata(),writebuff.max_length),[](const boost::system::error_code& error, std::size_t)
     {
 //        writer();
+        std::cout<<"wrote here"<<std::endl;
     });
 }
-
-int count=0;
 
 class Server
 {
@@ -96,6 +93,11 @@ int searchUser(std::string s)
 
 int main(int argc, char* argv[])
 {
+    if (argc!=2)
+    {
+        std::cout<<"Usage: server port"<<std::endl;
+        exit(1);
+    }
     boost::asio::io_context io;
 
     tcp::endpoint endpoint(tcp::v4(),std::atoi(argv[1]));       //needs ip version to use and port number
@@ -103,5 +105,4 @@ int main(int argc, char* argv[])
     Server s(io,endpoint);
     io.run();
     return 0;
-
 }

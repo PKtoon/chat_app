@@ -1,10 +1,26 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <string>
-//#include "old/2019-07-01/message.h"
+#include <list>
 #include "message_string.h"
 
 using boost::asio::ip::tcp;
+
+std::string readline()
+{
+    std::string temp="";
+    char i;
+    std::cin>>std::noskipws>>i;
+    if(i!='\n')
+        std::cin.unget();
+    while(std::cin>>std::noskipws>>i)
+    {
+        if(i=='\n')
+            break;
+        temp+=i;
+    }
+    return temp;
+}
 
 class Client
 {
@@ -12,6 +28,7 @@ class Client
     tcp::socket socket;
     tcp::resolver::results_type endpoints;
     Message writebuff,readbuff;
+    std::list<Message> buff;
 public:
     Client(std::string n,boost::asio::io_context& io,tcp::resolver::results_type endpoint):name{n},socket{io},endpoints{endpoint}
     {
@@ -21,37 +38,46 @@ public:
     void writer();
     void reader();
     void intro();
+    void printer();
 };
 
 void Client::connector()
 {
     boost::asio::async_connect(socket,endpoints,[this](const boost::system::error_code& error, const tcp::endpoint& endpoint)
     {
-        intro();
-        reader();
-        writer();
+        if (!error)
+        {
+            intro();
+            reader();
+            writer();
+        }
+        else {
+            connector();
+        }
     });
 }
 void Client::writer()
 {
     std::string receiver,msg;
-    std::cout<<"To:: "<<std::endl;
+    std::cout<<"To:: ";
     std::cin>>receiver;
-    std::cout<<"Message::"<<std::endl;
-    std::cin>>msg;
+    std::cout<<"Message:: ";
+    msg = readline();
     writebuff.makeMsg(name,receiver,msg);
-    boost::asio::async_write(socket,boost::asio::buffer(writebuff.getdata(), writebuff.max_length),[this](const boost::system::error_code& error, std::size_t t)
+    std::cout<<std::endl;
+    boost::asio::async_write(socket,boost::asio::buffer(writebuff.getdata(), writebuff.max_length),[this](const boost::system::error_code& error, std::size_t)
     {
+        printer();
         writer();
     });
 }
 
 void Client::reader()
 {
-    boost::asio::async_read(socket,boost::asio::buffer(readbuff.getdata(), readbuff.max_length),[this](const boost::system::error_code& error, std::size_t t)
+    boost::asio::async_read(socket,boost::asio::buffer(readbuff.getdata(), readbuff.max_length),[this](const boost::system::error_code& error, std::size_t)
     {
         readbuff.remakeMsg();
-        std::cout<<"From:: "<<readbuff.getSender()<<std::endl<<"Message:: "<<readbuff.getMsg()<<std::endl;
+        buff.push_back(readbuff);
         reader();
     });
 }
@@ -61,6 +87,17 @@ void Client::intro()
     writebuff.makeMsg(name,"server","name init");
     boost::asio::write(socket,boost::asio::buffer(writebuff.getdata(),Message::max_length));
 }
+
+void Client::printer()
+{
+    while(!buff.empty())
+    {
+        std::cout<<"\nFrom: "<<buff.begin()->getSender()<<std::endl;
+        std::cout<<"Message: "<<buff.begin()->getMsg()<<std::endl<<std::endl;
+        buff.pop_front();
+    }
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -82,5 +119,4 @@ int main(int argc, char* argv[])
 
     io.run();
     return 0;
-
 }
