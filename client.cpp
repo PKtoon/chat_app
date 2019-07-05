@@ -64,19 +64,21 @@ void Client::intro()
 
 int main(int argc, char* argv[])
 {
+    if (argc!=4)
+    {
+        std::cout<<"Usage: client id hostname port"<<std::endl;
+        exit(1);
+    }
     boost::asio::io_context io;
 
+    std::string id{argv[1]};
     std::string machine_name(argv[2]);
     std::string port{argv[3]};
-    //    std::string name{"0"};
-    //    if(argc==4)
-    //    {
-    //        name=argv[3];
-    //    }
+
     tcp::resolver resolver (io);
     tcp::resolver::results_type endpoints(resolver.resolve(machine_name,port));
 
-    Client c{argv[1],io,endpoints};
+    Client c{id,io,endpoints};
 
     io.run();
     return 0;
