@@ -36,15 +36,20 @@ void User::reader()
 {
     boost::asio::async_read(socket,boost::asio::buffer(readbuff.getdata(),readbuff.max_length),[this](const boost::system::error_code& error, std::size_t t)
     {
+        std::cout<<"reader enter lambda"<<std::endl;
         writebuff.remakeMsg(readbuff.getdata());
+        std::cout<<"reader below buff"<<std::endl;
         writer();
+        std::cout<<"reader below writer"<<std::endl;
         reader();
+        std::cout<<"reader leave lambda"<<std::endl;
     });
 }
 
 void User::writer()
 {
     int i=searchUser(writebuff.getReceiver());
+    std::cout<<"int i== "<<i<<std::endl;
     boost::asio::async_write(user_list[i]->socket,boost::asio::buffer(writebuff.getdata(),writebuff.max_length),[this](const boost::system::error_code& error, std::size_t t)
     {
 //        writer();
