@@ -1,69 +1,25 @@
 #include <iostream>
 #include <boost/asio.hpp>
-#include <vector>
+#include <deque>
 #include "message_string.h"
+#include "user.h"
 
 using boost::asio::ip::tcp;
 
-int searchUser(std::string );
-
-class User
-{
-public:
-    std::string name;
-    tcp::socket socket;
-    Message readbuff,writebuff;
-    User(std::string n, tcp::socket s):name{n},socket{std::move(s)}{}
-    User(tcp::socket s):socket{std::move(s)}{}
-    void reader();
-    void writer();
-    void intro();
-    void run()  { intro(); reader(); }
-};
-
-static std::vector<User*> user_list;
-
-void User::intro()
-{
-    boost::asio::read(socket,boost::asio::buffer(readbuff.getdata(),Message::max_length));
-    readbuff.remakeMsg();
-    name=readbuff.getSender();
-}
-
-void User::reader()
-{
-    boost::asio::async_read(socket,boost::asio::buffer(readbuff.getdata(),readbuff.max_length),[this](const boost::system::error_code& error, std::size_t)
-    {
-        writebuff.remakeMsg(readbuff.getdata());
-        writer();
-        reader();
-    });
-}
-
-void User::writer()
-{
-    int i=searchUser(writebuff.getReceiver());
-    if (i<0)
-    {
-        std::string msg = writebuff.getReceiver()+" not found";
-        writebuff.makeMsg("server",name,msg);
-        i=searchUser(name);
-    }
-    boost::asio::async_write(user_list[i]->socket,boost::asio::buffer(writebuff.getdata(),writebuff.max_length),[](const boost::system::error_code& error, std::size_t)
-    {
-//        writer();
-    });
-}
-
 class Server
 {
+    boost::asio::io_context& io_;
     tcp::acceptor acceptor;
+    boost::asio::steady_timer t{io_,boost::asio::chrono::seconds(30)};
     Message msg;
     void accept();
+    void removeUser();
+
 public:
-    Server(boost::asio::io_context& io,tcp::endpoint& endpoint):acceptor(io,endpoint)
+    Server(boost::asio::io_context& io,tcp::endpoint& endpoint):acceptor(io,endpoint),io_{io}
     {
         accept();
+        removeUser();
     }
 };
 
@@ -76,18 +32,36 @@ void Server::accept()
             User* u = new User{std::move(socket)};
             u->run();
             user_list.push_back(u);
-            std::cout<<"connected"<<std::endl;
         }
         accept();
     });
 }
 
-int searchUser(std::string s)
+void Server::removeUser()
 {
-    for(int i = 0;i<user_list.size();i++)
-        if(s==user_list[i]->name)
-            return i;
-    return -1;
+    t.expires_after(boost::asio::chrono::seconds(30));
+    t.async_wait([this](const boost::system::error_code& error)
+    {
+        std::cout<<"removal instance"<<std::endl;
+        if(!rem_list.empty())
+        {
+            for (auto i : rem_list)
+            {
+                int j=0;
+                while(j<user_list.size())
+                {
+                    if(i==user_list[j]->name)
+                    {
+                        std::cout<<user_list[j]->name<<" being deleted"<<std::endl;
+                        user_list.erase(user_list.begin()+j);
+                        break;
+                    }
+                    j++;
+                }
+            }
+        }
+        removeUser();
+    });
 }
 
 int main(int argc, char* argv[])
