@@ -9,59 +9,53 @@
 
 class Message
 {
+    std::string msg, sender,receiver;
+    char data[512];
 public:
     static constexpr std::size_t max_length=512, msg_length=496,name_length=8;
-    char data[max_length], msg[msg_length], sender[name_length],receiver[name_length];
     Message(){}
-    Message(char *name)
+    Message(std::string name)
     {
-        std::memcpy(sender,name,name_length);
+        sender=name;
     }
-    void makeMsg(char*,char*);
-    void remakeMsg();
-    void remakeMsg(char*);
-    char* getdata(){return data; }
-    void print() { std::cout<<"sender:: "<<sender<<std::endl<<"receiver:: "<<receiver<<std::endl<<"msg:: "<<msg<<std::endl<<"data:: "<<data<<std::endl; }
+    inline void makeMsg(std::string,std::string);
+    inline void makeMsg(std::string,std::string,std::string);
+    inline void remakeMsg();
+    inline void remakeMsg(const char*);
+    inline std::string getSender() { return sender; }
+    inline std::string getReceiver() { return receiver; }
+    inline std::string getMsg() { return msg; }
+    inline char* getdata() { return data; }
+    inline void print() { std::cout<<"sender:: "<<sender<<std::endl<<"receiver:: "<<receiver<<std::endl<<"msg:: "<<msg<<std::endl<<"data:: "<<data<<std::endl; }
 };
 
-//void Message::makeMsg(char* s)
-//{
-//    std::strcat(msg,s.c_str());
-//    length=s.size();
-//    std::sprintf(header, "%4d", length);
-//    std::strcpy(data,header);
-//    std::strcat(data,msg);
-////    sprintf(data,"%s%s",header,msg);
-//     std::cout<<"make msg header::"<<s<<"msg::"<<msg<<std::endl;
-//}
-
-void Message::makeMsg(char* rec,char* s)
+void Message::makeMsg(std::string rec, std::string mes)
 {
-    std::memcpy(msg,s,msg_length);
-    std::memcpy(receiver,rec,name_length);
-    std::sprintf(data,"%8s%8s%s",sender,receiver,msg);
+    receiver=rec;
+    msg=mes;
+    sprintf(data,"%8s%8s%s",sender.c_str(),receiver.c_str(),msg.c_str());
+}
+
+void Message::makeMsg(std::string sen,std::string rec, std::string mes)
+{
+    sender=sen;
+    receiver=rec;
+    msg=mes;
+    sprintf(data,"%8s%8s%s",sender.c_str(),receiver.c_str(),msg.c_str());
 }
 
 void Message::remakeMsg()
 {
+    std::string temp{data};
+    sender.assign(temp,0,8);
+    receiver.assign(temp,8,8);
+    msg=temp.substr(16,temp.size());
 }
 
-void Message::remakeMsg(char *data2)
+void Message::remakeMsg(const char *s)
 {
-    std::memcpy(data,data2,max_length);
+    memcpy(data,s,max_length);
     remakeMsg();
-//    int i=0;
-//    for(;i<8;i++)
-//        sender[i]=data[i];
-//    for(i=8;i<16;i++)
-//        receiver[i-8]=data[i];
-//    for(i=16;i<max_length;i++)
-//        msg[i-16]=data[i];
-}
-
-void pkprint(char *p)
-{
-    std::cout<<p<<std::endl;
 }
 
 #endif // MESSAGE_H
