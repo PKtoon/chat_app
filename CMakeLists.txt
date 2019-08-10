@@ -4,5 +4,7 @@ project(chat_app)
 
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread")
 
-add_executable("server" "server.cpp")
-add_executable("client" "client.cpp")
+file(GLOB SOURCES "server/*.h" "server/*.cpp")
+
+add_executable("server" ${SOURCES})
+add_executable("client" "client/main.cpp")
