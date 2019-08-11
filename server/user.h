@@ -30,7 +30,6 @@ public:
     tcp::socket* getSocket() { return &socket; }
     bool getStatus() const { return alive; }
     void pingMe();
-    ~User() { std::cerr<<name<<" is destroyed"; }
 };
 
 #endif // USER_H
