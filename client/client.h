@@ -3,7 +3,7 @@
 
 #include <list>
 #include <boost/asio.hpp>
-#include "../message.h"
+#include "../stream/stream.h"
 
 using boost::asio::ip::tcp;
 
@@ -12,8 +12,14 @@ class Client
     std::string name;
     tcp::socket socket;
     tcp::resolver::results_type endpoints;
-    Message writebuff,readbuff;
-    std::list<Message> buff;
+    
+    std::list<Stream> buff;
+    
+    std::vector<char> inHeader;
+    std::vector<char> inData;
+    int inDataSize=0;
+    int headerLength=4;
+
 public:
     Client(std::string n,boost::asio::io_context& io,tcp::resolver::results_type endpoint)
         :name{n},socket{io},endpoints{endpoint}
@@ -22,8 +28,9 @@ public:
     }
     void connector();
     void intro();
-    void writer(std::string, std::string);
-    void reader();
+    void writer(Stream);
+    void readHeader();
+    void readBody();
     void printer();
 };
 

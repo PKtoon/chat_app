@@ -1,50 +1,99 @@
 #include "server.h"
 #include "user.h"
 
-
 void User::intro()
 {
-    boost::asio::async_read(socket,boost::asio::buffer(readbuff.getdata(),Message::max_length),[this](const boost::system::error_code&, std::size_t)
+    inDataSize=20;
+    inData.resize(inDataSize);
+    boost::asio::async_read(socket,boost::asio::buffer(inData),[this](const boost::system::error_code& error, std::size_t)
     {
-        readbuff.remakeMsg();
-        name=readbuff.getSender();
+        std::string temp{inData.begin(),inData.end()};
+        std::istringstream is {temp};
+        is>>name;
         std::cout<<name<<" connected"<<std::endl;
-        reader();
+        readHeader();
     });
 }
 
-void User::reader()
+void User::readHeader()
 {
-    boost::asio::async_read(socket,boost::asio::buffer(readbuff.getdata(),readbuff.max_length),[this](const boost::system::error_code& error, std::size_t)
+    inHeader.resize(headerLength);
+    boost::asio::async_read(socket,boost::asio::buffer(inHeader),[this](const boost::system::error_code& error, std::size_t)
     {
-        if (!error)
+        if (error)
         {
-            writebuff.remakeMsg(readbuff.getdata());
-            if(writebuff.getReceiver()=="  server" && writebuff.getMsg()=="ack")
+            readHeader();
+        }
+        else
+        {
+            std::string temp{inHeader.begin(),inHeader.end()};
+            if(temp=="ping")
+            {
                 alive=true;
+                readHeader();
+            }
             else
-                writer();
-            reader();
+            {
+                std::istringstream is{temp};
+                is>>std::hex>>inDataSize;
+                readBody();
+            }
         }
     });
 }
 
-void User::writer()
+void User::readBody()
 {
-    if(!s->searchUser(writebuff.getReceiver()))
+    inData.resize(inDataSize);
+    boost::asio::async_read(socket,boost::asio::buffer(inData),[this](const boost::system::error_code& error, std::size_t)
     {
-        std::string msg = writebuff.getReceiver()+" not found";
-        writebuff.makeMsg("server",name,msg);
+        if (error)
+        {
+            readHeader();
+        }
+        else
+        {
+            std::string temp{inData.begin(),inData.end()};
+            //            streamBuf.push_back(Stream(temp));
+            writer(Stream(temp));
+            readHeader();
+        }
+    });
+}
+
+void User::writer(Stream st)
+{
+    User* u;
+    if(!s->searchUser(st.getName()))
+    {
+        std::string msg = st.getName()+" not found";
+        st = Stream("server", msg);
+        u=this;
     }
-    User* u = s->getUser(writebuff.getReceiver());
-    boost::asio::async_write(u->socket,boost::asio::buffer(writebuff.getdata(),writebuff.max_length),[](const boost::system::error_code& error, std::size_t)
+    else
+    {
+        u = s->getUser(st.getName());
+
+    }
+
+    std::string serialized{st.getSerialized()};
+    int length = serialized.size();
+    std::ostringstream os;
+    os<<std::setw(headerLength)<<std::hex<<length;
+    std::string header {os.str()};
+    std::vector<boost::asio::const_buffer> buffers;
+    buffers.push_back(boost::asio::buffer(header));
+    buffers.push_back(boost::asio::buffer(serialized));
+
+    boost::asio::async_write(u->socket,buffers,[](const boost::system::error_code& error, std::size_t)
     {
     });
 }
 
 void User::pingMe()
 {
-    writebuff.makeMsg("server",name,"ping");
-    writer();
+    std::ostringstream os;
+    os<<std::setw(headerLength)<<"ping";
+    boost::asio::async_write(socket,boost::asio::buffer(os.str()),[](const boost::system::error_code& error, std::size_t){});
     alive = false;
 }

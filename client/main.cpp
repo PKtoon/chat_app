@@ -1,9 +1,8 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <string>
-#include <list>
 #include <thread>
-#include "../message.h"
+
 #include "client.h"
 
 using boost::asio::ip::tcp;
@@ -51,7 +50,7 @@ int main(int argc, char* argv[])
         std::cin>>receiver;
         std::cout<<"Message:: ";
         msg = readline();
-        c.writer(receiver,msg);
+        c.writer(Stream(receiver,msg));
         c.printer();
     }
 

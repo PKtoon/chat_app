@@ -3,7 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <deque>
-//#include "../message.h"
+
 #include "user.h"
 
 class User;
@@ -17,7 +17,6 @@ class Server
     int timeout = 5;
     boost::asio::steady_timer t{io,boost::asio::chrono::seconds(0)};
     std::deque<User*> userList;
-    std::deque<std::string> remList;
     void accept();
     void removeUser();
     void isAlive();
