@@ -54,7 +54,6 @@ void User::readBody()
         else
         {
             std::string temp{inData.begin(),inData.end()};
-            //            streamBuf.push_back(Stream(temp));
             writer(Stream(temp));
             readHeader();
         }
@@ -64,16 +63,15 @@ void User::readBody()
 void User::writer(Stream st)
 {
     User* u;
-    if(!s->searchUser(st.getName()))
+    if(s->searchUser(st.getReceiver()))
     {
-        std::string msg = st.getName()+" not found";
-        st = Stream("server", msg);
-        u=this;
+        u = s->getUser(st.getReceiver());
     }
     else
     {
-        u = s->getUser(st.getName());
-
+        std::string msg = st.getReceiver()+" not found";
+        st = Stream("server", name, msg);
+        u=this;
     }
 
     std::string serialized{st.getSerialized()};

@@ -91,7 +91,7 @@ void Client::printer()
 {
     while(!buff.empty())
     {
-        std::cout<<"\nFrom: "<<buff.begin()->getName()<<std::endl;
+        std::cout<<"\nFrom: "<<buff.begin()->getSender()<<std::endl;
         std::cout<<"Message: "<<buff.begin()->getData1()<<std::endl<<std::endl;
         buff.pop_front();
     }

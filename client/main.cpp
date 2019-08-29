@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
         std::cin>>receiver;
         std::cout<<"Message:: ";
         msg = readline();
-        c.writer(Stream(receiver,msg));
+        c.writer(Stream(c.getName(),receiver,msg));
         c.printer();
     }
 
