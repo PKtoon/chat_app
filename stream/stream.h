@@ -18,6 +18,7 @@ class Stream
     friend class boost::serialization::access;
     char header='m';
     //char head;
+    std::string sender;
     std::string receiver;
     std::string data1;
     std::vector<char> data2;
@@ -25,6 +26,7 @@ class Stream
     template <class Archive> void serialize(Archive& ar, const unsigned int version)
     {
         ar & header;
+        ar & sender;
         ar & receiver;
         ar & data1;
         if(header!='m')
@@ -36,8 +38,9 @@ class Stream
 public:
     Stream(){}
     Stream(std::string s) { getUnSerialized(s);}
-    Stream(std::string name, std::string msg):receiver{name},data1{msg}{}
-    std::string getName() { return receiver;}
+    Stream(std::string s, std::string r, std::string msg): sender{s}, receiver{r},data1{msg}{}
+    std::string getSender() { return sender; }
+    std::string getReceiver() { return receiver;}
     std::string getData1() { return data1; }
     std::string getSerialized();
     void getUnSerialized(std::string&);
