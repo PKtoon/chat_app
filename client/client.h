@@ -26,6 +26,7 @@ public:
     {
         connector();
     }
+    std::string getName() { return name; }
     void connector();
     void intro();
     void writer(Stream);
