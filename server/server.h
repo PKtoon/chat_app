@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <deque>
+#include <list>
 
 #include "user.h"
 
@@ -25,7 +26,7 @@ public:
     Server(tcp::endpoint& endpoint):acceptor(io,endpoint)
     {
         accept();
-        //isAlive();
+        isAlive();
         io.run();
     }
 
