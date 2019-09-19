@@ -9,8 +9,6 @@
 #include <boost/serialization/string.hpp>
 #include <boost/asio.hpp>
 
-#include "../helper.h"
-
 enum {MESSAGE, LOCAL_FILE};
 
 class Stream
