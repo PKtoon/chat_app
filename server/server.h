@@ -25,7 +25,7 @@ public:
     Server(tcp::endpoint& endpoint):acceptor(io,endpoint)
     {
         accept();
-        //isAlive();
+        isAlive();
         io.run();
     }
 

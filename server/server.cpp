@@ -26,9 +26,7 @@ void Server::removeUser()
             {
                 userList[i]->getSocket()->close();
                 std::cout<<userList[i]->getName()<<" being kicked out"<<std::endl;
-                User* u = userList[i];
                 userList.erase(userList.begin()+i);
-                delete u;
             }
         isAlive();
     });
@@ -60,4 +58,5 @@ User* Server::getUser(std::string name)
     for(int i=0; i<userList.size(); i++)
         if(name==userList[i]->getName())
             return userList[i];
+    return nullptr;
 }

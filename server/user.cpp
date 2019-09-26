@@ -22,7 +22,8 @@ void User::readHeader()
     {
         if (error)
         {
-            readHeader();
+            if (error != boost::asio::error::operation_aborted)
+                readHeader();
         }
         else
         {
@@ -49,7 +50,8 @@ void User::readBody()
     {
         if (error)
         {
-            readHeader();
+            if (error != boost::asio::error::operation_aborted)
+                readHeader();
         }
         else
         {
