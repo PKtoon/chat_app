@@ -22,7 +22,7 @@ void Server::removeUser()
     {
         std::cout<<"removal instance"<<std::endl;
         for(int i=0; i<userList.size(); i++)
-            if(userList[i]->getStatus())
+            if(!userList[i]->getStatus())
             {
                 userList[i]->getSocket()->close();
                 std::cout<<userList[i]->getName()<<" being kicked out"<<std::endl;
