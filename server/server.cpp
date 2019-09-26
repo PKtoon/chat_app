@@ -58,4 +58,5 @@ User* Server::getUser(std::string name)
     for(int i=0; i<userList.size(); i++)
         if(name==userList[i]->getName())
             return userList[i];
+    return nullptr;
 }
