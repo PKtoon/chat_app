@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    tcp::endpoint endpoint(tcp::v4(),std::atoi(argv[1]));       //needs ip version to use and port number
+    tcp::endpoint endpoint(tcp::v6(),std::atoi(argv[1]));       //needs ip version to use and port number
 
     Server s(endpoint);
     return 0;

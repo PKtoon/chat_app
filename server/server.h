@@ -3,11 +3,8 @@
 
 #include <boost/asio.hpp>
 #include <deque>
-#include <list>
 
 #include "user.h"
-
-class User;
 
 using  boost::asio::ip::tcp;
 
@@ -29,8 +26,6 @@ public:
         isAlive();
         io.run();
     }
-
-    bool searchUser(std::string);
     User* getUser(std::string);
 };
 

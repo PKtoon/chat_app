@@ -1,8 +1,6 @@
 #ifndef USER_H
 #define USER_H
 
-#include <iostream>
-
 #include <boost/asio.hpp>
 
 #include "../stream/stream.h"
@@ -20,7 +18,7 @@ class User
     unsigned int headerLength = 4;
     std::vector<char> inHeader;
     std::vector<char> inData;
-    int inDataSize=0;
+    unsigned long inDataSize=0;
 public:
     Server *serv;
 

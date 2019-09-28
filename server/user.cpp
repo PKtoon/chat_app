@@ -1,3 +1,5 @@
+#include<iostream>
+
 #include "server.h"
 #include "user.h"
 
@@ -7,11 +9,19 @@ void User::intro()
     inData.resize(inDataSize);
     boost::asio::async_read(socket,boost::asio::buffer(inData),[this](const boost::system::error_code& error, std::size_t)
     {
-        std::string temp{inData.begin(),inData.end()};
-        std::istringstream is {temp};
-        is>>name;
-        std::cout<<name<<" connected"<<std::endl;
-        readHeader();
+        if (error)
+        {
+            if (error != boost::asio::error::operation_aborted)
+                intro();
+        }
+        else
+        {
+            std::string temp{inData.begin(),inData.end()};
+            std::istringstream is {temp};
+            is>>name;
+            std::cout<<name<<" connected"<<std::endl;
+            readHeader();
+        }
     });
 }
 
@@ -73,15 +83,13 @@ void User::writer(Stream st)
     }
 
     std::string serialized{st.getSerialized()};
-    int length = serialized.size();
-    std::ostringstream os;
-    os<<std::setw(headerLength)<<std::hex<<length;
-    std::string header {os.str()};
+    std::ostringstream header;
+    header<<std::setw(headerLength)<<std::hex<<serialized.size();
     std::vector<boost::asio::const_buffer> buffers;
-    buffers.push_back(boost::asio::buffer(header));
+    buffers.push_back(boost::asio::buffer(header.str()));
     buffers.push_back(boost::asio::buffer(serialized));
 
-    boost::asio::async_write(u->socket,buffers,[](const boost::system::error_code& error, std::size_t)
+    boost::asio::async_write(u->socket,buffers,[](const boost::system::error_code&, std::size_t)
     {
     });
 }
@@ -90,6 +98,6 @@ void User::pingMe()
 {
     std::ostringstream os;
     os<<std::setw(headerLength)<<"ping";
-    boost::asio::async_write(socket,boost::asio::buffer(os.str()),[](const boost::system::error_code& error, std::size_t){});
+    boost::asio::async_write(socket,boost::asio::buffer(os.str()),[](const boost::system::error_code&, std::size_t){});
     alive = false;
 }

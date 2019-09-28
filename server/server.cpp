@@ -1,3 +1,4 @@
+#include <iostream>
 #include "server.h"
 #include "user.h"
 
@@ -18,10 +19,10 @@ void Server::accept()
 void Server::removeUser()
 {
     t.expires_after(boost::asio::chrono::seconds(timeout));
-    t.async_wait([this](const boost::system::error_code& error)
+    t.async_wait([this](const boost::system::error_code&)
     {
         std::cout<<"removal instance"<<std::endl;
-        for(int i=0; i<userList.size(); i++)
+        for(unsigned long i=0; i<userList.size(); i++)
             if(!userList[i]->getStatus())
             {
                 userList[i]->getSocket()->close();
@@ -35,7 +36,7 @@ void Server::removeUser()
 void Server::isAlive()
 {
     t.expires_after(boost::asio::chrono::seconds(timeout));
-    t.async_wait([this](const boost::system::error_code& error)
+    t.async_wait([this](const boost::system::error_code&)
     {
         for(auto a:userList)
             a->pingMe();
@@ -45,7 +46,7 @@ void Server::isAlive()
 
 User* Server::getUser(std::string name)
 {
-    for(int i=0; i<userList.size(); i++)
+    for(unsigned long i=0; i<userList.size(); i++)
         if(name==userList[i]->getName())
             return userList[i];
     return nullptr;
