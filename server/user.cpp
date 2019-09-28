@@ -65,11 +65,7 @@ void User::readBody()
 void User::writer(Stream st)
 {
     User* u;
-    if(s->searchUser(st.getReceiver()))
-    {
-        u = s->getUser(st.getReceiver());
-    }
-    else
+    if(!(u = serv->getUser(st.getReceiver())))
     {
         std::string msg = st.getReceiver()+" not found";
         st = Stream("server", name, msg);

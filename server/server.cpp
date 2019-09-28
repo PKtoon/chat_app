@@ -43,16 +43,6 @@ void Server::isAlive()
     });
 }
 
-bool Server::searchUser(std::string name)
-{
-    for(auto a:userList)
-    {
-        if(name==a->getName())
-            return true;
-    }
-    return false;
-}
-
 User* Server::getUser(std::string name)
 {
     for(int i=0; i<userList.size(); i++)

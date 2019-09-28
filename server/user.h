@@ -22,11 +22,11 @@ class User
     std::vector<char> inData;
     int inDataSize=0;
 public:
-    Server *s;
+    Server *serv;
 
-    User(std::string n, tcp::socket s):name{n},socket{std::move(s)}{}
-    User(tcp::socket s):socket{std::move(s)}{}
-    User(Server* q,tcp::socket s):socket{std::move(s)},s{q}{}
+//    User(std::string n, tcp::socket s):name{n},socket{std::move(s)}{}
+//    User(tcp::socket s):socket{std::move(s)}{}
+    User(Server* q,tcp::socket s):socket{std::move(s)},serv{q}{}
     void intro();
     void readHeader();
     void readBody();
