@@ -4,14 +4,15 @@
 
 void Client::connector()
 {
-    boost::asio::async_connect(socket,endpoints,[this](const boost::system::error_code& error, const tcp::endpoint& endpoint)
+    boost::asio::async_connect(socket,endpoints,[this](const boost::system::error_code& error, const tcp::endpoint&)
     {
-        if (!error)
+        if (error)
         {
-            intro();
+            if (error != boost::asio::error::operation_aborted)
+                connector();
         }
         else {
-            connector();
+            intro();
         }
     });
 }
@@ -23,22 +24,28 @@ void Client::intro()
     std::string out{os.str()};
 
     boost::asio::async_write(socket,boost::asio::buffer(out),[this](const boost::system::error_code& error, std::size_t){
-        readHeader();
+        if (error)
+        {
+            if (error != boost::asio::error::operation_aborted)
+                intro();
+        }
+        else
+            readHeader();
     });
 }
 
-void Client::writer(Stream s)
+void Client::writer(Stream outData)
 {
-    std::string serialized{s.getSerialized()};
-    int length = serialized.size();
-    std::ostringstream os;
-    os<<std::setw(headerLength)<<std::hex<<length;
-    std::string header {os.str()};
+    std::string serialized{outData.getSerialized()};
+    unsigned long length = serialized.size();
+    std::ostringstream header;
+    header<<std::setw(headerLength)<<std::hex<<length;
+//    std::string header {os.str()};
     std::vector<boost::asio::const_buffer> buffers;
-    buffers.push_back(boost::asio::buffer(header));
+    buffers.push_back(boost::asio::buffer(header.str()));
     buffers.push_back(boost::asio::buffer(serialized));
 
-    boost::asio::async_write(socket,buffers,[this](const boost::system::error_code& error, std::size_t){});
+    boost::asio::async_write(socket,buffers,[](const boost::system::error_code&, std::size_t){});
 }
 
 void Client::readHeader()
@@ -48,7 +55,8 @@ void Client::readHeader()
     {
         if (error)
         {
-            readHeader();
+            if (error != boost::asio::error::operation_aborted)
+                readHeader();
         }
         else
         {
@@ -57,7 +65,7 @@ void Client::readHeader()
             {
                 std::ostringstream os;
                 os<<std::setw(headerLength)<<"ping";
-                boost::asio::async_write(socket,boost::asio::buffer(os.str()),[](const boost::system::error_code& error, std::size_t){});
+                boost::asio::async_write(socket,boost::asio::buffer(os.str()),[](const boost::system::error_code&, std::size_t){});
                 readHeader();
             }
             else
@@ -77,6 +85,7 @@ void Client::readBody()
     {
         if (error)
         {
+            if (error != boost::asio::error::operation_aborted)
             readHeader();
         }
         else
@@ -92,8 +101,7 @@ void Client::printer()
 {
     while(!buff.empty())
     {
-        std::cout<<"\nFrom: "<<buff.begin()->getSender()<<std::endl;
-        std::cout<<"Message: "<<buff.begin()->getData1()<<std::endl<<std::endl;
+        std::cout<<std::endl<<"\""<<buff.begin()->getSender()<<" : "<<buff.begin()->getData1()<<"\""<<std::endl;
         buff.pop_front();
     }
 }

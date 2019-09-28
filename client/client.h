@@ -17,12 +17,12 @@ class Client
     
     std::vector<char> inHeader;
     std::vector<char> inData;
-    int inDataSize=0;
-    int headerLength=4;
+    unsigned int inDataSize=0;
+    unsigned int headerLength=4;
 
 public:
-    Client(std::string n,boost::asio::io_context& io,tcp::resolver::results_type endpoint)
-        :name{n},socket{io},endpoints{endpoint}
+    Client(std::string& n,boost::asio::io_context& io,tcp::resolver::results_type& endpoint)
+        :name{std::move(n)},socket{io},endpoints{std::move(endpoint)}
     {
         connector();
     }
