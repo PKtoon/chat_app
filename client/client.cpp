@@ -40,7 +40,6 @@ void Client::writer(Stream outData)
     unsigned long length = serialized.size();
     std::ostringstream header;
     header<<std::setw(headerLength)<<std::hex<<length;
-//    std::string header {os.str()};
     std::vector<boost::asio::const_buffer> buffers;
     buffers.push_back(boost::asio::buffer(header.str()));
     buffers.push_back(boost::asio::buffer(serialized));
