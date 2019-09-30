@@ -44,7 +44,6 @@ void User::readHeader()
             if(temp=="ping")
             {
                 alive=true;
-                std::string msg {name+": received ping"};
                 logIt(name,": received ping");
                 readHeader();
             }
