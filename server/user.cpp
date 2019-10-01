@@ -74,7 +74,6 @@ void User::readBody()
         {
             std::string temp{inData.begin(),inData.end()};
             writer(Stream(temp));
-            logIt(name,": received data");
             readHeader();
         }
     });

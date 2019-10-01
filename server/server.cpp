@@ -1,46 +1,70 @@
-#include <iostream>
 #include "server.h"
 #include "user.h"
+#include "../logging.h"
 
 void Server::accept()
 {
-    acceptor.async_accept([this](boost::system::error_code ec, tcp::socket socket)
+    acceptor.async_accept([this](boost::system::error_code error, tcp::socket socket)
     {
-        if (!ec)
+        if (error)
+        {
+            if (error != boost::asio::error::operation_aborted)
+                accept();
+            logError("server",": accept(): error: ", error);
+        }
+        else
         {
             User* u = new User{this,std::move(socket)};
             u->intro();
             userList.push_back(u);
+            accept();
         }
-        accept();
     });
 }
 
 void Server::removeUser()
 {
     t.expires_after(boost::asio::chrono::seconds(timeout));
-    t.async_wait([this](const boost::system::error_code&)
+    t.async_wait([this](const boost::system::error_code& error)
     {
-        std::cout<<"removal instance"<<std::endl;
-        for(unsigned long i=0; i<userList.size(); i++)
-            if(!userList[i]->getStatus())
-            {
-                userList[i]->getSocket()->close();
-                std::cout<<userList[i]->getName()<<" being kicked out"<<std::endl;
-                userList.erase(userList.begin()+i);
-            }
-        isAlive();
+        logIt("server: ","removal instance");
+        if (error)
+        {
+            if (error != boost::asio::error::operation_aborted)
+                removeUser();
+            logError("server: ",": removeUser(): error: ", error);
+        }
+        else
+        {
+            for(unsigned long i=0; i<userList.size(); i++)
+                if(!userList[i]->getStatus())
+                {
+                    userList[i]->getSocket()->close();
+                    logIt("server: ",userList[i]->getName()+" being kicked out");
+                    userList.erase(userList.begin()+i);
+                }
+            isAlive();
+        }
     });
 }
 
 void Server::isAlive()
 {
     t.expires_after(boost::asio::chrono::seconds(timeout));
-    t.async_wait([this](const boost::system::error_code&)
+    t.async_wait([this](const boost::system::error_code& error)
     {
-        for(auto a:userList)
-            a->pingMe();
-        removeUser();
+        if (error)
+        {
+            if (error != boost::asio::error::operation_aborted)
+                isAlive();
+            logError("server: ",": isAlive(): error: ", error);
+        }
+        else
+        {
+            for(auto a:userList)
+                a->pingMe();
+            removeUser();
+        }
     });
 }
 
