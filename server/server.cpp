@@ -39,7 +39,6 @@ void Server::removeUser()
             for(unsigned long i=0; i<userList.size(); i++)
                 if(!userList[i]->getStatus())
                 {
-                    userList[i]->getSocket()->close();
                     logIt("server: ",userList[i]->getName()+" being kicked out");
                     userList.erase(userList.begin()+i);
                 }

@@ -22,6 +22,7 @@ class User
     Server *serv;
 public:
     User(Server* q,tcp::socket s):socket{std::move(s)},serv{q}{}
+    ~User(){ socket.close(); }
     void intro();
     void readHeader();
     void readBody();
