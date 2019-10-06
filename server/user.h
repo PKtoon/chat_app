@@ -2,7 +2,7 @@
 #define USER_H
 
 #include <boost/asio.hpp>
-
+#include <iostream>
 #include "../stream/stream.h"
 
 class Server;
@@ -22,7 +22,7 @@ class User
     Server *serv;
 public:
     User(Server* q,tcp::socket s):socket{std::move(s)},serv{q}{}
-    ~User(){ socket.close(); }
+    ~User(){ socket.close(); std::cerr<<name<<" is destroyed"<<std::endl; }
     void intro();
     void readHeader();
     void readBody();

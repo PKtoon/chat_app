@@ -6,14 +6,17 @@ void User::intro()
 {
     inDataSize=20;
     inData.resize(inDataSize);
-    boost::asio::async_read(socket,boost::asio::buffer(inData),[this](const boost::system::error_code& error, std::size_t recvd)
+    //    boost::asio::async_read(socket,boost::asio::buffer(inData),[this](const boost::system::error_code& error, std::size_t recvd)
+    socket.async_receive(boost::asio::buffer(inData),[this](const boost::system::error_code& error, std::size_t recvd)
     {
-        logRead(name,": intro(): received: ", recvd);
+        //        logRead(name,": intro(): received: ", recvd);
         if (error)
         {
             if (error != boost::asio::error::operation_aborted)
+            {
                 intro();
-            logError(name,": intro(): error: ", error);
+                logError(name,": intro(): error: ", error);
+            }
         }
         else
         {
@@ -28,31 +31,37 @@ void User::intro()
 
 void User::readHeader()
 {
+    inHeader.clear();
     inHeader.resize(headerLength);
-    boost::asio::async_read(socket,boost::asio::buffer(inHeader),[this](const boost::system::error_code& error, std::size_t recvd)
+    socket.async_receive(boost::asio::buffer(inHeader),[this](const boost::system::error_code& error, std::size_t recvd)
     {
-        logRead(name, ": readHeader(): received: ", recvd);
+        //        logRead(name, ": readHeader(): received: ", recvd);
         if (error)
         {
             if (error != boost::asio::error::operation_aborted)
+            {
                 readHeader();
-            logError(name,": readHeader(): error: ", error);
+                logError(name,": readHeader(): error: ", error);
+            }
         }
         else
         {
-            std::string temp{inHeader.begin(),inHeader.end()};
-            if(temp=="ping")
+            if(!inHeader.empty())
             {
-                alive=true;
-                logIt(name,": received ping");
-                readHeader();
-            }
-            else
-            {
-                std::istringstream is{temp};
-                is>>std::hex>>inDataSize;
-                logRead(name,": readHeader(): expected data: ", inDataSize);
-                readBody();
+                std::string temp{inHeader.begin(),inHeader.end()};
+                if(temp=="ping")
+                {
+                    alive=true;
+                    logIt(name,": received ping");
+                    readHeader();
+                }
+                else
+                {
+                    std::istringstream is{temp};
+                    is>>std::hex>>inDataSize;
+                    logRead(name,": readHeader(): expected data: ", inDataSize);
+                    readBody();
+                }
             }
         }
     });
@@ -60,20 +69,26 @@ void User::readHeader()
 
 void User::readBody()
 {
+    inData.clear();
     inData.resize(inDataSize);
-    boost::asio::async_read(socket,boost::asio::buffer(inData),[this](const boost::system::error_code& error, std::size_t recvd)
+    socket.async_receive(boost::asio::buffer(inData),[this](const boost::system::error_code& error, std::size_t recvd)
     {
-        logRead(name, ": readBody(): received: ", recvd);
+        //        logRead(name, ": readBody(): received: ", recvd);
         if (error)
         {
             if (error != boost::asio::error::operation_aborted)
+            {
                 readHeader();
-            logError(name,": readBody(): error: ", error);
+                logError(name,": readBody(): error: ", error);
+            }
         }
         else
         {
-            std::string temp{inData.begin(),inData.end()};
-            writer(Stream(temp));
+            if(!inData.empty())
+            {
+                std::string temp{inData.begin(),inData.end()};
+                writer(Stream(temp));
+            }
             readHeader();
         }
     });
@@ -96,27 +111,28 @@ void User::writer(Stream st)
     buffers.push_back(boost::asio::buffer(header.str()));
     buffers.push_back(boost::asio::buffer(serialized));
 
-    boost::asio::async_write(u->socket,buffers,[this,u](const boost::system::error_code& error, std::size_t send)
+    u->socket.async_send(buffers,[this,u](const boost::system::error_code& error, std::size_t send)
     {
-        logWrite(name,": writer(): sent: ", u->getName(), send);
+        //        logWrite(name,": writer(): sent: ", u->getName(), send);
         if (error)
         {
-            logError(name,": writer(): error: ", error);
+            if (error != boost::asio::error::operation_aborted)
+                logError(name,": writer(): error: ", error);
         }
     });
 }
 
 void User::pingMe()
 {
+    alive = false;
     std::ostringstream os;
     os<<std::setw(headerLength)<<"ping";
-    boost::asio::async_write(socket,boost::asio::buffer(os.str()),[this](const boost::system::error_code& error, std::size_t send)
+    socket.async_send(boost::asio::buffer(os.str()),[this](const boost::system::error_code& error, std::size_t send)
     {
-        logWrite(name,": pingMe(): sent: ", name, send);
         if (error)
         {
-            logError(name,": pingMe(): error: ", error);
+            if (error != boost::asio::error::operation_aborted)
+                logError(name,": pingMe(): error: ", error);
         }
     });
-    alive = false;
 }
