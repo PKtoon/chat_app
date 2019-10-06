@@ -2,7 +2,7 @@
 #define SERVER_H
 
 #include <boost/asio.hpp>
-#include <deque>
+#include <vector>
 
 #include "user.h"
 
@@ -14,7 +14,7 @@ class Server
     tcp::acceptor acceptor;
     int timeout = 5;
     boost::asio::steady_timer t{io,boost::asio::chrono::seconds(0)};
-    std::deque<User*> userList;
+    std::vector<std::unique_ptr<User>> userList;
     void accept();
     void removeUser();
     void isAlive();

@@ -16,7 +16,7 @@ void Server::accept()
         {
             User* u = new User{this,std::move(socket)};
             u->intro();
-            userList.push_back(u);
+            userList.emplace_back(u);
             accept();
         }
     });
@@ -42,6 +42,14 @@ void Server::removeUser()
                     logIt("server: ",userList[i]->getName()+" being kicked out");
                     userList.erase(userList.begin()+i);
                 }
+//            for(auto iter = userList.begin(); iter!=userList.end();)
+//                if(!(*iter)->getStatus())
+//                {
+//                    logIt("server: ",(*iter)->getName()+" being kicked out");
+//                    auto rem = iter;
+//                    iter++;
+//                    userList.erase(rem);
+//                }
             isAlive();
         }
     });
@@ -60,7 +68,7 @@ void Server::isAlive()
         }
         else
         {
-            for(auto a:userList)
+            for(auto& a:userList)
                 a->pingMe();
             removeUser();
         }
@@ -69,8 +77,8 @@ void Server::isAlive()
 
 User* Server::getUser(std::string name)
 {
-    for(unsigned long i=0; i<userList.size(); i++)
-        if(name==userList[i]->getName())
-            return userList[i];
+    for(auto iter = userList.begin(); iter!=userList.end();)
+        if(name==(*iter)->getName())
+            return &(*iter->get());
     return nullptr;
 }
