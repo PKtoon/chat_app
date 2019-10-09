@@ -77,8 +77,11 @@ void Server::isAlive()
 
 User* Server::getUser(std::string name)
 {
-    for(auto iter = userList.begin(); iter!=userList.end();)
-        if(name==(*iter)->getName())
-            return &(*iter->get());
+//    for(auto iter = userList.begin(); iter!=userList.end();)
+//        if(name==(*iter)->getName())
+//            return ((*iter).get());
+    for(unsigned long i = 0; i < userList.size(); i++)
+        if(name==userList[i]->getName())
+            return userList[i].get();
     return nullptr;
 }

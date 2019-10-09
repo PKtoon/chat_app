@@ -9,7 +9,6 @@ void User::intro()
     //    boost::asio::async_read(socket,boost::asio::buffer(inData),[this](const boost::system::error_code& error, std::size_t recvd)
     socket.async_receive(boost::asio::buffer(inData),[this](const boost::system::error_code& error, std::size_t recvd)
     {
-        //        logRead(name,": intro(): received: ", recvd);
         if (error)
         {
             if (error != boost::asio::error::operation_aborted)
@@ -20,6 +19,7 @@ void User::intro()
         }
         else
         {
+            logRead(name,": intro(): received: ", recvd);
             std::string temp{inData.begin(),inData.end()};
             std::istringstream is {temp};
             is>>name;
@@ -35,7 +35,6 @@ void User::readHeader()
     inHeader.resize(headerLength);
     socket.async_receive(boost::asio::buffer(inHeader),[this](const boost::system::error_code& error, std::size_t recvd)
     {
-        //        logRead(name, ": readHeader(): received: ", recvd);
         if (error)
         {
             if (error != boost::asio::error::operation_aborted)
@@ -46,6 +45,7 @@ void User::readHeader()
         }
         else
         {
+            logRead(name, ": readHeader(): received: ", recvd);
             if(!inHeader.empty())
             {
                 std::string temp{inHeader.begin(),inHeader.end()};
@@ -73,7 +73,6 @@ void User::readBody()
     inData.resize(inDataSize);
     socket.async_receive(boost::asio::buffer(inData),[this](const boost::system::error_code& error, std::size_t recvd)
     {
-        //        logRead(name, ": readBody(): received: ", recvd);
         if (error)
         {
             if (error != boost::asio::error::operation_aborted)
@@ -84,6 +83,7 @@ void User::readBody()
         }
         else
         {
+            logRead(name, ": readBody(): received: ", recvd);
             if(!inData.empty())
             {
                 std::string temp{inData.begin(),inData.end()};
@@ -110,14 +110,16 @@ void User::writer(Stream st)
     std::vector<boost::asio::const_buffer> buffers;
     buffers.push_back(boost::asio::buffer(header.str()));
     buffers.push_back(boost::asio::buffer(serialized));
-
     u->socket.async_send(buffers,[this,u](const boost::system::error_code& error, std::size_t send)
+//    boost::asio::async_write(u->socket,buffers,[this,u](const boost::system::error_code& error, std::size_t send)
     {
-        //        logWrite(name,": writer(): sent: ", u->getName(), send);
         if (error)
         {
             if (error != boost::asio::error::operation_aborted)
                 logError(name,": writer(): error: ", error);
+        }
+        else {
+            logWrite(name,": writer(): sent: ", u->getName(), send);
         }
     });
 }
@@ -133,6 +135,9 @@ void User::pingMe()
         {
             if (error != boost::asio::error::operation_aborted)
                 logError(name,": pingMe(): error: ", error);
+        }
+        else {
+            logWrite(name,": pingMe(): sent: ", name, send);
         }
     });
 }
