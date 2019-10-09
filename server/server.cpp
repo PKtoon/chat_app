@@ -42,6 +42,7 @@ void Server::removeUser()
                     logIt("server: ",userList[i]->getName()+" being kicked out");
                     userList.erase(userList.begin()+i);
                 }
+            //for vector subscripting is better
 //            for(auto iter = userList.begin(); iter!=userList.end();)
 //                if(!(*iter)->getStatus())
 //                {
@@ -77,11 +78,8 @@ void Server::isAlive()
 
 User* Server::getUser(std::string name)
 {
-//    for(auto iter = userList.begin(); iter!=userList.end();)
-//        if(name==(*iter)->getName())
-//            return ((*iter).get());
-    for(unsigned long i = 0; i < userList.size(); i++)
-        if(name==userList[i]->getName())
-            return userList[i].get();
+    for(auto& a:userList)
+        if(a->getName()==name)
+            return a.get();
     return nullptr;
 }
