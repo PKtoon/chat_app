@@ -2,15 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 
 project(chat_app)
 
-include_directories("~/boost/usr/include")
-link_directories("~/boost/usr/lib")
-
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread -lboost_serialization")
 
 # Find the QtWidgets library
 find_package(Qt5Widgets CONFIG REQUIRED)
 
-#file(GLOB SERVER_SOURCES "server/*.h" "server/*.cpp")
 set(SERVER_SOURCES
     src/server/user.h
     src/server/user.cpp
@@ -19,16 +15,12 @@ set(SERVER_SOURCES
     src/server/main.cpp
     )
 
-#file(GLOB CLIENT_SOURCES "client/*.h" "client/*.cpp")
-set(CLIENT_SOURCES
+    set(CLIENT_SOURCES
     src/client/client.h
     src/client/client.cpp
     src/client/main.cpp
     )
 
-
-
-#file( GLOB LIB "src/stream/*" )
 set(STREAM
     src/stream/stream.h
     src/stream/stream.cpp
