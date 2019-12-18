@@ -3,14 +3,14 @@
 
 void ConnectionManager::connector(std::function<void(boost::system::error_code)> callBack)
 {
-     boost::asio::async_connect(socket,endpoints,[&callBack](const boost::system::error_code& error, const tcp::endpoint&)
-         {
+    boost::asio::async_connect(socket,endpoints,[this,callBack](const boost::system::error_code& error, const tcp::endpoint&)
+        {
             callBack(error);
-         });
+        });
 }
 
 void ConnectionManager::writer(const std::string outData, std::function<void (boost::system::error_code, std::size_t)> callBack)
-{    
+{   
     boost::asio::async_write(socket,boost::asio::buffer(outData),[&callBack](boost::system::error_code error, std::size_t sent)
     {
         callBack(error,sent);

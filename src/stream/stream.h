@@ -14,8 +14,7 @@ enum {MESSAGE, LOCAL_FILE};
 class Stream
 {
     friend class boost::serialization::access;
-    char header='m';
-    //char head;
+    char type='m';
     std::string sender;
     std::string receiver;
     std::string data1;
@@ -23,11 +22,11 @@ class Stream
     
     template <class Archive> void serialize(Archive& ar, const unsigned int version)
     {
-        ar & header;
+        ar & type;
         ar & sender;
         ar & receiver;
         ar & data1;
-        if(header!='m')
+        if(type!='m')
         {
             ar & data2;
         }
