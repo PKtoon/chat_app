@@ -14,13 +14,44 @@ void Server::accept()
         }
         else
         {
-            User* u = new User{this,std::move(socket)};
-            u->intro();
-            userList.emplace_back(u);
+            new User{std::move(socket),this};
             accept();
         }
     });
 }
+
+void Server::addMe(User* user)
+{
+    userList.emplace_back(user);
+}
+
+void Server::deliverMessages()
+{
+    isDelivering = true;
+    while(!deliveryQueue.empty())
+    {
+        Stream data = (*deliveryQueue.begin());
+        User* user = getUser(data.receiver);
+        if(!user)
+        {
+            user = getUser(data.sender);
+            data.data1 = data.receiver+" not found";
+            data.receiver = data.sender;
+            data.sender = "server";
+        }
+        user->queueMessage(data);
+        deliveryQueue.pop_front();
+    }
+    isDelivering = false;
+}
+
+void Server::queueDelivery(Stream data)
+{
+    deliveryQueue.push_back(data);
+    if(!isDelivering)
+        deliverMessages();
+}
+
 
 void Server::removeUser()
 {

@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <vector>
+#include <deque>
 
 #include "user.h"
 
@@ -15,6 +16,8 @@ class Server
     int timeout = 5;
     boost::asio::steady_timer t{io,boost::asio::chrono::seconds(0)};
     std::vector<std::unique_ptr<User>> userList;
+    std::deque<Stream> deliveryQueue;
+    bool isDelivering{false};
     void accept();
     void removeUser();
     void isAlive();
@@ -27,6 +30,9 @@ public:
         io.run();
     }
     User* getUser(std::string);
+    void addMe(User*);
+    void queueDelivery(Stream);
+    void deliverMessages();
 };
 
 #endif // SERVER_H
