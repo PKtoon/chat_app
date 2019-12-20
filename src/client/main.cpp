@@ -37,23 +37,23 @@ int main(int argc, char* argv[])
     std::string receiver,msg;
 
     boost::asio::io_context io;
-    tcp::resolver resolver (io);
-    tcp::resolver::results_type endpoints(resolver.resolve(machine_name,port));
+    
+    Client c{id,machine_name,port,io};
+    
+    io.run();
 
-    Client c{id,io,endpoints};
+//     std::thread t {[&io](){ io.run(); }};
 
-    std::thread t {[&io](){ io.run(); }};
-
-    while(true)
-    {
-        std::cout<<"To:: ";
-        std::cin>>receiver;
-        std::cout<<"Message:: ";
-        msg = readline();
-        c.writer(Stream(c.getName(),receiver,msg));
-        c.printer();
-    }
-
-    t.join();
+//     while(true)
+//     {
+//         std::cout<<"To:: ";
+//         std::cin>>receiver;
+//         std::cout<<"Message:: ";
+//         msg = readline();
+// //         c.writer(Stream(c.getName(),receiver,msg));
+// //         c.printer();
+//     }
+// 
+//     t.join();
     return 0;
 }

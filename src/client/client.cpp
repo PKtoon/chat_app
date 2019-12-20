@@ -2,105 +2,125 @@
 #include <sstream>
 #include "client.h"
 
-void Client::connector()
+
+Client::Client(std::string clientName, std::string hostname, std::string port, boost::asio::io_context& io) : name{clientName}, net{io,hostname,port}
 {
-    boost::asio::async_connect(socket,endpoints,[this](const boost::system::error_code& error, const tcp::endpoint&)
-    {
-        if (error)
-        {
-            if (error != boost::asio::error::operation_aborted)
-                connector();
-        }
-        else {
-            intro();
-        }
-    });
+    connect();
 }
 
-void Client::intro()
+void Client::connect()
 {
-    std::ostringstream os;
-    os<<std::setw(20)<<name;
-    std::string out{os.str()};
-
-    boost::asio::async_write(socket,boost::asio::buffer(out),[this](const boost::system::error_code& error, std::size_t){
-        if (error)
+    net.connect([this](boost::system::error_code error)
+    {
+        if(error)
         {
-            if (error != boost::asio::error::operation_aborted)
-                intro();
+            if(error != boost::asio::error::operation_aborted)
+                connect();
         }
         else
-            readHeader();
-    });
+            initialize();
+    }
+    );
 }
 
-void Client::writer(Stream outData)
+void Client::initialize()
 {
-    std::string serialized{outData.getSerialized()};
-    unsigned long length = serialized.size();
-    std::ostringstream header;
-    header<<std::setw(headerLength)<<std::hex<<length;
-    std::vector<boost::asio::const_buffer> buffers;
-    buffers.push_back(boost::asio::buffer(header.str()));
-    buffers.push_back(boost::asio::buffer(serialized));
-
-    boost::asio::async_write(socket,buffers,[](const boost::system::error_code&, std::size_t){});
-}
-
-void Client::readHeader()
-{
-    inHeader.resize(headerLength);
-    boost::asio::async_read(socket,boost::asio::buffer(inHeader),[this](const boost::system::error_code& error, std::size_t)
+    Stream initPack;
+    initPack.head = Header::INIT;
+    initPack.sender = name;
+    net.send(initPack,[this](boost::system::error_code error, std::size_t sent)
     {
-        if (error)
+        if(error)
         {
-            if (error != boost::asio::error::operation_aborted)
-                readHeader();
+            if(error !=boost::asio::error::operation_aborted)
+                initialize();
         }
         else
         {
-            std::string temp{inHeader.begin(),inHeader.end()};
-            if(temp=="ping")
+            net.receive([this](Stream initAck, boost::system::error_code error, std::size_t read)
             {
-                std::ostringstream os;
-                os<<std::setw(headerLength)<<"ping";
-                boost::asio::async_write(socket,boost::asio::buffer(os.str()),[](const boost::system::error_code&, std::size_t){});
-                readHeader();
+                if(error)
+                {
+                    if(error !=boost::asio::error::operation_aborted)
+                        initialize();
+                }
+                else
+                {
+                    if(initAck.head ==(Header) (Header::INIT | Header::ACK))
+                        reader();
+                    else
+                        initialize();
+                }
+            }
+            );
+        }
+    }
+    );
+}
+
+void Client::processData(Stream data)
+{
+    switch(data.head)
+    {
+        case Header::PING:
+            ping();
+            break;
+        default:
+            break;
+    }
+}
+
+void Client::queueMessage(Stream data)
+{
+    writeQueue.push_back(data);
+    if(!isWriting)
+        writer();
+}
+
+void Client::ping()
+{
+    Stream ping;
+    ping.head = Header::PING;
+    queueMessage(ping);
+}
+
+void Client::reader()
+{
+    net.receive([this](Stream data, boost::system::error_code error, std::size_t read)
+    {
+        if(error)
+        {
+            if(error !=boost::asio::error::operation_aborted)
+                reader();
+        }
+        else
+        {
+            processData(data);
+            reader();
+        }
+    }
+    );
+}
+
+void Client::writer()
+{
+    isWriting = true;
+    if(!writeQueue.empty())
+    {
+        net.send(*writeQueue.begin(),[this](boost::system::error_code error, std::size_t sent)
+        {
+            if(error)
+            {
+                if(error != boost::asio::error::operation_aborted)
+                    writer();
             }
             else
             {
-                std::istringstream is{temp};
-                is>>std::hex>>inDataSize;
-                readBody();
+                writeQueue.pop_front();
+                writer();
             }
-        }
-    });
-}
-
-void Client::readBody()
-{
-    inData.resize(inDataSize);
-    boost::asio::async_read(socket,boost::asio::buffer(inData),[this](const boost::system::error_code& error, std::size_t)
-    {
-        if (error)
-        {
-            if (error != boost::asio::error::operation_aborted)
-            readHeader();
-        }
-        else
-        {
-            std::string temp{inData.begin(),inData.end()};
-            buff.push_back(Stream(temp));
-            readHeader();
-        }
-    });
-}
-
-void Client::printer()
-{
-    while(!buff.empty())
-    {
-        std::cout<<std::endl<<"\""<<buff.begin()->getSender()<<" : "<<buff.begin()->getData1()<<"\""<<std::endl;
-        buff.pop_front();
+        });
     }
+    else
+        isWriting = false;
 }

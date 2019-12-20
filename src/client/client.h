@@ -2,37 +2,28 @@
 #define CLIENT_H
 
 #include <list>
+#include <deque>
 #include <boost/asio.hpp>
 #include "../stream/stream.h"
-
-using boost::asio::ip::tcp;
+#include "../network-interface/netface.h"
 
 class Client
 {
     std::string name;
-    tcp::socket socket;
-    tcp::resolver::results_type endpoints;
+    NetFace net;
+    std::deque<Stream> writeQueue;
+    bool isWriting{false};
     
-    std::list<Stream> buff;
-    
-    std::vector<char> inHeader;
-    std::vector<char> inData;
-    unsigned int inDataSize=0;
-    unsigned int headerLength=4;
-
 public:
-    Client(std::string& n,boost::asio::io_context& io,tcp::resolver::results_type& endpoint)
-        :name{std::move(n)},socket{io},endpoints{std::move(endpoint)}
-    {
-        connector();
-    }
-    std::string getName() { return name; }
-    void connector();
-    void intro();
-    void writer(Stream);
-    void readHeader();
-    void readBody();
-    void printer();
+    Client(std::string clientName, std::string hostname, std::string port, boost::asio::io_context& io);
+    
+    void connect();
+    void initialize();
+    void reader();
+    void writer();
+    void processData(Stream);
+    void queueMessage(Stream);
+    void ping();
 };
 
-#endif // CLIENT_H
+#endif
