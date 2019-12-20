@@ -1,5 +1,6 @@
-#include "connectionmanager.h"
+#include "connection-manager.h"
 #include <iomanip>
+#include <iostream>
 
 void ConnectionManager::connector(std::function<void(boost::system::error_code)> callBack)
 {
@@ -17,11 +18,11 @@ void ConnectionManager::writer(const std::string outData, std::function<void (bo
     });
 }
 
-void ConnectionManager::reader(int length, std::function<void (std::vector<char> &, boost::system::error_code, std::size_t)> callBack)
+void ConnectionManager::reader(int length, std::function<void (std::vector<char> , boost::system::error_code, std::size_t)> callBack)
 {
     inData.clear();
     inData.resize(length);
-    boost::asio::async_read(socket,boost::asio::buffer(inData),[this,&callBack](const boost::system::error_code& error, std::size_t read)
+    boost::asio::async_read(socket,boost::asio::buffer(inData),[this,callBack](const boost::system::error_code& error, std::size_t read)
     {
         callBack(inData,error,read);
     });

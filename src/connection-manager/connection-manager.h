@@ -17,7 +17,9 @@ class ConnectionManager
 
 public:
     ConnectionManager(boost::asio::io_context& io):socket{io}, resolver{io}{}
+    ConnectionManager(tcp::socket sock) : socket{std::move(sock)}, resolver{socket.get_executor()} {}
     
+    tcp::socket& getSocket() { return socket; }
     void setEndpoints(std::string hostname, std::string port)
     {
         endpoints = resolver.resolve(hostname,port);
@@ -26,7 +28,7 @@ public:
     void connector(std::function<void(boost::system::error_code)> callBack);
     void writer(const std::string outData
     , std::function<void (boost::system::error_code,std::size_t)> callBack);
-    void reader(int length, std::function<void(std::vector<char>&,boost::system::error_code,std::size_t)> callBack);
+    void reader(int length, std::function<void(std::vector<char>,boost::system::error_code,std::size_t)> callBack);
 };
 
 #endif // CONNECTIONMANAGER_H
