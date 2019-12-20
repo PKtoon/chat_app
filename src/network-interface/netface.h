@@ -1,8 +1,8 @@
 #ifndef NETFACE_H
 #define NETFACE_H
 
-#include "src/connection-manager/connection-manager.h"
-#include <src/stream/stream.h>
+#include "../connection-manager/connection-manager.h"
+#include "../stream/stream.h"
 
 class NetFace
 {
