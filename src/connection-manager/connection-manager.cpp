@@ -10,13 +10,22 @@ void ConnectionManager::connector(std::function<void(boost::system::error_code)>
         });
 }
 
-void ConnectionManager::writer(const std::string outData, std::function<void (boost::system::error_code, std::size_t)> callBack)
+void ConnectionManager::writer(const std::vector<char> outData, std::function<void (boost::system::error_code, std::size_t)> callBack)
 {   
     boost::asio::async_write(socket,boost::asio::buffer(outData),[callBack](boost::system::error_code error, std::size_t sent)
     {
         callBack(error,sent);
     });
 }
+
+void ConnectionManager::writer(const std::vector<boost::asio::const_buffer> buffer, std::function<void (boost::system::error_code, std::size_t)> callBack)
+{
+    boost::asio::async_write(socket,buffer,[callBack](boost::system::error_code error, std::size_t sent)
+    {
+        callBack(error,sent);
+    });
+}
+
 
 void ConnectionManager::reader(int length, std::function<void (std::vector<char> , boost::system::error_code, std::size_t)> callBack)
 {
