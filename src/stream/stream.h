@@ -14,11 +14,11 @@ enum Header
     EMPTY = 0,
     ACK = 1,
     ERROR = 1<<1,
-    CLOSE = 1<<2,
+    SOCKET_CLOSE = 1<<2,
     INIT = 1<<3,
     PING = 1<<4,
     MESSAGE = 1<<5,
-    GROUP = 1<<6,
+    GROUP_MESSAGE = 1<<6,
     LOCAL_FILE = 1<<7
 };
 
@@ -40,18 +40,17 @@ public:
         ar & head;
         switch(head)
         {
+            case Header::PING: case Header::INIT | Header::ACK:
+                break;
+            case Header::MESSAGE:
+                ar & receiver;
+                ar & data1;
             case Header::INIT:
                 ar & sender;
-                break;
-            case Header::INIT | Header::ACK:
                 break;
             default:
                 break;
         }
-//         ar & head;
-//         ar & sender;
-//         ar & receiver;
-//         ar & data1;
     }
 
     Stream(){}
