@@ -33,14 +33,15 @@ void NetFace::disconnect()
     connMan.getSocket().close();
 }
 
-
 void NetFace::send(Stream data, std::function<void(boost::system::error_code, std::size_t)> callBack)
 {
     std::string payload(data.getSerialized());
     unsigned long length = payload.size();
     std::ostringstream header;
     header<<std::setw(headerLength)<<std::hex<<length;
-    connMan.writer((header.str()+payload),[this,payload,callBack](boost::system::error_code error,std::size_t sent)
+    payload = header.str()+payload;
+    std::vector<char> buffer{payload.begin(),payload.end()};
+    connMan.writer(buffer,[callBack](boost::system::error_code error,std::size_t sent)
     {
         if(error)
         {
@@ -66,7 +67,7 @@ void NetFace::receive(std::function<void(Stream, boost::system::error_code, std:
             std::string header(data.begin(),data.end());
             std::stringstream headerStream(header);
             unsigned int dataLength;
-            headerStream>>dataLength;
+            headerStream>>std::hex>>dataLength;
             connMan.reader(dataLength,[callBack](std::vector<char> data, boost::system::error_code error, std::size_t read)
             {
                 if(error)
@@ -81,28 +82,6 @@ void NetFace::receive(std::function<void(Stream, boost::system::error_code, std:
         }
     });
 }
-
-// void NetFace::receiveBody(unsigned int length, std::function<void (Stream, boost::system::error_code, std::size_t)> callBack)
-// {
-//     connMan.reader(length,[this,callBack](std::vector<char> data, boost::system::error_code error,std::size_t read)
-//     {
-//         if (error)
-//         {
-//             callBack(Stream(),error,read);
-//         }
-//         else
-//         {
-// //             std::cerr<<"netface receive data "<<data.size()<<std::endl;
-// //             std::string header(data.begin(),data.end());
-// //             std::stringstream headerStream(header);
-// //             unsigned int dataLength;
-// //             headerStream>>dataLength;
-// //             std::cerr<<"netface receive header init"<<std::endl;
-//             callBack(Stream(std::string(data.begin(),data.end())),error,read);
-//         }
-//     });
-// }
-
 
 void NetFace::runIOThread()
 {
