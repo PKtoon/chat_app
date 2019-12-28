@@ -42,7 +42,7 @@ set(LIB
     "-lpthread"
     )
 
-add_executable("server"  ${SERVER_SOURCES} ${NETWORK_INTERFACE})
+    add_executable("server"  ${SERVER_SOURCES} ${NETWORK_INTERFACE})
 add_executable("client" ${CLIENT_SOURCES} ${NETWORK_INTERFACE})
 
 target_link_libraries( "server" ${LIB} )
