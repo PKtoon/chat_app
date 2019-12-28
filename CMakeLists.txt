@@ -7,6 +7,13 @@ SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lpthread -lboost_serialization")
 # Find the QtWidgets library
 find_package(Qt5Widgets CONFIG REQUIRED)
 
+set(NETWORK_INTERFACE
+    src/connection-manager/connection-manager.h
+    src/connection-manager/connection-manager.cpp
+    src/network-interface/netface.h
+    src/network-interface/netface.cpp
+    )
+    
 set(SERVER_SOURCES
     src/server/user.h
     src/server/user.cpp
@@ -28,8 +35,8 @@ set(STREAM
 
 add_library( "stream" ${STREAM} )
 
-add_executable("server"  ${SERVER_SOURCES})
-add_executable("client" ${CLIENT_SOURCES} )
+add_executable("server"  ${SERVER_SOURCES} ${NETWORK_INTERFACE})
+add_executable("client" ${CLIENT_SOURCES} ${NETWORK_INTERFACE})
 
 target_link_libraries( "server" "stream" )
 target_link_libraries( "client" "stream" )
