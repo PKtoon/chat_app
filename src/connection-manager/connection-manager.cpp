@@ -1,6 +1,4 @@
 #include "connection-manager.h"
-#include <iomanip>
-#include <iostream>
 
 void ConnectionManager::connector(std::function<void(boost::system::error_code)> callBack)
 {

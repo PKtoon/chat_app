@@ -1,8 +1,10 @@
 #ifndef CONNECTIONMANAGER_H
 #define CONNECTIONMANAGER_H
 
-#include <boost/asio.hpp>
+
 #include <functional>
+
+#include <boost/asio.hpp>
 
 using boost::asio::ip::tcp;
 
