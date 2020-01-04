@@ -1,5 +1,4 @@
 #include "netface.h"
-#include <iostream>
 
 NetFace::NetFace(boost::asio::io_context& io) : connMan{io} {}
 
@@ -12,11 +11,8 @@ void NetFace::connect(std::string host, std::string portNum, std::function<void(
 {
     hostname = host;
     port = portNum;
-    connMan.setEndpoints(hostname,port);
-    connMan.connector([this,callBack](boost::system::error_code error)
-    {
-        callBack(error);
-    });
+
+    connect(callBack);
 }
 
 void NetFace::connect(std::function<void(boost::system::error_code)> callBack)
@@ -81,14 +77,4 @@ void NetFace::receive(std::function<void(Stream, boost::system::error_code, std:
             });
         }
     });
-}
-
-void NetFace::runIOThread()
-{
-    ioThread = std::thread([this](){ io.run(); });
-}
-
-void NetFace::stopIOThread()
-{
-    ioThread.join();
 }
