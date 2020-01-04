@@ -8,6 +8,7 @@
 
 Q_DECLARE_METATYPE(boost::system::error_code)
 Q_DECLARE_METATYPE(std::size_t)
+Q_DECLARE_METATYPE(Stream)
 
 int main(int argc, char* argv[])
 {
@@ -18,6 +19,7 @@ int main(int argc, char* argv[])
     
     qRegisterMetaType<boost::system::error_code>();
     qRegisterMetaType<std::size_t>();
+    qRegisterMetaType<Stream>();
 
     MainWindow mainWin;
     mainWin.show();
