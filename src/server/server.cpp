@@ -15,6 +15,7 @@ void Server::accept()
         else
         {
             new User{std::move(socket),this};
+            std::cout<<"new connect"<<std::endl;
             accept();
         }
     });

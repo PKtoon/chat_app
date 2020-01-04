@@ -1,9 +1,10 @@
 #ifndef USER_H
 #define USER_H
 
-#include <boost/asio.hpp>
-#include <iostream>
 #include <deque>
+
+#include <boost/asio.hpp>
+
 #include "../stream/stream.h"
 #include "../network-interface/netface.h"
 
