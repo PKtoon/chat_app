@@ -1,9 +1,10 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <list>
 #include <deque>
+
 #include <boost/asio.hpp>
+
 #include "../stream/stream.h"
 #include "../network-interface/netface.h"
 

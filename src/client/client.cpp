@@ -1,7 +1,4 @@
-#include <iostream>
-#include <sstream>
 #include "client.h"
-
 
 Client::Client(std::string clientName, std::string hostname, std::string port, boost::asio::io_context& io) : name{clientName}, net{io,hostname,port}
 {
