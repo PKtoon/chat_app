@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(chat_app)
 
-include_directories("~/boost/usr/include")
-link_directories("~/boost/usr/lib")
-
 # Find the QtWidgets library
 find_package(Qt5Widgets CONFIG REQUIRED)
 
