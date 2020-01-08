@@ -9,7 +9,7 @@ class ConnDialog : public QDialog
 
 public:
     explicit ConnDialog(QWidget *parent = nullptr);
-    
+
     QGridLayout* grid = new QGridLayout(this);
     QLabel* name = new QLabel("Name:",this);
     QLineEdit* nameInput = new QLineEdit(this);

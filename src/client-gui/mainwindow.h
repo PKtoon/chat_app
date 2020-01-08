@@ -18,6 +18,15 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow()
+    {
+        if(isThreadRunning)
+        {
+            disConnect();
+            work.reset();
+            ioThread.join();
+        }
+    }
 
 signals:
     void insertText(const QString& text);
@@ -27,36 +36,44 @@ public slots:
     void doConnect(const QString userName, const QString host, const QString portNum);
     void disConnect();
     void displayMessage(QListWidgetItem* item);
-    void sendMsg();
+    void sendMessage();
     void newContact();
-    void createCon(const QString& text);
+    void createContact(const QString& text);
 
 private:
-    QString name = "PK";
+    //client parameters
+    QString name;
     QString hostname;
     QString port;
+    
+    //networking scaffold
     boost::asio::io_context io;
     NetFace net{io};
-//     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work = boost::asio::make_work_guard(io_context);
-    boost::asio::executor_work_guard<boost::asio::io_context::executor_type>* work;
     std::thread ioThread;
-    ConnDialog* connDialog;
-    QListWidget* contactsList;
+    bool isThreadRunning{false};
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work = boost::asio::make_work_guard(io);
+    
+    // I/O scaffold
     std::deque<Stream> writeQueue;
     bool isWriting{false};
+    
+    // GUI components
     QWidget* center = new QWidget(this);
+    QListWidget* contactsListWidget  = new QListWidget(center);
     QTextEdit* message = new QTextEdit(center);
     QLineEdit* msgIn = new QLineEdit(center);
     QPushButton* sendButt = new QPushButton("Send",center);
-    NewContactDialog* newContactDialog;
-    std::vector<ContactListItem> contacts;
+    ConnDialog* connDialog = new ConnDialog(this);
+    NewContactDialog* newContactDialog = new NewContactDialog(this);
     
-    void createActions();
+    std::vector<ContactListItem> contactsList;
+     
+    void createMenuBar();
     void decorate();
     void setContactList();
     void processMessage(Stream data);
-    ContactListItem* createContact(const QString& text);
-    ContactListItem* getUser(std::string name);
+    ContactListItem* makeContact(const QString& text);
+    ContactListItem* getUser(QString name);
     
     //client.h
     void initialize();

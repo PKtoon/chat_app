@@ -10,6 +10,7 @@ class NewContactDialog : public QDialog
 
 public:
     NewContactDialog(QWidget *parent = nullptr);
+    void clear();
 
 signals:
     void createContact(const QString &text);

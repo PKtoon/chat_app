@@ -14,3 +14,8 @@ void NewContactDialog::createPressed()
 {
     emit createContact(conInput->text());
 }
+
+void NewContactDialog::clear()
+{
+    conInput->clear();
+}
