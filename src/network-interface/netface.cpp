@@ -32,6 +32,7 @@ void NetFace::disconnect()
 void NetFace::send(Stream data, std::function<void(boost::system::error_code, std::size_t)> callBack)
 {
     std::string payload(data.getSerialized());
+    payload = "HEAD" + payload + "TAIL";
     unsigned long length = payload.size();
     std::ostringstream header;
     header<<std::setw(headerLength)<<std::hex<<length;
@@ -72,7 +73,9 @@ void NetFace::receive(std::function<void(Stream, boost::system::error_code, std:
                 }
                 else
                 {
-                    callBack(Stream(std::string(data.begin(),data.end())),error,read);
+                    std::string temp {data.begin(),data.end()};
+                    if(temp.substr(0,4)=="HEAD" && temp.substr(temp.size()-4,4) == "TAIL")
+                        callBack(Stream(temp.substr(4,temp.size()-8)),error,read);
                 }
             });
         }
