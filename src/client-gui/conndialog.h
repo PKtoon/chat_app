@@ -6,10 +6,7 @@
 class ConnDialog : public QDialog
 {
     Q_OBJECT
-
-public:
-    explicit ConnDialog(QWidget *parent = nullptr);
-
+    
     QGridLayout* grid = new QGridLayout(this);
     QLabel* name = new QLabel("Name:",this);
     QLineEdit* nameInput = new QLineEdit(this);
@@ -21,16 +18,22 @@ public:
     QPushButton* cancel = new QPushButton("Cancel",this);
     QLabel* inform = new QLabel(this);
     
+    void decorate();
+    
+public:
+    explicit ConnDialog(QWidget *parent = nullptr);
+    ~ConnDialog();
+    
     void setInform(QString text);
+    void setHostInputText(QString text);
+    void setPortInputText(QString text);
+    void setCancelButtonText(QString text);
 
 signals:
     void doConnect(const QString name, const QString host, const QString port);
 
 public slots:
     void connInit();
-   
-private:
-    void decorate();
 };
 
 #endif // CONNDIALOG_H

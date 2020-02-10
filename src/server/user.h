@@ -5,7 +5,6 @@
 
 #include <boost/asio.hpp>
 
-#include "../stream/stream.h"
 #include "../network-interface/netface.h"
 
 class Server;

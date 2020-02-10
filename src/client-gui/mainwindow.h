@@ -18,15 +18,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow()
-    {
-        if(isThreadRunning)
-        {
-            disConnect();
-            work.reset();
-            ioThread.join();
-        }
-    }
+    ~MainWindow();
 
 signals:
     void insertText(const QString& text);
@@ -58,13 +50,15 @@ private:
     bool isWriting{false};
     
     // GUI components
+    ConnDialog* connDialog;
+    NewContactDialog* newContactDialog;
+    
     QWidget* center = new QWidget(this);
     QListWidget* contactsListWidget  = new QListWidget(center);
     QTextEdit* message = new QTextEdit(center);
     QLineEdit* msgIn = new QLineEdit(center);
     QPushButton* sendButt = new QPushButton("Send",center);
-    ConnDialog* connDialog = new ConnDialog(this);
-    NewContactDialog* newContactDialog = new NewContactDialog(this);
+    
     
     std::vector<ContactListItem> contactsList;
      

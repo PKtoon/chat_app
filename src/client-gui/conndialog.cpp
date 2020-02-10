@@ -2,7 +2,22 @@
 
 ConnDialog::ConnDialog(QWidget* parent) : QDialog(parent)
 {
+    setAttribute(Qt::WA_DeleteOnClose,true);
     decorate();
+}
+
+ConnDialog::~ConnDialog()
+{
+    delete grid;
+    delete name;
+    delete nameInput;
+    delete hostLabel;
+    delete hostInput;
+    delete portLabel;
+    delete portInput;
+    delete connButton;
+    delete cancel;
+    delete inform;
 }
 
 void ConnDialog::decorate()
@@ -30,3 +45,19 @@ void ConnDialog::setInform(QString text)
 {
     inform->setText(text);
 }
+
+void ConnDialog::setHostInputText(QString text)
+{
+    hostInput->setText(text);
+}
+
+void ConnDialog::setPortInputText(QString text)
+{
+    portInput->setText(text);
+}
+
+void ConnDialog::setCancelButtonText(QString text)
+{
+    cancel->setText(text);
+}
+
