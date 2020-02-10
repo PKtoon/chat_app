@@ -2,6 +2,7 @@
 
 NewContactDialog::NewContactDialog(QWidget* parent) : QDialog(parent)
 {
+    setAttribute(Qt::WA_DeleteOnClose,true);
     setLayout(gridMsg);
     gridMsg->addWidget(conLabel,0,0,Qt::AlignRight);
     gridMsg->addWidget(conInput,0,1);
@@ -10,12 +11,15 @@ NewContactDialog::NewContactDialog(QWidget* parent) : QDialog(parent)
     connect(createCon,&QPushButton::clicked,this,&NewContactDialog::createPressed);
 }
 
+NewContactDialog::~NewContactDialog()
+{
+    delete gridMsg;
+    delete conLabel;
+    delete conInput;
+    delete createCon;
+}
+
 void NewContactDialog::createPressed()
 {
     emit createContact(conInput->text());
-}
-
-void NewContactDialog::clear()
-{
-    conInput->clear();
 }

@@ -12,6 +12,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setContactList();
 }
 
+MainWindow::~MainWindow()
+{
+    if(isThreadRunning)
+    {
+        disConnect();
+        work.reset();
+        ioThread.join();
+    }
+}
+
+
 //GUI functions
 void MainWindow::createMenuBar()
 {
@@ -61,10 +72,7 @@ void MainWindow::setContactList()
 
 ContactListItem* MainWindow::makeContact(const QString& text)
 {
-    ContactListItem* user;
-    if(!(user = getUser(text)))
-        user = new ContactListItem(text,contactsListWidget);
-    return user;
+    return new ContactListItem(text,contactsListWidget);
 }
 
 void MainWindow::processMessage(Stream data)
@@ -97,7 +105,7 @@ void MainWindow::initialize()
     {
         if(error)
         {
-            if(error !=boost::asio::error::operation_aborted)
+            if(error != boost::asio::error::operation_aborted)
                 initialize();
         }
         else
@@ -106,7 +114,7 @@ void MainWindow::initialize()
             {
                 if(error)
                 {
-                    if(error !=boost::asio::error::operation_aborted)
+                    if(error != boost::asio::error::operation_aborted)
                         initialize();
                 }
                 else
@@ -129,7 +137,7 @@ void MainWindow::reader()
     {
         if(error)
         {
-            if(error !=boost::asio::error::operation_aborted)
+            if(error != boost::asio::error::operation_aborted)
                 reader();
         }
         else
@@ -196,12 +204,13 @@ void MainWindow::ping()
 //slots
 void MainWindow::initConnect()
 {
+    connDialog = new ConnDialog(this);
     connDialog->setWindowTitle("Connect");
 
     connect(connDialog,&ConnDialog::doConnect, this, &MainWindow::doConnect);
 
-    connDialog->hostInput->setText("localhost");
-    connDialog->portInput->setText("1098");
+    connDialog->setHostInputText("localhost");
+    connDialog->setPortInputText("1098");
 
     connDialog->show();
 }
@@ -229,7 +238,7 @@ void MainWindow::doConnect(const QString userName, const QString host, const QSt
         }
         else
         {
-            connDialog->cancel->setText("Close");
+            connDialog->setCancelButtonText("Close");
             connDialog->setInform("Connected Successfully");
             initialize();
         }
@@ -278,13 +287,14 @@ void MainWindow::sendMessage()
     data.data1 = msgIn->text().toStdString();
     ContactListItem* user = static_cast<ContactListItem*>(contactsListWidget->currentItem());
     user->pushMsg(MessageItem(data.sender,data.data1));
-    emit contactsListWidget->itemChanged(user);
+    emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution
     msgIn->clear();
     queueMessage(data);
 }
 
 void MainWindow::newContact()
 {
+    newContactDialog = new NewContactDialog(this);
     connect(newContactDialog,&NewContactDialog::createContact,this,&MainWindow::createContact);
 
     newContactDialog->show();
@@ -292,7 +302,12 @@ void MainWindow::newContact()
 
 void MainWindow::createContact(const QString& text)
 {
-    newContactDialog->clear();
     newContactDialog->close();
-    makeContact(text);
+    ContactListItem* user;
+    user=getUser(text);
+    if(!user)
+    {
+        user = makeContact(text);
+    }
+    emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution
 }
