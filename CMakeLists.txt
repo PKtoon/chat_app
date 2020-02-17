@@ -2,8 +2,21 @@ cmake_minimum_required(VERSION 2.8)
 
 project(chat_app)
 
-# Find the QtWidgets library
-find_package(Qt5Widgets CONFIG REQUIRED)
+# Find boost library
+find_package(Boost 1.70.0 REQUIRED COMPONENTS serialization)
+include_directories(${Boost_INCLUDE_DIRS})
+
+set(STREAM
+    src/stream/stream.h
+    src/stream/stream.cpp
+    )
+
+add_library( "stream" ${STREAM})
+
+set(LIB
+    "stream"
+    "-lpthread"
+    )
 
 set(NETWORK_INTERFACE
     src/connection-manager/connection-manager.h
@@ -20,30 +33,25 @@ set(SERVER_SOURCES
     src/server/main.cpp
     )
 
+add_executable("server"  ${SERVER_SOURCES} ${NETWORK_INTERFACE})
+target_link_libraries( "server" ${LIB} Boost::serialization)
+
 set(CLIENT_SOURCES
     src/client/client.h
     src/client/client.cpp
     src/client/main.cpp
     )
-
-set(STREAM
-    src/stream/stream.h
-    src/stream/stream.cpp
-    )
-
-add_library( "stream" ${STREAM} )
-
-set(LIB
-    "stream"
-    "-lboost_serialization" 
-    "-lpthread"
-    )
-
-add_executable("server"  ${SERVER_SOURCES} ${NETWORK_INTERFACE})
+    
 add_executable("client" ${CLIENT_SOURCES} ${NETWORK_INTERFACE})
+target_link_libraries( "client" ${LIB} Boost::serialization)
 
-target_link_libraries( "server" ${LIB} )
-target_link_libraries( "client" ${LIB} )
+
+# Find the QtWidgets library
+find_package(Qt5Widgets CONFIG REQUIRED)
+
+# Find SQLite3
+find_package(SQLite3 REQUIRED)
+include_directories(${SQLite3_INCLUDE_DIRS})
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -51,6 +59,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 # Instruct CMake to create code from Qt designer ui files
 set(CMAKE_AUTOUIC ON)
+
+set(SQLITEDB
+    src/db/sqlite3_wrap.h
+    )
 
 set(CLIENT_GUI_SOURCES
     src/client-gui/newcontactdialog.h
@@ -65,5 +77,5 @@ set(CLIENT_GUI_SOURCES
     src/client-gui/main-gui.cpp
     )
 
-add_executable("client-gui" ${CLIENT_GUI_SOURCES} ${NETWORK_INTERFACE} )
-target_link_libraries( "client-gui" Qt5::Widgets ${LIB} )
+add_executable("client-gui" ${CLIENT_GUI_SOURCES} ${NETWORK_INTERFACE} ${SQLITEDB})
+target_link_libraries( "client-gui" Qt5::Widgets ${LIB} Boost::serialization ${SQLite3_LIBRARIES})
