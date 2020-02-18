@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <deque>
+#include <functional>
 
 #include <QMainWindow>
 #include <QListWidget>
@@ -12,6 +13,8 @@
 #include "conndialog.h"
 #include "newcontactdialog.h"
 #include "contactlistitem.h"
+
+#include "external/sqlite3_wrap.h"
 
 class MainWindow : public QMainWindow
 {
@@ -59,9 +62,6 @@ private:
     QLineEdit* msgIn = new QLineEdit(center);
     QPushButton* sendButt = new QPushButton("Send",center);
     
-    
-    std::vector<ContactListItem> contactsList;
-     
     void createMenuBar();
     void decorate();
     void setContactList();
@@ -76,6 +76,10 @@ private:
     void processData(Stream);
     void queueMessage(Stream);
     void ping();
+    
+    //SQLite3 db
+    SQLite3DB db {"storage"};
+    void initDB();
 };
 
 #endif // MAINWINDOW_H

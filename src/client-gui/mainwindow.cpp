@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setCentralWidget(center);
     createMenuBar();
     decorate();
+    initDB();
     setContactList();
 }
 
@@ -64,14 +65,27 @@ void MainWindow::decorate()
 
 void MainWindow::setContactList()
 {
-    for(auto& a : contactsList)
-        contactsListWidget->addItem(&a);
+    std::string query {"select name from contacts;"};
+    
+    if(!db.queryExec(query,[this](int numOfColumns, char **columnData, char **columnName)->int
+        {
+            std::string colName {columnName[0]};
+            if(colName=="name")
+            {
+                new ContactListItem(columnData[0],contactsListWidget);
+            }
+            return 0;
+        }))
+        qInfo()<<db.getError().c_str();
     
     connect(contactsListWidget,&QListWidget::itemClicked,this,&MainWindow::displayMessage);
 }
 
 ContactListItem* MainWindow::makeContact(const QString& text)
 {
+    std::string query{"insert into contacts values (\""+text.toStdString()+"\");"};
+    if(!db.queryExec(query))
+        qInfo()<<db.getError().c_str();
     return new ContactListItem(text,contactsListWidget);
 }
 
@@ -83,7 +97,9 @@ void MainWindow::processMessage(Stream data)
     {
         user = makeContact(data.sender.c_str());
     }
-    user->pushMsg(MessageItem(data.sender,data.data1));
+    std::string query {"insert into messages (name,sender,message,time) values (\""+data.sender+"\", \""+data.sender+"\", \""+data.data1+"\",datetime(\"now\"));"};
+    if(!db.queryExec(query))
+        qInfo()<<db.getError().c_str();
     emit contactsListWidget->itemChanged(user);
 }
 
@@ -264,12 +280,20 @@ void MainWindow::displayMessage(QListWidgetItem* item)
     message->clear();
     ContactListItem* item2 = static_cast<ContactListItem*>(item);
     contactsListWidget->setCurrentItem(item2);
-
-    for(auto& a : (*item2).msg)
+    
+    std::string query = "select sender,message from messages where name=\""+item2->text().toStdString()+"\";";
+    
+    auto fun = [this](int numOfColumns,char **columnData, char **columnName)->int
     {
-        QString msg {QString(a.from.c_str())+QString(":\n")+QString(a.message.c_str())+QString("\n\n")};
+        QString msg {QString(columnData[0])+QString(":\n")+QString(columnData[1])+QString("\n\n")};
         emit insertText(msg);
-    }
+        
+        return 0;
+    };
+    
+    if(!db.queryExec(query,fun))
+        qInfo()<<db.getError().c_str();
+    
     message->ensureCursorVisible();
 }
 
@@ -286,7 +310,10 @@ void MainWindow::sendMessage()
     data.receiver = contactsListWidget->currentItem()->text().toStdString();
     data.data1 = msgIn->text().toStdString();
     ContactListItem* user = static_cast<ContactListItem*>(contactsListWidget->currentItem());
-    user->pushMsg(MessageItem(data.sender,data.data1));
+    
+    std::string query {"insert into messages (name,sender,message,time) values (\""+data.receiver+"\", \""+data.sender+"\", \""+data.data1+"\",datetime(\"now\"));"};
+    if(!db.queryExec(query))
+        qInfo()<<db.getError().c_str();
     emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution
     msgIn->clear();
     queueMessage(data);
@@ -310,4 +337,51 @@ void MainWindow::createContact(const QString& text)
         user = makeContact(text);
     }
     emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution
+}
+
+void MainWindow::initDB()
+{
+    std::string query {"select count(name) from sqlite_master where name=\"user\";"};
+    if(!db.queryExec(query,[this](int numOfColumns, char **columnData, char **columnName)->int
+        {
+            std::string colName{columnName[0]};
+            std::string colData{columnData[0]};
+            if(colName == "count(name)" && colData == "0")
+            {
+                if(!db.queryExec("create table user (name text primary key);"))
+                    qInfo()<<db.getError().c_str();
+            }
+               return 0;
+        }))
+        qInfo()<<db.getError().c_str();
+    
+    
+    
+    query ="select count(name) from sqlite_master where name=\"contacts\";";
+    if(!db.queryExec(query,[this](int numOfColumns, char **columnData, char **columnName)->int
+        {
+            std::string colName{columnName[0]};
+            std::string colData{columnData[0]};
+            if(colName == "count(name)" && colData == "0")
+            {
+                if(!db.queryExec("create table contacts (name text primary key);"))
+                    qInfo()<<db.getError().c_str();
+            }
+                return 0;
+        }))
+        qInfo()<<db.getError().c_str();
+    
+    query ="select count(name) from sqlite_master where name=\"messages\";";
+    if(!db.queryExec(query,[this](int numOfColumns, char **columnData, char **columnName)->int
+        {
+            std::string colName{columnName[0]};
+            std::string colData{columnData[0]};
+            if(colName == "count(name)" && colData == "0")
+            {
+                if(!db.queryExec("create table messages (id INTEGER PRIMARY KEY AUTOINCREMENT, name text, sender text, message text, time text);"))
+                    qInfo()<<db.getError().c_str();
+            }
+                return 0;
+        }))
+        qInfo()<<db.getError().c_str();
 }
