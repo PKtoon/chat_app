@@ -61,7 +61,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(SQLITEDB
-    external/sqlite3_wrap.h
+    external/SQLite/sqlite3_wrap.h
     )
 
 set(CLIENT_GUI_SOURCES

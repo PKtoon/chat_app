@@ -1,0 +1,3 @@
+[submodule "external/SQLite"]
+	path = external/SQLite
+	url = https://github.com/PKtoon/SQLite3-Wrapper.git

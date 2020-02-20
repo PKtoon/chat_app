@@ -14,7 +14,7 @@
 #include "newcontactdialog.h"
 #include "contactlistitem.h"
 
-#include "external/sqlite3_wrap.h"
+#include "external/SQLite/sqlite3_wrap.h"
 
 class MainWindow : public QMainWindow
 {
