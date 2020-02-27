@@ -18,7 +18,7 @@ class Client
 public:
     Client(std::string clientName, std::string hostname, std::string port, boost::asio::io_context& io);
     
-    void connect();
+    void connect(std::string hostname,std::string port);
     void initialize();
     void reader();
     void writer();

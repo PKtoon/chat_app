@@ -6,19 +6,11 @@ NetFace::NetFace(boost::asio::io_context& io) : connMan{io} {}
 
 NetFace::NetFace(tcp::socket sock) : connMan{std::move(sock)} {}
 
-NetFace::NetFace(boost::asio::io_context& io, std::string host, std::string portNum) : hostname{host}, port{portNum}, connMan{io} {}
-
-
 void NetFace::connect(std::string host, std::string portNum, std::function<void(boost::system::error_code)> callBack)
 {
-    hostname = host;
-    port = portNum;
+    std::string hostname = host;
+    std::string port = portNum;
 
-    connect(callBack);
-}
-
-void NetFace::connect(std::function<void(boost::system::error_code)> callBack)
-{
     connMan.setEndpoints(hostname,port);
     connMan.connector([this,callBack](boost::system::error_code error)
     {

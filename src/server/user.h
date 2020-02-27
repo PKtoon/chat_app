@@ -11,17 +11,18 @@ class Server;
 
 class User
 {
-    std::string name{"uninitialized"};
-    bool isAlive{true};
+    std::string name;
+    bool isAlive{false};
     bool isWriting{false};
     std::deque<Stream> writeQueue;
     NetFace net;
-    Server *server;
+    Server& server;
+    boost::asio::steady_timer timer {net.getSocket().get_executor(),boost::asio::chrono::seconds(20)};
 public:
-    User(boost::asio::ip::tcp::socket socket, Server* serv);
+    User(boost::asio::ip::tcp::socket socket, Server& serv);
+    ~User(){ std::cerr<<"User died";}
     
     const std::string& getName() const { return name; }
-    bool getStatus() const { return isAlive; }
     
     void initialize();
     void writer();
@@ -29,6 +30,7 @@ public:
     void queueMessage(Stream);
     void processData(Stream);
     void pingMe();
+    void checkPulse();
 };
 
 #endif

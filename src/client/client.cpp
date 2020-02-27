@@ -1,18 +1,18 @@
 #include "client.h"
 
-Client::Client(std::string clientName, std::string hostname, std::string port, boost::asio::io_context& io) : name{clientName}, net{io,hostname,port}
+Client::Client(std::string clientName, std::string hostname, std::string port, boost::asio::io_context& io) : name{clientName}, net{io}
 {
-    connect();
+    connect(hostname,port);
 }
 
-void Client::connect()
+void Client::connect(std::string hostname, std::string port)
 {
-    net.connect([this](boost::system::error_code error)
+    net.connect(hostname,port,[this,hostname,port](boost::system::error_code error)
     {
         if(error)
         {
             if(error != boost::asio::error::operation_aborted)
-                connect();
+                connect(hostname,port);
         }
         else
             initialize();

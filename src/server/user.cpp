@@ -2,8 +2,13 @@
 #include "server.h"
 #include "user.h"
 
-User::User(boost::asio::ip::tcp::socket socket, Server* serv) : net{std::move(socket)}, server{serv}
+User::User(boost::asio::ip::tcp::socket socket, Server& serv) : net{std::move(socket)}, server{serv}
 {
+    server.addMe(this);
+    timer.async_wait([this](const boost::system::error_code& error)
+    {
+       checkPulse();
+    });
     initialize();
 }
 
@@ -20,12 +25,15 @@ void User::initialize()
         {
             if(data.head == Header::INIT)
             {
-                name = data.sender;
-                server->addMe(this);
-                Stream reply;
-                reply.head = (Header)(Header::INIT | Header::ACK);
-                queueMessage(reply);
-                reader();
+                if(!server.getUser(data.sender))
+                {
+                    isAlive=true;
+                    name = data.sender;                    
+                    Stream reply;
+                    reply.head = (Header)(Header::INIT | Header::ACK);
+                    queueMessage(reply);
+                    reader();
+                }
             }
             else
                 initialize();
@@ -38,13 +46,27 @@ void User::processData(Stream data)
     switch(data.head)
     {
         case Header::MESSAGE:
-            server->queueDelivery(data);
+            server.queueDelivery(data);
             break;
         case Header::PING:
             isAlive = true;
             break;
         default:
             break;
+    }
+}
+
+void User::checkPulse()
+{
+    if(!isAlive)
+        server.removeMe(this);
+    else
+    {
+    pingMe();
+    timer.async_wait([this](const boost::system::error_code& error)
+    {
+       checkPulse();
+    });
     }
 }
 
