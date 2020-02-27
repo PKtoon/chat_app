@@ -20,7 +20,6 @@ class User
     boost::asio::steady_timer timer {net.getSocket().get_executor(),boost::asio::chrono::seconds(20)};
 public:
     User(boost::asio::ip::tcp::socket socket, Server& serv);
-    ~User(){ std::cerr<<"User died";}
     
     const std::string& getName() const { return name; }
     

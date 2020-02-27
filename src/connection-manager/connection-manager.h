@@ -21,11 +21,6 @@ public:
     ConnectionManager(boost::asio::io_context& io):socket{io}, resolver{io}{}
     ConnectionManager(tcp::socket sock) : socket{std::move(sock)}, resolver{socket.get_executor()} {}
     
-    ~ConnectionManager()
-    {
-        std::cerr<<"connMan died";
-    }
-    
     tcp::socket& getSocket() { return socket; }
     void setEndpoints(std::string hostname, std::string port)
     {
