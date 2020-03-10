@@ -1,3 +1,5 @@
+#include <iomanip>
+
 #include "netface.h"
 
 NetFace::NetFace(boost::asio::io_context& io) : connMan{io} {}
@@ -42,11 +44,11 @@ void NetFace::send(Stream data, std::function<void(boost::system::error_code, st
     {
         if(error)
         {
-                callBack(error,sent);
+            callBack(error,sent);
         }
         else
         {
-                callBack(error,sent);
+            callBack(error,sent);
         }
     });
 }

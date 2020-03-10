@@ -1,22 +1,71 @@
 #include "stream.h"
 
-#include <sstream>
-
-#include <boost/asio.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
+#include "external/json/single_include/nlohmann/json.hpp"
 
 std::string Stream::getSerialized()
 {
-    std::ostringstream archiveStream;
-    boost::archive::text_oarchive archive(archiveStream);
-    archive<<*this;
-    return archiveStream.str();
+    nlohmann::json j;
+    constexpr Header comp = static_cast<Header>(Header::ACK|Header::PING|Header::ERROR|Header::SOCKET_CLOSE);
+
+    j["head"] = head;
+
+    if((head & comp) || head==Header::EMPTY)
+    {
+        j["sender"] = sender;
+        j["receiver"] = receiver;
+    }
+    else
+    {
+        switch (head)
+        {
+        case Header::LOCAL_FILE:
+            j["currentPart"] = currentPart;
+            j["totalParts"] = totalParts;
+        case Header::GROUP_MESSAGE:
+            j["data2"] = data2;
+        case Header::MESSAGE:
+            j["receiver"] = receiver;
+            j["data1"] = data1;
+        case Header::INIT:
+            j["sender"] = sender;
+        default:
+            break;
+        }
+    }
+
+    return j.dump();
 }
 
 void Stream::getUnSerialized(std::string& inData)
 {
-    std::istringstream archiveStream(inData);
-    boost::archive::text_iarchive archive(archiveStream);
-    archive>>*this;
+    nlohmann::json j = nlohmann::json::parse(inData);
+
+    constexpr Header comp = static_cast<Header>(Header::ACK|Header::PING|Header::ERROR|Header::SOCKET_CLOSE);
+
+    head = (j["head"]);
+
+    if((head & comp) || head==Header::EMPTY)
+    {
+        sender = j["sender"];
+        receiver = j["receiver"];
+        return;
+    }
+    else
+    {
+        switch (head)
+        {
+        case Header::LOCAL_FILE:
+            currentPart = j["currentPart"];
+            totalParts = j["totalParts"];
+        case Header::GROUP_MESSAGE:
+            data2 = j["data2"];
+        case Header::MESSAGE:
+            receiver = j["receiver"];
+            data1 = j["data1"];
+        case Header::INIT:
+            sender = j["sender"];
+        default:
+            break;
+        }
+    }
 }
