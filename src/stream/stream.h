@@ -32,7 +32,6 @@ class Stream
 
     Stream(){}
     Stream(std::string s) { getUnSerialized(s);}
-    Stream(std::string s, std::string r, std::string msg): sender{std::move(s)}, receiver{std::move(r)}, data1{std::move(msg)}{}
     std::string getSerialized();
     void getUnSerialized(std::string&);
 };

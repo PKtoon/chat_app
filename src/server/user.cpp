@@ -63,6 +63,7 @@ void User::checkPulse()
     else
     {
     pingMe();
+    timer.expires_after(boost::asio::chrono::seconds(20));
     timer.async_wait([this](const boost::system::error_code& error)
     {
        checkPulse();

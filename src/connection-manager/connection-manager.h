@@ -1,7 +1,6 @@
 #ifndef CONNECTIONMANAGER_H
 #define CONNECTIONMANAGER_H
 
-#include <iostream>
 #include <functional>
 
 #include <boost/asio.hpp>
