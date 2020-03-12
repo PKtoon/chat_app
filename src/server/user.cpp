@@ -1,10 +1,8 @@
-#include "../logging.h"
 #include "server.h"
 #include "user.h"
 
 User::User(boost::asio::ip::tcp::socket socket, Server& serv) : net{std::move(socket)}, server{serv}
 {
-    server.addMe(this);
     timer.async_wait([this](const boost::system::error_code& error)
     {
        checkPulse();
@@ -103,6 +101,13 @@ void User::reader()
     }
     );
 }
+
+//todo:
+//writer if unable to write due to error will repeat indefinitely and other messages will stall rather than sending others
+//one thing I can do is make a pending buffer which will store failed messages. then whenever next invocation of writer occurs all pending will be appended to writeQueue
+//well appending at front can make writer face same error over and over again, and appending at end will mess up message order unless a sequence number for message is used
+//multiple failure can result in long wait time for failed message and beyond that removal of message
+//todo end
 
 void User::writer()
 {

@@ -12,15 +12,10 @@ void Server::accept()
         }
         else
         {
-            new User{std::move(socket),*this};
+            userList.emplace_back(std::make_unique<User>(std::move(socket),*this));
             accept();
         }
     });
-}
-
-void Server::addMe(User* user)
-{
-    userList.emplace_back(user);
 }
 
 void Server::removeMe(User* user)
@@ -31,6 +26,10 @@ void Server::removeMe(User* user)
             userList.erase(userList.begin()+i);
     }
 }
+
+//this deliverMessages function has same problems as User::writer()
+//debatable architecture question here. rather than giving message delivery to server and making one more buffer, just make user class to access other user class' message queue like old design.
+//but this will have problem when all of this become concurrent when many Users try to access same User's message queue. this problem will persist even if server is used for message delivery
 
 void Server::deliverMessages()
 {
