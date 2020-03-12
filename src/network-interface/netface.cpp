@@ -12,7 +12,7 @@ void NetFace::connect(std::string host, std::string portNum, std::function<void(
     std::string port = portNum;
 
     connMan.setEndpoints(hostname,port);
-    connMan.connector([this,callBack](boost::system::error_code error)
+    connMan.connector([callBack](boost::system::error_code error, tcp::endpoint)
     {
         callBack(error);
     });
@@ -27,21 +27,14 @@ void NetFace::send(Stream data, std::function<void(boost::system::error_code, st
 {
     std::string payload(data.getSerialized());
     payload = "HEAD" + payload + "TAIL";
-    unsigned long length = payload.size();
+    uint32_t length = payload.size();
     std::ostringstream header;
     header<<std::setw(headerLength)<<std::hex<<length;
     payload = header.str()+payload;
     std::vector<char> buffer{payload.begin(),payload.end()};
     connMan.writer(buffer,[callBack](boost::system::error_code error,std::size_t sent)
     {
-        if(error)
-        {
-            callBack(error,sent);
-        }
-        else
-        {
-            callBack(error,sent);
-        }
+        callBack(error,sent);
     });
 }
 
@@ -57,7 +50,7 @@ void NetFace::receive(std::function<void(Stream, boost::system::error_code, std:
         {
             std::string header(data.begin(),data.end());
             std::stringstream headerStream(header);
-            unsigned int dataLength;
+            uint32_t dataLength;
             headerStream>>std::hex>>dataLength;
             connMan.reader(dataLength,[callBack](std::vector<char> data, boost::system::error_code error, std::size_t read)
             {
@@ -70,6 +63,12 @@ void NetFace::receive(std::function<void(Stream, boost::system::error_code, std:
                     std::string temp {data.begin(),data.end()};
                     if(temp.substr(0,4)=="HEAD" && temp.substr(temp.size()-4,4) == "TAIL")
                         callBack(Stream(temp.substr(4,temp.size()-8)),error,read);
+                    else
+                    {
+                        Stream data;
+                        data.head = static_cast<Header>(Header::ERROR|Header::MESSAGE_CORRUPT);
+                        callBack(data,error,read);
+                    }
                 }
             });
         }

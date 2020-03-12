@@ -1,10 +1,10 @@
 #include "connection-manager.h"
 
-void ConnectionManager::connector(std::function<void(boost::system::error_code)> callBack)
+void ConnectionManager::connector(std::function<void(boost::system::error_code, tcp::endpoint)> callBack)
 {
-    boost::asio::async_connect(socket,endpoints,[this,callBack](const boost::system::error_code& error, const tcp::endpoint&)
+    boost::asio::async_connect(socket,endpoints,[callBack](const boost::system::error_code& error, const tcp::endpoint& endpoint)
         {
-            callBack(error);
+            callBack(error,endpoint);
         });
 }
 
@@ -23,7 +23,6 @@ void ConnectionManager::writer(const std::vector<boost::asio::const_buffer> buff
         callBack(error,sent);
     });
 }
-
 
 void ConnectionManager::reader(int length, std::function<void (std::vector<char> , boost::system::error_code, std::size_t)> callBack)
 {

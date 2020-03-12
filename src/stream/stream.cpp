@@ -16,6 +16,7 @@ std::string Stream::getSerialized()
     }
     else
     {
+        //switch has fall-through
         switch (head)
         {
         case Header::LOCAL_FILE:
@@ -32,14 +33,12 @@ std::string Stream::getSerialized()
             break;
         }
     }
-
     return j.dump();
 }
 
 void Stream::getUnSerialized(std::string& inData)
 {
     nlohmann::json j = nlohmann::json::parse(inData);
-
     constexpr Header comp = static_cast<Header>(Header::ACK|Header::PING|Header::ERROR|Header::SOCKET_CLOSE);
 
     head = (j["head"]);
@@ -48,10 +47,10 @@ void Stream::getUnSerialized(std::string& inData)
     {
         sender = j["sender"];
         receiver = j["receiver"];
-        return;
     }
     else
     {
+        //switch has fall-through
         switch (head)
         {
         case Header::LOCAL_FILE:

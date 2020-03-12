@@ -15,7 +15,8 @@ enum Header
     MESSAGE = 1<<5,
     GROUP_MESSAGE = 1<<6,
     LOCAL_FILE = 1<<7,
-    MESSAGE_OUT_OF_ORDER = 1<<8
+    MESSAGE_OUT_OF_ORDER = 1<<8,
+    MESSAGE_CORRUPT = 1<<9
 };
 
 class Stream
