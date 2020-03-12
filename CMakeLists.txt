@@ -68,8 +68,6 @@ set(CLIENT_GUI_SOURCES
     src/client-gui/newcontactdialog.h
     src/client-gui/newcontactdialog.cpp
     src/client-gui/messageitem.h
-    src/client-gui/contactlistitem.h
-    src/client-gui/contactlistitem.cpp
     src/client-gui/conndialog.h
     src/client-gui/conndialog.cpp
     src/client-gui/mainwindow.h

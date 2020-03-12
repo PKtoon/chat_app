@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <deque>
-#include <functional>
 
 #include <QMainWindow>
 #include <QListWidget>
@@ -12,7 +11,6 @@
 #include "src/network-interface/netface.h"
 #include "conndialog.h"
 #include "newcontactdialog.h"
-#include "contactlistitem.h"
 
 #include "external/SQLite/sqlite3_wrap.h"
 
@@ -66,8 +64,8 @@ private:
     void decorate();
     void setContactList();
     void processMessage(Stream data);
-    ContactListItem* makeContact(const QString& text);
-    ContactListItem* getUser(QString name);
+    QListWidgetItem* makeContact(const QString& text);
+    QListWidgetItem* getUser(QString name);
     
     //client.h
     void initialize();
