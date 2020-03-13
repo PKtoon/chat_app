@@ -332,10 +332,7 @@ void MainWindow::createContact(const QString& text)
     {
         user = makeContact(text);
     }
-    //todo:
-    //check if NewContactDialog real deletes itself after close()
-    //same for ConnDialog
-    //todo end
+
     newContactDialog->close();      
     emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution
 }
