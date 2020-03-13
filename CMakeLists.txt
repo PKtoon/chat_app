@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 project(chat_app)
 
 # Find boost library
-find_package(Boost 1.70.0 REQUIRED COMPONENTS serialization)
+find_package(Boost 1.70.0 REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 set(STREAM
@@ -11,7 +11,7 @@ set(STREAM
     src/stream/stream.cpp
     )
 
-add_library( "stream" ${STREAM})
+add_library("stream" ${STREAM})
 
 set(LIB
     "stream"
@@ -33,8 +33,8 @@ set(SERVER_SOURCES
     src/server/main.cpp
     )
 
-add_executable("server"  ${SERVER_SOURCES} ${NETWORK_INTERFACE})
-target_link_libraries( "server" ${LIB} Boost::serialization)
+add_executable("server" ${SERVER_SOURCES} ${NETWORK_INTERFACE})
+target_link_libraries( "server" ${LIB})
 
 set(CLIENT_SOURCES
     src/client/client.h
@@ -43,7 +43,7 @@ set(CLIENT_SOURCES
     )
     
 add_executable("client" ${CLIENT_SOURCES} ${NETWORK_INTERFACE})
-target_link_libraries( "client" ${LIB} Boost::serialization)
+target_link_libraries("client" ${LIB})
 
 
 # Find the QtWidgets library
@@ -67,7 +67,6 @@ set(SQLITEDB
 set(CLIENT_GUI_SOURCES
     src/client-gui/newcontactdialog.h
     src/client-gui/newcontactdialog.cpp
-    src/client-gui/messageitem.h
     src/client-gui/conndialog.h
     src/client-gui/conndialog.cpp
     src/client-gui/mainwindow.h
@@ -76,4 +75,4 @@ set(CLIENT_GUI_SOURCES
     )
 
 add_executable("client-gui" ${CLIENT_GUI_SOURCES} ${NETWORK_INTERFACE} ${SQLITEDB})
-target_link_libraries( "client-gui" Qt5::Widgets ${LIB} Boost::serialization ${SQLite3_LIBRARIES})
+target_link_libraries("client-gui" Qt5::Widgets ${LIB} ${SQLite3_LIBRARIES})
