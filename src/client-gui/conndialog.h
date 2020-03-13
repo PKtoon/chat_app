@@ -22,8 +22,7 @@ class ConnDialog : public QDialog
     
 public:
     explicit ConnDialog(QWidget *parent = nullptr);
-    ~ConnDialog();
-    
+
     void setInform(QString text);
     void setHostInputText(QString text);
     void setPortInputText(QString text);

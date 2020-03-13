@@ -15,8 +15,7 @@ class NewContactDialog : public QDialog
     
 public:
     NewContactDialog(QWidget *parent = nullptr);
-    ~NewContactDialog();
-    
+
 signals:
     void createContact(const QString &text);
     

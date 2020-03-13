@@ -11,14 +11,6 @@ NewContactDialog::NewContactDialog(QWidget* parent) : QDialog(parent)
     connect(createCon,&QPushButton::clicked,this,&NewContactDialog::createPressed);
 }
 
-NewContactDialog::~NewContactDialog()
-{
-    delete gridMsg;
-    delete conLabel;
-    delete conInput;
-    delete createCon;
-}
-
 void NewContactDialog::createPressed()
 {
     emit createContact(conInput->text());

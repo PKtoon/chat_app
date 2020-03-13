@@ -6,20 +6,6 @@ ConnDialog::ConnDialog(QWidget* parent) : QDialog(parent)
     decorate();
 }
 
-ConnDialog::~ConnDialog()
-{
-    delete grid;
-    delete name;
-    delete nameInput;
-    delete hostLabel;
-    delete hostInput;
-    delete portLabel;
-    delete portInput;
-    delete connButton;
-    delete cancel;
-    delete inform;
-}
-
 void ConnDialog::decorate()
 {   
     connect(connButton,&QPushButton::clicked, this,&ConnDialog::connInit);
