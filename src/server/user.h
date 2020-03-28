@@ -3,7 +3,7 @@
 
 #include <deque>
 
-#include <boost/asio.hpp>
+#include <asio.hpp>
 
 #include "../network-interface/netface.h"
 
@@ -17,9 +17,9 @@ class User
     std::deque<Stream> writeQueue;
     NetFace net;
     Server& server;
-    boost::asio::steady_timer timer {net.getSocket().get_executor(),boost::asio::chrono::seconds(20)};
+    asio::steady_timer timer {net.getSocket().get_executor(),asio::chrono::seconds(20)};
 public:
-    User(boost::asio::ip::tcp::socket socket, Server& serv);
+    User(asio::ip::tcp::socket socket, Server& serv);
     
     const std::string& getName() const { return name; }
     

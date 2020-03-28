@@ -3,7 +3,7 @@
 
 #include <deque>
 
-#include <boost/asio.hpp>
+#include <asio.hpp>
 
 #include "../stream/stream.h"
 #include "../network-interface/netface.h"
@@ -16,7 +16,7 @@ class Client
     bool isWriting{false};
     
 public:
-    Client(std::string clientName, std::string hostname, std::string port, boost::asio::io_context& io);
+    Client(std::string clientName, std::string hostname, std::string port, asio::io_context& io);
     
     void connect(std::string hostname,std::string port);
     void initialize();

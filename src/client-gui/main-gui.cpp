@@ -1,4 +1,4 @@
-#include <boost/asio.hpp>
+#include <asio.hpp>
 
 #include <QApplication>
 
@@ -6,7 +6,7 @@
 
 #include "mainwindow.h"
 
-Q_DECLARE_METATYPE(boost::system::error_code)
+Q_DECLARE_METATYPE(asio::error_code)
 Q_DECLARE_METATYPE(std::size_t)
 Q_DECLARE_METATYPE(Stream)
 
@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("Chat app client");
     QCoreApplication::setApplicationVersion(QT_VERSION_STR);
     
-    qRegisterMetaType<boost::system::error_code>();
+    qRegisterMetaType<asio::error_code>();
     qRegisterMetaType<std::size_t>();
     qRegisterMetaType<Stream>();
 

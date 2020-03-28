@@ -6,7 +6,7 @@
 #include <QMainWindow>
 #include <QListWidget>
 
-#include <boost/asio.hpp>
+#include <asio.hpp>
 
 #include "src/network-interface/netface.h"
 #include "conndialog.h"
@@ -40,11 +40,11 @@ private:
     QString port;
     
     //networking scaffold
-    boost::asio::io_context io;
+    asio::io_context io;
     NetFace net{io};
     std::thread ioThread;
     bool isThreadRunning{false};
-    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work = boost::asio::make_work_guard(io);
+    asio::executor_work_guard<asio::io_context::executor_type> work = asio::make_work_guard(io);
     
     // I/O scaffold
     std::deque<Stream> writeQueue;

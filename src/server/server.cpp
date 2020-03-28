@@ -3,11 +3,11 @@
 
 void Server::accept()
 {
-    acceptor.async_accept([this](boost::system::error_code error, tcp::socket socket)
+    acceptor.async_accept([this](asio::error_code error, asio::ip::tcp::socket socket)
     {
         if (error)
         {
-            if (error != boost::asio::error::operation_aborted)
+            if (error != asio::error::operation_aborted)
                 accept();
         }
         else

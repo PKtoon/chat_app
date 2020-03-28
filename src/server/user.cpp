@@ -1,9 +1,9 @@
 #include "server.h"
 #include "user.h"
 
-User::User(boost::asio::ip::tcp::socket socket, Server& serv) : net{std::move(socket)}, server{serv}
+User::User(asio::ip::tcp::socket socket, Server& serv) : net{std::move(socket)}, server{serv}
 {
-    timer.async_wait([this](const boost::system::error_code& error)
+    timer.async_wait([this](const asio::error_code& error)
     {
        checkPulse();
     });
@@ -12,11 +12,11 @@ User::User(boost::asio::ip::tcp::socket socket, Server& serv) : net{std::move(so
 
 void User::initialize()
 {
-    net.receive([this](Stream data, boost::system::error_code error, std::size_t read)
+    net.receive([this](Stream data, asio::error_code error, std::size_t read)
     {
         if(error)
         {
-            if(error != boost::asio::error::operation_aborted)
+            if(error != asio::error::operation_aborted)
                 initialize();
         }
         else
@@ -61,8 +61,8 @@ void User::checkPulse()
     else
     {
     pingMe();
-    timer.expires_after(boost::asio::chrono::seconds(20));
-    timer.async_wait([this](const boost::system::error_code& error)
+    timer.expires_after(asio::chrono::seconds(20));
+    timer.async_wait([this](const asio::error_code& error)
     {
        checkPulse();
     });
@@ -86,11 +86,11 @@ void User::queueMessage(Stream data)
 
 void User::reader()
 {
-    net.receive([this](Stream data, boost::system::error_code error, std::size_t read)
+    net.receive([this](Stream data, asio::error_code error, std::size_t read)
     {
         if(error)
         {
-            if(error != boost::asio::error::operation_aborted)
+            if(error != asio::error::operation_aborted)
                 reader();
         }
         else
@@ -114,11 +114,11 @@ void User::writer()
     isWriting = true;
     if(!writeQueue.empty())
     {
-        net.send(*writeQueue.begin(),[this](boost::system::error_code error, std::size_t sent)
+        net.send(*writeQueue.begin(),[this](asio::error_code error, std::size_t sent)
         {
             if(error)
             {
-                if(error != boost::asio::error::operation_aborted)
+                if(error != asio::error::operation_aborted)
                     writer();
             }
             else

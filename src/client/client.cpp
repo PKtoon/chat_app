@@ -1,17 +1,17 @@
 #include "client.h"
 
-Client::Client(std::string clientName, std::string hostname, std::string port, boost::asio::io_context& io) : name{clientName}, net{io}
+Client::Client(std::string clientName, std::string hostname, std::string port, asio::io_context& io) : name{clientName}, net{io}
 {
     connect(hostname,port);
 }
 
 void Client::connect(std::string hostname, std::string port)
 {
-    net.connect(hostname,port,[this,hostname,port](boost::system::error_code error)
+    net.connect(hostname,port,[this,hostname,port](asio::error_code error)
     {
         if(error)
         {
-            if(error != boost::asio::error::operation_aborted)
+            if(error != asio::error::operation_aborted)
                 connect(hostname,port);
         }
         else
@@ -25,20 +25,20 @@ void Client::initialize()
     Stream initPack;
     initPack.head = Header::INIT;
     initPack.sender = name;
-    net.send(initPack,[this](boost::system::error_code error, std::size_t sent)
+    net.send(initPack,[this](asio::error_code error, std::size_t sent)
     {
         if(error)
         {
-            if(error !=boost::asio::error::operation_aborted)
+            if(error !=asio::error::operation_aborted)
                 initialize();
         }
         else
         {
-            net.receive([this](Stream initAck, boost::system::error_code error, std::size_t read)
+            net.receive([this](Stream initAck, asio::error_code error, std::size_t read)
             {
                 if(error)
                 {
-                    if(error !=boost::asio::error::operation_aborted)
+                    if(error !=asio::error::operation_aborted)
                         initialize();
                 }
                 else
@@ -83,11 +83,11 @@ void Client::ping()
 
 void Client::reader()
 {
-    net.receive([this](Stream data, boost::system::error_code error, std::size_t read)
+    net.receive([this](Stream data, asio::error_code error, std::size_t read)
     {
         if(error)
         {
-            if(error !=boost::asio::error::operation_aborted)
+            if(error !=asio::error::operation_aborted)
                 reader();
         }
         else
@@ -104,11 +104,11 @@ void Client::writer()
     isWriting = true;
     if(!writeQueue.empty())
     {
-        net.send(*writeQueue.begin(),[this](boost::system::error_code error, std::size_t sent)
+        net.send(*writeQueue.begin(),[this](asio::error_code error, std::size_t sent)
         {
             if(error)
             {
-                if(error != boost::asio::error::operation_aborted)
+                if(error != asio::error::operation_aborted)
                     writer();
             }
             else

@@ -4,17 +4,15 @@
 #include <vector>
 #include <deque>
 
-#include <boost/asio.hpp>
+#include <asio.hpp>
 
 #include "user.h"
 
-using  boost::asio::ip::tcp;
-
 class Server
 {
-    boost::asio::io_context io;
-    tcp::endpoint endpoint;
-    tcp::acceptor acceptor;
+    asio::io_context io;
+    asio::ip::tcp::endpoint endpoint;
+    asio::ip::tcp::acceptor acceptor;
      
     std::vector<std::unique_ptr<User>> userList;
     std::deque<Stream> deliveryQueue;
@@ -24,7 +22,7 @@ class Server
     void deliverMessages();
 
 public:
-    Server(unsigned short port): endpoint{tcp::v6(),port}, acceptor{io,endpoint} 
+    Server(unsigned short port): endpoint{asio::ip::tcp::v6(),port}, acceptor{io,endpoint} 
     {
         accept();
         io.run();

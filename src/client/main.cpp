@@ -1,11 +1,10 @@
 #include <iostream>
-#include <boost/asio.hpp>
 #include <string>
 #include <thread>
 
-#include "client.h"
+#include <asio.hpp>
 
-using boost::asio::ip::tcp;
+#include "client.h"
 
 std::string readline()
 {
@@ -36,7 +35,7 @@ int main(int argc, char* argv[])
     std::string port{argv[3]};
     std::string receiver,msg;
 
-    boost::asio::io_context io;
+    asio::io_context io;
     
     Client c{id,machine_name,port,io};
     

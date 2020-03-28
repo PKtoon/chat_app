@@ -2,9 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(chat_app)
 
-# Find boost library
-find_package(Boost 1.70.0 REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories("external/asio/asio/include/")
 
 set(STREAM
     src/stream/stream.h

@@ -112,20 +112,20 @@ void MainWindow::initialize()
     Stream initPack;
     initPack.head = Header::INIT;
     initPack.sender = name.toStdString();
-    net.send(initPack,[this](boost::system::error_code error, std::size_t sent)
+    net.send(initPack,[this](asio::error_code error, std::size_t sent)
     {
         if(error)
         {
-            if(error != boost::asio::error::operation_aborted)
+            if(error != asio::error::operation_aborted)
                 initialize();
         }
         else
         {
-            net.receive([this](Stream initAck, boost::system::error_code error, std::size_t read)
+            net.receive([this](Stream initAck, asio::error_code error, std::size_t read)
             {
                 if(error)
                 {
-                    if(error != boost::asio::error::operation_aborted)
+                    if(error != asio::error::operation_aborted)
                         initialize();
                 }
                 else
@@ -144,11 +144,11 @@ void MainWindow::initialize()
 
 void MainWindow::reader()
 {
-    net.receive([this](Stream data, boost::system::error_code error, std::size_t read)
+    net.receive([this](Stream data, asio::error_code error, std::size_t read)
     {
         if(error)
         {
-            if(error != boost::asio::error::operation_aborted)
+            if(error != asio::error::operation_aborted)
                 reader();
         }
         else
@@ -166,11 +166,11 @@ void MainWindow::writer()
     isWriting = true;
     if(!writeQueue.empty())
     {
-        net.send(*writeQueue.begin(),[this](boost::system::error_code error, std::size_t sent)
+        net.send(*writeQueue.begin(),[this](asio::error_code error, std::size_t sent)
         {
             if(error)
             {
-                if(error != boost::asio::error::operation_aborted)
+                if(error != asio::error::operation_aborted)
                     writer();
             }
             else
@@ -240,11 +240,11 @@ void MainWindow::doConnect(const QString userName, const QString host, const QSt
         return;
     }
 
-    net.connect(hostname.toStdString(),port.toStdString(),[this](boost::system::error_code error)
+    net.connect(hostname.toStdString(),port.toStdString(),[this](asio::error_code error)
     {
         if(error)
         {
-            if(error != boost::asio::error::operation_aborted)
+            if(error != asio::error::operation_aborted)
             {
                 connDialog->setInform("Connection Error");
             }
