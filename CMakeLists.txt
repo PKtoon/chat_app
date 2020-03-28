@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(chat_app)
 
-include_directories("external/asio/asio/include/")
+include_directories("external/asio/asio/include/" "external/json/single_include/")
 
 set(STREAM
     src/stream/stream.h

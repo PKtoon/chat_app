@@ -1,6 +1,7 @@
 #include "stream.h"
 
-#include "external/json/single_include/nlohmann/json.hpp"
+// #include "external/json/single_include/nlohmann/json.hpp"
+#include "nlohmann/json.hpp"
 
 std::string Stream::getSerialized()
 {
