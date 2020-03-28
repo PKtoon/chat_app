@@ -6,3 +6,6 @@
 	path = external/json
 	url = https://github.com/nlohmann/json.git
 	shallow = true
+[submodule "external/asio"]
+	path = external/asio
+	url = https://github.com/chriskohlhoff/asio.git
