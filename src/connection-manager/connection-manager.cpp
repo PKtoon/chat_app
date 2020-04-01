@@ -2,9 +2,25 @@
 
 void ConnectionManager::connector(std::function<void(asio::error_code, asio::ip::tcp::endpoint)> callBack)
 {
-    asio::async_connect(socket,endpoints,[callBack](const asio::error_code& error, const asio::ip::tcp::endpoint& endpoint)
+    asio::async_connect(socket,endpoints,[this,callBack](const asio::error_code& error, const asio::ip::tcp::endpoint& endpoint)
         {
-            callBack(error,endpoint);
+            if(error)
+            {
+                if(error != asio::error::operation_aborted)
+                {
+                    if(endpoints == endpoints.end())
+                    {
+                        callBack(error,endpoint);
+                    }
+                    else
+                    {
+                        endpoints++;
+                        connector(callBack);
+                    }
+                }
+            }
+            else
+                callBack(error,endpoint);
         });
 }
 
