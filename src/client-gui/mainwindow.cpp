@@ -55,6 +55,7 @@ void MainWindow::decorate()
     
     
     connect(contactsListWidget,&QListWidget::itemChanged,this,&MainWindow::displayMessage);
+    connect(contactsListWidget,&QListWidget::itemClicked,this,&MainWindow::displayMessage);
     connect(sendButt,&QPushButton::clicked,this,&MainWindow::sendMessage);
     connect(this,&MainWindow::insertText,message,&QTextEdit::insertPlainText);
     
