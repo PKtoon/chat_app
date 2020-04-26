@@ -2,17 +2,23 @@
 
 #include "netface.h"
 
-NetFace::NetFace(asio::io_context& io) : connMan{io} {}
+NetFace::NetFace(asio::io_context& io)
+{
+    connMan = new ConnectionManager(io);
+}
 
-NetFace::NetFace(asio::ip::tcp::socket sock) : connMan{std::move(sock)} {}
+NetFace::NetFace(asio::ip::tcp::socket sock)
+{
+    connMan = new ConnectionManager{std::move(sock)};
+}
 
 void NetFace::connect(std::string host, std::string portNum, std::function<void(asio::error_code)> callBack)
 {
     std::string hostname = host;
     std::string port = portNum;
 
-    connMan.setEndpoints(hostname,port);
-    connMan.connector([callBack](asio::error_code error, asio::ip::tcp::endpoint)
+    connMan->setEndpoints(hostname,port);
+    connMan->connector([callBack](asio::error_code error, asio::ip::tcp::endpoint)
     {
         callBack(error);
     });
@@ -20,7 +26,22 @@ void NetFace::connect(std::string host, std::string portNum, std::function<void(
 
 void NetFace::disconnect()
 {
-    connMan.getSocket().close();
+    connMan->getSocket().close();
+    delete connMan;
+}
+
+void NetFace::newConnection(asio::io_context &io)
+{
+    if(connMan)
+        delete connMan;
+    connMan = new ConnectionManager{io};
+}
+
+void NetFace::newConnection(asio::ip::tcp::socket sock)
+{
+    if(connMan)
+        delete connMan;
+    connMan = new ConnectionManager{std::move(sock)};
 }
 
 void NetFace::send(Stream data, std::function<void(asio::error_code, std::size_t)> callBack)
@@ -32,7 +53,7 @@ void NetFace::send(Stream data, std::function<void(asio::error_code, std::size_t
     header<<std::setw(headerLength)<<std::hex<<length;
     payload = header.str()+payload;
     std::vector<char> buffer{payload.begin(),payload.end()};
-    connMan.writer(buffer,[callBack](asio::error_code error,std::size_t sent)
+    connMan->writer(buffer,[callBack](asio::error_code error,std::size_t sent)
     {
         callBack(error,sent);
     });
@@ -40,7 +61,7 @@ void NetFace::send(Stream data, std::function<void(asio::error_code, std::size_t
 
 void NetFace::receive(std::function<void(Stream, asio::error_code, std::size_t)> callBack)
 {
-    connMan.reader(headerLength,[this,callBack](std::vector<char> data, asio::error_code error,std::size_t read)
+    connMan->reader(headerLength,[this,callBack](std::vector<char> data, asio::error_code error,std::size_t read)
     {
         if (error)
         {
@@ -52,7 +73,7 @@ void NetFace::receive(std::function<void(Stream, asio::error_code, std::size_t)>
             std::stringstream headerStream(header);
             uint32_t dataLength;
             headerStream>>std::hex>>dataLength;
-            connMan.reader(dataLength,[callBack](std::vector<char> data, asio::error_code error, std::size_t read)
+            connMan->reader(dataLength,[callBack](std::vector<char> data, asio::error_code error, std::size_t read)
             {
                 if(error)
                 {
