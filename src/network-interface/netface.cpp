@@ -26,21 +26,26 @@ void NetFace::connect(std::string host, std::string portNum, std::function<void(
 
 void NetFace::disconnect()
 {
-    connMan->getSocket().close();
-    delete connMan;
+    if(connMan)
+    {
+        connMan->getSocket().shutdown(asio::ip::tcp::socket::shutdown_both);
+        connMan->getSocket().close();
+        delete connMan;
+        connMan = nullptr;
+    }
 }
 
 void NetFace::newConnection(asio::io_context &io)
 {
     if(connMan)
-        delete connMan;
+        disconnect();
     connMan = new ConnectionManager{io};
 }
 
 void NetFace::newConnection(asio::ip::tcp::socket sock)
 {
     if(connMan)
-        delete connMan;
+        disconnect();
     connMan = new ConnectionManager{std::move(sock)};
 }
 

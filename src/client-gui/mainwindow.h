@@ -26,7 +26,7 @@ signals:
 
 public slots:
     void initConnect();
-    void doConnect(const QString userName, const QString host, const QString portNum);
+    void doConnect(const QString userName, const QString passWD, const QString host, const QString portNum);
     void disConnect();
     void displayMessage(QListWidgetItem* item);
     void sendMessage();
@@ -36,12 +36,13 @@ public slots:
 private:
     //client parameters
     QString name;
+    QString passwd;
     QString hostname;
     QString port;
     
     //networking scaffold
     asio::io_context io;
-    NetFace net{io};
+    NetFace net;
     std::thread ioThread;
     bool isThreadRunning{false};
     asio::executor_work_guard<asio::io_context::executor_type> work = asio::make_work_guard(io);

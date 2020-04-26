@@ -10,12 +10,7 @@ std::string Stream::getSerialized()
 
     j["head"] = head;
 
-    if((head & comp) || head==Header::EMPTY)
-    {
-        j["sender"] = sender;
-        j["receiver"] = receiver;
-    }
-    else
+    if(!((head & comp) || head==Header::EMPTY))
     {
         //switch has fall-through
         switch (head)
@@ -25,10 +20,9 @@ std::string Stream::getSerialized()
             j["totalParts"] = totalParts;
         case Header::GROUP_MESSAGE:
             j["data2"] = data2;
-        case Header::MESSAGE:
-            j["receiver"] = receiver;
+        case Header::MESSAGE: case Header::INIT:
             j["data1"] = data1;
-        case Header::INIT:
+            j["receiver"] = receiver;
             j["sender"] = sender;
         default:
             break;
@@ -44,12 +38,7 @@ void Stream::getUnSerialized(std::string& inData)
 
     head = (j["head"]);
 
-    if((head & comp) || head==Header::EMPTY)
-    {
-        sender = j["sender"];
-        receiver = j["receiver"];
-    }
-    else
+    if(!((head & comp) || head==Header::EMPTY))
     {
         //switch has fall-through
         switch (head)
@@ -59,10 +48,9 @@ void Stream::getUnSerialized(std::string& inData)
             totalParts = j["totalParts"];
         case Header::GROUP_MESSAGE:
             data2 = j["data2"];
-        case Header::MESSAGE:
+        case Header::MESSAGE: case Header::INIT:
             receiver = j["receiver"];
             data1 = j["data1"];
-        case Header::INIT:
             sender = j["sender"];
         default:
             break;

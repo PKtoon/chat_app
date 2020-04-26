@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     decorate();
     initDB();
     setContactList();
+    net.newConnection(io);
 }
 
 MainWindow::~MainWindow()
@@ -113,6 +114,7 @@ void MainWindow::initialize()
     Stream initPack;
     initPack.head = Header::INIT;
     initPack.sender = name.toStdString();
+    initPack.data1 = passwd.toStdString();
     net.send(initPack,[this](asio::error_code error, std::size_t sent)
     {
         if(error)
@@ -229,9 +231,10 @@ void MainWindow::initConnect()
     connDialog->show();
 }
 
-void MainWindow::doConnect(const QString userName, const QString host, const QString portNum)
+void MainWindow::doConnect(const QString userName, const QString passWD, const QString host, const QString portNum)
 {
     name = userName;
+    passwd = passWD;
     hostname = host;
     port = portNum;
 
@@ -240,6 +243,9 @@ void MainWindow::doConnect(const QString userName, const QString host, const QSt
         connDialog->setInform("All fields are necessary");
         return;
     }
+
+    if(!net.getConnection())
+        net.newConnection(io);
 
     net.connect(hostname.toStdString(),port.toStdString(),[this](asio::error_code error)
     {

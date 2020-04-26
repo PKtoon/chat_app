@@ -6,6 +6,7 @@
 #include <asio.hpp>
 
 #include "../network-interface/netface.h"
+#include "../logger.hpp"
 
 class Server;
 
@@ -21,6 +22,7 @@ class User
     asio::steady_timer timer {net.getSocket().get_executor(),asio::chrono::seconds(20)};
 public:
     User(asio::ip::tcp::socket socket, Server& serv);
+    ~User() { log(name+" is destroyed");}
     
     const std::string& getName() const { return name; }
     

@@ -7,12 +7,13 @@
 class NetFace
 {
     int headerLength = 4;
-    ConnectionManager* connMan;
+    ConnectionManager* connMan = nullptr;
     asio::io_context io;
     
 public:
     NetFace(asio::io_context& io);
     NetFace(asio::ip::tcp::socket sock);
+    NetFace(){}
     ~NetFace()
     {
         if(connMan)

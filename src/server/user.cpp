@@ -3,6 +3,7 @@
 
 User::User(asio::ip::tcp::socket socket, Server& serv) : net{std::move(socket)}, server{serv}
 {
+    log("User is created");
     timer.async_wait([this](const asio::error_code& error)
     {
         if(error != asio::error::operation_aborted)

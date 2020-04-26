@@ -10,6 +10,8 @@ class ConnDialog : public QDialog
     QGridLayout* grid = new QGridLayout(this);
     QLabel* name = new QLabel("Name:",this);
     QLineEdit* nameInput = new QLineEdit(this);
+    QLabel* passwd = new QLabel("Password:",this);
+    QLineEdit* passwdInput = new QLineEdit(this);
     QLabel* hostLabel = new QLabel("Host:",this);
     QLineEdit* hostInput = new QLineEdit(this);
     QLabel* portLabel = new QLabel("Port:",this);
@@ -29,7 +31,7 @@ public:
     void setCancelButtonText(QString text);
 
 signals:
-    void doConnect(const QString name, const QString host, const QString port);
+    void doConnect(const QString name, const QString passwd, const QString host, const QString port);
 
 public slots:
     void connInit();
