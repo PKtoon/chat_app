@@ -22,6 +22,7 @@ public:
     asio::ip::tcp::socket& getSocket() { return connMan->getSocket(); }
     void connect(std::string hostname, std::string port, std::function<void(asio::error_code)> callBack);
     void disconnect();
+    ConnectionManager* getConnection() { return connMan;}
     void newConnection(asio::io_context& io);
     void newConnection(asio::ip::tcp::socket sock);
     void send(Stream data, std::function<void(asio::error_code,std::size_t)> callBack);
