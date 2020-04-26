@@ -16,7 +16,7 @@ class Server
     std::vector<std::unique_ptr<User>> userList;
     std::deque<Stream> deliveryQueue;
     bool isDelivering{false};
-    pk::PSQLdb db{""};
+    pk::PSQLdb db{"postgresql://postgres@localhost:5432/chat"};
 
     void accept();
     void deliverMessages();

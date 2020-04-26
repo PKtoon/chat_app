@@ -14,6 +14,7 @@ class User
     std::string name;
     bool isAlive{false};
     bool isWriting{false};
+    unsigned short count = 0;
     std::deque<Stream> writeQueue;
     NetFace net;
     Server& server;

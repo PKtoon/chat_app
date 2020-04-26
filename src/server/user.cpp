@@ -5,38 +5,63 @@ User::User(asio::ip::tcp::socket socket, Server& serv) : net{std::move(socket)},
 {
     timer.async_wait([this](const asio::error_code& error)
     {
-       checkPulse();
+        if(error != asio::error::operation_aborted)
+            checkPulse();
     });
     initialize();
 }
 
 void User::initialize()
 {
-    net.receive([this](Stream data, asio::error_code error, std::size_t read)
+    if(count < 5)
     {
-        if(error)
+        count++;
+        net.receive([this](Stream data, asio::error_code error, std::size_t read)
         {
-            if(error != asio::error::operation_aborted)
-                initialize();
-        }
-        else
-        {
-            if(data.head == Header::INIT)
+            Stream reply;
+            reply.head = static_cast<Header>(Header::INIT|Header::ERROR);
+            reply.sender = "server";
+            if(error)
             {
-                if(!server.getUser(data.sender))
-                {
-                    isAlive=true;
-                    name = data.sender;                    
-                    Stream reply;
-                    reply.head = (Header)(Header::INIT | Header::ACK);
-                    queueMessage(reply);
-                    reader();
-                }
+                if(error != asio::error::operation_aborted)
+                    initialize();
             }
             else
-                initialize();
-        }
-    });
+            {
+                if(data.head == Header::INIT)
+                {
+                    isAlive = true;
+                    pqxx::result res = server.getUser(data.sender);
+                    switch (res.size())
+                    {
+                    case 1:
+                        if(server.authUser(data.sender,data.data1))
+                        {
+                            name = data.sender;
+                            reply.receiver = name;
+                            reply.head = static_cast<Header>(Header::INIT|Header::ACK);
+                            reader();
+                        }
+                        break;
+                    case 0:
+                        server.addUser(data.sender,data.data1);
+                        name = data.sender;
+                        reader();
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                else
+                {
+                    reply.head = static_cast<Header>(Header::ERROR);
+                    reply.receiver = data.sender;
+                    initialize();
+                }
+                queueMessage(reply);
+            }
+        });
+    }
 }
 
 void User::processData(Stream data)
@@ -48,6 +73,10 @@ void User::processData(Stream data)
             break;
         case Header::PING:
             isAlive = true;
+            break;
+        case Header::SOCKET_CLOSE:
+            isAlive = false;
+            timer.cancel();
             break;
         default:
             break;
@@ -64,7 +93,8 @@ void User::checkPulse()
     timer.expires_after(asio::chrono::seconds(20));
     timer.async_wait([this](const asio::error_code& error)
     {
-       checkPulse();
+        if(error != asio::error::operation_aborted)
+            checkPulse();
     });
     }
 }
