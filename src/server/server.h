@@ -4,9 +4,8 @@
 #include <vector>
 #include <deque>
 
-#include <asio.hpp>
-
 #include "user.h"
+#include "psql-wrap.hpp"
 
 class Server
 {
@@ -17,7 +16,8 @@ class Server
     std::vector<std::unique_ptr<User>> userList;
     std::deque<Stream> deliveryQueue;
     bool isDelivering{false};
-    
+    pk::PSQLdb db{""};
+
     void accept();
     void deliverMessages();
 
@@ -27,10 +27,15 @@ public:
         accept();
         io.run();
     }
+
   
-    User* getUser(std::string);
+    User* getActiveUser(std::string);
     void removeMe(User*);
     void queueDelivery(Stream);
+
+    void addUser(std::string name, std::string passwd);
+    pqxx::result getUser(std::string name);
+    bool authUser(std::string name, std::string passwd);
 };
 
 #endif // SERVER_H

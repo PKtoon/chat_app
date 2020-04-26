@@ -20,6 +20,8 @@ set(LIB
     "-lpthread"
     )
     
+find_library(PQXX_LIB pqxx)
+
 set(SERVER_SOURCES
     src/server/user.h
     src/server/user.cpp
@@ -29,7 +31,7 @@ set(SERVER_SOURCES
     )
 
 add_executable("server" ${SERVER_SOURCES})
-target_link_libraries( "server" ${LIB})
+target_link_libraries( "server" ${LIB} ${PQXX_LIB})
 
 set(CLIENT_SOURCES
     src/client/client.h

@@ -37,10 +37,10 @@ void Server::deliverMessages()
     while(!deliveryQueue.empty())
     {
         Stream data = (*deliveryQueue.begin());
-        User* user = getUser(data.receiver);
+        User* user = getActiveUser(data.receiver);
         if(!user)
         {
-            user = getUser(data.sender);
+            user = getActiveUser(data.sender);
             data.data1 = data.receiver+" not found";
             data.receiver = data.sender;
             data.sender = "server";
@@ -58,7 +58,26 @@ void Server::queueDelivery(Stream data)
         deliverMessages();
 }
 
-User* Server::getUser(std::string name)
+void Server::addUser(std::string name, std::string passwd)
+{
+    db.execCommit("INSERT INTO users (name,passwd) VALUES ('"+name+"','"+passwd+"');");
+}
+
+pqxx::result Server::getUser(std::string name)
+{
+    return db.exec("SELECT name FROM users WHERE name = '"+name+"';");
+}
+
+bool Server::authUser(std::string name, std::string passwd)
+{
+    pqxx::result res = db.exec("SELECT name,passwd FROM users WHERE name = '"+name+"';");
+    if(res.size() == 1)
+        if(res[0][0].c_str() == name && res[0][1].c_str() == passwd)
+            return true;
+    return false;
+}
+
+User* Server::getActiveUser(std::string name)
 {
     for(auto& a:userList)
         if(a->getName()==name)
