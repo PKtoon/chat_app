@@ -4,23 +4,20 @@ project(chat_app)
 
 include_directories("external/asio/asio/include/" "external/json/single_include/")
 
-set(STREAM
+set(NETWORK_INTERFACE
     src/stream/stream.h
     src/stream/stream.cpp
-    )
-
-add_library("stream" ${STREAM})
-
-set(LIB
-    "stream"
-    "-lpthread"
-    )
-
-set(NETWORK_INTERFACE
     src/connection-manager/connection-manager.h
     src/connection-manager/connection-manager.cpp
     src/network-interface/netface.h
     src/network-interface/netface.cpp
+    )
+
+add_library("netface" ${NETWORK_INTERFACE})
+
+set(LIB
+    "netface"
+    "-lpthread"
     )
     
 set(SERVER_SOURCES
@@ -31,7 +28,7 @@ set(SERVER_SOURCES
     src/server/main.cpp
     )
 
-add_executable("server" ${SERVER_SOURCES} ${NETWORK_INTERFACE})
+add_executable("server" ${SERVER_SOURCES})
 target_link_libraries( "server" ${LIB})
 
 set(CLIENT_SOURCES
@@ -40,7 +37,7 @@ set(CLIENT_SOURCES
     src/client/main.cpp
     )
     
-add_executable("client" ${CLIENT_SOURCES} ${NETWORK_INTERFACE})
+add_executable("client" ${CLIENT_SOURCES})
 target_link_libraries("client" ${LIB})
 
 
@@ -72,5 +69,5 @@ set(CLIENT_GUI_SOURCES
     src/client-gui/main-gui.cpp
     )
 
-add_executable("client-gui" ${CLIENT_GUI_SOURCES} ${NETWORK_INTERFACE} ${SQLITEDB})
+add_executable("client-gui" ${CLIENT_GUI_SOURCES} ${SQLITEDB})
 target_link_libraries("client-gui" Qt5::Widgets ${LIB} ${SQLite3_LIBRARIES})
