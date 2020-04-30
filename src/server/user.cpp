@@ -55,9 +55,14 @@ void User::initialize()
                 }
                 else
                 {
-                    reply.head = static_cast<Header>(Header::ERROR);
-                    reply.receiver = data.sender;
-                    initialize();
+                    if(data.head == SOCKET_CLOSE)
+                        net.disconnect();
+                    else
+                    {
+                        reply.head = static_cast<Header>(Header::ERROR);
+                        reply.receiver = data.sender;
+                        initialize();
+                    }
                 }
                 queueMessage(reply);
             }
@@ -77,7 +82,7 @@ void User::processData(Stream data)
             break;
         case Header::SOCKET_CLOSE:
             isAlive = false;
-            timer.cancel();
+            name = "";
             break;
         default:
             break;

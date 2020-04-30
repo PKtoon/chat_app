@@ -2,14 +2,14 @@
 
 #include "mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), net(io)
 {
     setCentralWidget(center);
     createMenuBar();
     decorate();
     initDB();
     setContactList();
-    net.newConnection(io);
+//    net.newConnection(io);
 }
 
 MainWindow::~MainWindow()
@@ -244,7 +244,7 @@ void MainWindow::doConnect(const QString userName, const QString passWD, const Q
         return;
     }
 
-    if(!net.getConnection())
+    if(!net.getSocket())
         net.newConnection(io);
 
     net.connect(hostname.toStdString(),port.toStdString(),[this](asio::error_code error)
@@ -276,10 +276,13 @@ void MainWindow::doConnect(const QString userName, const QString passWD, const Q
 
 void MainWindow::disConnect()
 {
-    //todo:
-    //better disconnect. send a socket close to server and then close the socket.
-    //todo end
-    net.disconnect();
+    Stream data;
+    data.head = Header::SOCKET_CLOSE;
+    net.send(data,[this](asio::error_code error, std::size_t)
+    {
+       if(error != asio::error::operation_aborted)
+           net.disconnect();
+    });
 }
 
 void MainWindow::displayMessage(QListWidgetItem* item)

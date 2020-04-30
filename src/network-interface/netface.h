@@ -7,23 +7,21 @@
 class NetFace
 {
     int headerLength = 4;
-    ConnectionManager* connMan = nullptr;
-    asio::io_context io;
+    ConnectionManager connMan;
     
 public:
     NetFace(asio::io_context& io);
     NetFace(asio::ip::tcp::socket sock);
-    NetFace(){}
+//    NetFace(){}
     ~NetFace()
     {
-        if(connMan)
-            delete connMan;
+
     }
     
-    asio::ip::tcp::socket& getSocket() { return connMan->getSocket(); }
+    asio::ip::tcp::socket* getSocket() { return connMan.getSocket(); }
     void connect(std::string hostname, std::string port, std::function<void(asio::error_code)> callBack);
     void disconnect();
-    ConnectionManager* getConnection() { return connMan;}
+//    ConnectionManager* getConnection() { return connMan;}
     void newConnection(asio::io_context& io);
     void newConnection(asio::ip::tcp::socket sock);
     void send(Stream data, std::function<void(asio::error_code,std::size_t)> callBack);
