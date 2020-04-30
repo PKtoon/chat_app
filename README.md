@@ -10,6 +10,8 @@ Requirements:
 1. CMake
 2. Any C++ compiler (I am using g++ and clang++)
 3. Boost libraries
+4. SQLite3
+5. Qt5
 
 Building on linux:
 1. mkdir build
