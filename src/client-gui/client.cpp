@@ -45,15 +45,8 @@ void Client::init(std::string name, std::string password,std::function<void (asi
         {
             net.receive([this,callBack](Stream initAck, asio::error_code error, std::size_t read)
             {
-                if(error)
-                {
-                    if(error != asio::error::operation_aborted)
-                        callBack(error, Stream());
-                }
-                else
-                {
-                    callBack(error,initAck);
-                }
+                if(error != asio::error::operation_aborted)
+                    callBack(error, Stream());
             }
             );
         }
@@ -67,14 +60,15 @@ void Client::reader(std::function<void (Stream data,asio::error_code,std::size_t
     {
         if(error)
         {
-            if(error != asio::error::operation_aborted)
-                callBack(data,error,read);
+//            if(error != asio::error::operation_aborted)
+//                callBack(data,error,read);
         }
         else
         {
             processData(data);
-            callBack(data,error,read);
         }
+        if(error != asio::error::operation_aborted)
+            callBack(data,error,read);
     }
     );
 }
@@ -89,14 +83,14 @@ void Client::writer()
         {
             if(error)
             {
-                if(error != asio::error::operation_aborted)
-                    writer();
+
             }
             else
             {
                 writeQueue.pop_front();
-                writer();
             }
+            if(error != asio::error::operation_aborted)
+                writer();
         });
     }
     else

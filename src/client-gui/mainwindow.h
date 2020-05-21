@@ -30,15 +30,9 @@ public slots:
     void createContact(const QString& text);
 
 private:
-    //client parameters
-    QString name;
-    QString passwd;
-    QString hostname;
-    QString port;
-    
     //networking scaffold
     asio::io_context io;
-    Client client;
+    Client client{io};
     std::thread ioThread;
     bool isThreadRunning{false};
     asio::executor_work_guard<asio::io_context::executor_type> work = asio::make_work_guard(io);
@@ -60,7 +54,7 @@ private:
     QListWidgetItem* getUser(QString name);
     
     //client.h
-    void initialize();
+    void initialize(QString userName, QString passwd);
     void reader();
     void processData(Stream data);
     void processMessage(Stream data);

@@ -2,12 +2,11 @@
 
 #include "mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), /*net(io),*/ client(io)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     setCentralWidget(center);
     createMenuBar();
     decorate();
-    client.initDB();
     setContactList();
 }
 
@@ -95,19 +94,19 @@ QListWidgetItem* MainWindow::getUser(QString user)
 }
 
 //client core
-void MainWindow::initialize()
+void MainWindow::initialize(QString userName, QString passwd)
 {
-    client.init(name.toStdString(),passwd.toStdString(),[this](asio::error_code error, Stream initAck)
+    client.init(userName.toStdString(),passwd.toStdString(),[this,userName,passwd](asio::error_code error, Stream initAck)
     {
         if(error)
-            initialize();
+            initialize(userName,passwd);
         else
             if(initAck.head == static_cast<Header>(Header::INIT | Header::ACK))
             {
                 reader();
             }
             else
-                initialize();
+                initialize(userName,passwd);
     });
 }
 
@@ -152,14 +151,9 @@ void MainWindow::initConnect()
     connDialog->show();
 }
 
-void MainWindow::doConnect(const QString userName, const QString passWD, const QString host, const QString portNum)
+void MainWindow::doConnect(const QString userName, const QString passwd, const QString host, const QString port)
 {
-    name = userName;
-    passwd = passWD;
-    hostname = host;
-    port = portNum;
-
-    if(name.isEmpty() || hostname.isEmpty() || port.isEmpty())
+    if(userName.isEmpty() || passwd.isEmpty() || host.isEmpty() || port.isEmpty())
     {
         connDialog->setInform("All fields are necessary");
         return;
@@ -168,7 +162,7 @@ void MainWindow::doConnect(const QString userName, const QString passWD, const Q
     if(!client.getSocket())
         client.newSocket(io);
 
-    client.connect(hostname.toStdString(),port.toStdString(),[this](asio::error_code error)
+    client.connect(host.toStdString(),port.toStdString(),[this,userName,passwd](asio::error_code error)
     {
         if(error)
         {
@@ -181,7 +175,7 @@ void MainWindow::doConnect(const QString userName, const QString passWD, const Q
         {
             connDialog->setCancelButtonText("Close");
             connDialog->setInform("Connected Successfully");
-            initialize();
+            initialize(userName,passwd);
         }
     }
     );
@@ -236,7 +230,7 @@ void MainWindow::sendMessage()
 
     Stream data;
     data.head = Header::MESSAGE;
-    data.sender = name.toStdString();
+    data.sender = client.name();
     data.receiver = contactsListWidget->currentItem()->text().toStdString();
     data.data1 = msgIn->text().toStdString();
     QListWidgetItem* user = contactsListWidget->currentItem();
