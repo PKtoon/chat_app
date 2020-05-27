@@ -2,14 +2,12 @@
 
 #include "mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), net(io)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     setCentralWidget(center);
     createMenuBar();
     decorate();
-    initDB();
     setContactList();
-//    net.newConnection(io);
 }
 
 MainWindow::~MainWindow()
@@ -65,26 +63,16 @@ void MainWindow::decorate()
 
 void MainWindow::setContactList()
 {
-    std::string query {"SELECT name FROM contacts;"};
-    
-    auto func = [this](int numOfColumns, char **columnData, char **columnName)->int
-        {
-            std::string colName {columnName[0]};            //need to store in a string first as columnName[0]=="name" always fails
-            if(colName=="name")
-                new QListWidgetItem(columnData[0],contactsListWidget);
-    
-            return 0;
-        };
-        
-    if(!db.queryExec(query,func))
-        qInfo()<<db.getError().c_str();
+    std::vector<std::string> list;
+
+    if(!client.getContactList(list))
+        qInfo()<<client.getDBError().c_str();
+    for(auto& a : list)
+        new QListWidgetItem(a.c_str(),contactsListWidget);
 }
 
 QListWidgetItem* MainWindow::makeContact(const QString& text)
 {
-    std::string query{"INSERT INTO contacts VALUES (\""+text.toStdString()+"\");"};
-    if(!db.queryExec(query))
-        qInfo()<<db.getError().c_str();
     return new QListWidgetItem(text,contactsListWidget);
 }
 
@@ -94,9 +82,6 @@ void MainWindow::processMessage(Stream data)
     if(!user)
         user = makeContact(data.sender.c_str());
 
-    std::string query {"INSERT INTO messages (name,sender,message,time) VALUES (\""+data.sender+"\", \""+data.sender+"\", \""+data.data1+"\",datetime(\"now\"));"};
-    if(!db.queryExec(query))
-        qInfo()<<db.getError().c_str();
     emit contactsListWidget->itemChanged(user);
 }
 
@@ -109,111 +94,46 @@ QListWidgetItem* MainWindow::getUser(QString user)
 }
 
 //client core
-void MainWindow::initialize()
+void MainWindow::initialize(QString userName, QString passwd)
 {
-    Stream initPack;
-    initPack.head = Header::INIT;
-    initPack.sender = name.toStdString();
-    initPack.data1 = passwd.toStdString();
-    net.send(initPack,[this](asio::error_code error, std::size_t sent)
+    client.init(userName.toStdString(),passwd.toStdString(),[this,userName,passwd](asio::error_code error, Stream initAck)
     {
         if(error)
-        {
-            if(error != asio::error::operation_aborted)
-                initialize();
-        }
+            initialize(userName,passwd);
         else
-        {
-            net.receive([this](Stream initAck, asio::error_code error, std::size_t read)
+            if(initAck.head == static_cast<Header>(Header::INIT | Header::ACK))
             {
-                if(error)
-                {
-                    if(error != asio::error::operation_aborted)
-                        initialize();
-                }
-                else
-                {
-                    if(initAck.head == static_cast<Header>(Header::INIT | Header::ACK))
-                        reader();
-                    else
-                        initialize();
-                }
+                reader();
             }
-            );
-        }
-    }
-    );
+            else
+                initialize(userName,passwd);
+    });
 }
 
 void MainWindow::reader()
 {
-    net.receive([this](Stream data, asio::error_code error, std::size_t read)
+    client.reader([this](Stream data, asio::error_code error, std::size_t read)
     {
         if(error)
         {
-            if(error != asio::error::operation_aborted)
-                reader();
+
         }
         else
-        {
             processData(data);
-            reader();
-        }
-    }
-    );
-}
-
-//same problem as described in server. one failing message will stall others. well here the recipient is only server, so if one message have network error all other messages will also.
-void MainWindow::writer()
-{
-    isWriting = true;
-    if(!writeQueue.empty())
-    {
-        net.send(*writeQueue.begin(),[this](asio::error_code error, std::size_t sent)
-        {
-            if(error)
-            {
-                if(error != asio::error::operation_aborted)
-                    writer();
-            }
-            else
-            {
-                writeQueue.pop_front();
-                writer();
-            }
-        });
-    }
-    else
-        isWriting = false;
+        reader();
+    });
 }
 
 void MainWindow::processData(Stream data)
 {
     switch(data.head)
     {
-        case Header::PING:
-            ping();
-            break;
         case Header::MESSAGE:
             processMessage(data);
             break;
         default:
             break;
     }
-}
-
-void MainWindow::queueMessage(Stream data)
-{
-    writeQueue.push_back(data);
-    if(!isWriting)
-        writer();
-}
-
-void MainWindow::ping()
-{
-    Stream ping;
-    ping.head = Header::PING;
-    queueMessage(ping);
 }
 
 //slots
@@ -231,23 +151,18 @@ void MainWindow::initConnect()
     connDialog->show();
 }
 
-void MainWindow::doConnect(const QString userName, const QString passWD, const QString host, const QString portNum)
+void MainWindow::doConnect(const QString userName, const QString passwd, const QString host, const QString port)
 {
-    name = userName;
-    passwd = passWD;
-    hostname = host;
-    port = portNum;
-
-    if(name.isEmpty() || hostname.isEmpty() || port.isEmpty())
+    if(userName.isEmpty() || passwd.isEmpty() || host.isEmpty() || port.isEmpty())
     {
         connDialog->setInform("All fields are necessary");
         return;
     }
 
-    if(!net.getSocket())
-        net.newConnection(io);
+    if(!client.getSocket())
+        client.newSocket(io);
 
-    net.connect(hostname.toStdString(),port.toStdString(),[this](asio::error_code error)
+    client.connect(host.toStdString(),port.toStdString(),[this,userName,passwd](asio::error_code error)
     {
         if(error)
         {
@@ -260,7 +175,7 @@ void MainWindow::doConnect(const QString userName, const QString passWD, const Q
         {
             connDialog->setCancelButtonText("Close");
             connDialog->setInform("Connected Successfully");
-            initialize();
+            initialize(userName,passwd);
         }
     }
     );
@@ -276,13 +191,15 @@ void MainWindow::doConnect(const QString userName, const QString passWD, const Q
 
 void MainWindow::disConnect()
 {
-    Stream data;
-    data.head = Header::SOCKET_CLOSE;
-    net.send(data,[this](asio::error_code error, std::size_t)
-    {
-       if(error != asio::error::operation_aborted)
-           net.disconnect();
-    });
+    //do something like this with new client
+//    Stream data;
+//    data.head = Header::SOCKET_CLOSE;
+//    net.send(data,[this](asio::error_code error, std::size_t)
+//    {
+//       if(error != asio::error::operation_aborted)
+//           net.disconnect();
+//    });
+    client.disconnect();
 }
 
 void MainWindow::displayMessage(QListWidgetItem* item)
@@ -290,18 +207,17 @@ void MainWindow::displayMessage(QListWidgetItem* item)
     message->clear();
     contactsListWidget->setCurrentItem(item);
     
-    std::string query = "SELECT sender,message FROM messages WHERE name=\""+item->text().toStdString()+"\";";
-    
-    auto func = [this](int numOfColumns,char **columnData, char **columnName)->int
+    std::vector<std::pair<std::string,std::string>> messages;
+
+    if(!client.getMessages(item->text().toStdString(),messages))
+        qInfo()<<client.getDBError().c_str();
+
+    for(auto& a : messages)
     {
-        QString msg {QString(columnData[0])+QString(":\n")+QString(columnData[1])+QString("\n\n")};
+        QString msg {QString(a.first.c_str())+QString(":\n")+QString(a.second.c_str())+QString("\n\n")};
         emit insertText(msg);
-        return 0;
-    };
-    
-    if(!db.queryExec(query,func))
-        qInfo()<<db.getError().c_str();
-    
+    }
+
     message->ensureCursorVisible();
 }
 
@@ -314,17 +230,16 @@ void MainWindow::sendMessage()
 
     Stream data;
     data.head = Header::MESSAGE;
-    data.sender = name.toStdString();
+    data.sender = client.name();
     data.receiver = contactsListWidget->currentItem()->text().toStdString();
     data.data1 = msgIn->text().toStdString();
     QListWidgetItem* user = contactsListWidget->currentItem();
     
-    std::string query {"INSERT INTO messages (name,sender,message,time) VALUES (\""+data.receiver+"\", \""+data.sender+"\", \""+data.data1+"\",datetime(\"now\"));"};
-    if(!db.queryExec(query))
-        qInfo()<<db.getError().c_str();
+    if(!client.insertMessage(data.receiver,data.sender,data.data1))
+        qInfo()<<client.getDBError().c_str();
     emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution else it will fail in runtime with 'unable to create child' error
     msgIn->clear();
-    queueMessage(data);
+    client.queueMessage(data);
 }
 
 void MainWindow::newContact()
@@ -340,61 +255,10 @@ void MainWindow::createContact(const QString& text)
     QListWidgetItem* user = getUser(text);
     if(!user)
     {
+        client.insertContact(text.toStdString());
         user = makeContact(text);
     }
 
     newContactDialog->close();      
     emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution
-}
-
-void MainWindow::initDB()
-{
-    std::string query {"SELECT COUNT(name) FROM sqlite_master WHERE name=\"user\";"};
-    {
-        auto func = [this](int numOfColumns, char **columnData, char **columnName)->int
-            {
-                std::string colName{columnName[0]};
-                std::string colData{columnData[0]};
-                if(colName == "COUNT(name)" && colData == "0")
-                {
-                    if(!db.queryExec("CREATE TABLE user (name TEXT PRIMARY KEY);"))
-                        qInfo()<<db.getError().c_str();
-                }
-                return 0;
-            };
-        if(!db.queryExec(query,func))
-            qInfo()<<db.getError().c_str();
-    }
-    query ="SELECT COUNT(name) FROM sqlite_master WHERE name=\"contacts\";";
-    {
-        auto func = [this](int numOfColumns, char **columnData, char **columnName)->int
-        {
-            std::string colName{columnName[0]};
-            std::string colData{columnData[0]};
-            if(colName == "COUNT(name)" && colData == "0")
-            {
-                if(!db.queryExec("CREATE TABLE contacts (name TEXT PRIMARY KEY);"))
-                    qInfo()<<db.getError().c_str();
-            }
-                return 0;
-        };
-        if(!db.queryExec(query,func))
-            qInfo()<<db.getError().c_str();
-    }
-    query ="SELECT COUNT(name) FROM sqlite_master WHERE name=\"messages\";";
-    {
-        auto func = [this](int numOfColumns, char **columnData, char **columnName)->int
-            {
-                std::string colName{columnName[0]};
-                std::string colData{columnData[0]};
-                if(colName == "COUNT(name)" && colData == "0")
-                {
-                    if(!db.queryExec("CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, sender TEXT, message TEXT, time TEXT);"))
-                        qInfo()<<db.getError().c_str();
-                }
-                    return 0;
-            };
-        if(!db.queryExec(query,func))
-            qInfo()<<db.getError().c_str();
-    }
 }

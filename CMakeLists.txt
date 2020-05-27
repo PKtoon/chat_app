@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(chat_app)
 
+set(CMAKE_CXX_STANDARD 17)
 include_directories("external/asio/asio/include/" "external/json/single_include/")
 
 set(NETWORK_INTERFACE
@@ -62,6 +63,8 @@ set(SQLITEDB
     )
 
 set(CLIENT_GUI_SOURCES
+    src/client-gui/client.hpp
+    src/client-gui/client.cpp
     src/client-gui/newcontactdialog.h
     src/client-gui/newcontactdialog.cpp
     src/client-gui/conndialog.h

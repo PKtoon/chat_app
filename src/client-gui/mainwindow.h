@@ -6,13 +6,9 @@
 #include <QMainWindow>
 #include <QListWidget>
 
-#include <asio.hpp>
-
-#include "src/network-interface/netface.h"
 #include "conndialog.h"
 #include "newcontactdialog.h"
-
-#include "external/SQLite/sqlite3_wrap.h"
+#include "src/client-gui/client.hpp"
 
 class MainWindow : public QMainWindow
 {
@@ -34,22 +30,12 @@ public slots:
     void createContact(const QString& text);
 
 private:
-    //client parameters
-    QString name;
-    QString passwd;
-    QString hostname;
-    QString port;
-    
     //networking scaffold
     asio::io_context io;
-    NetFace net;
+    Client client{io};
     std::thread ioThread;
     bool isThreadRunning{false};
     asio::executor_work_guard<asio::io_context::executor_type> work = asio::make_work_guard(io);
-    
-    // I/O scaffold
-    std::deque<Stream> writeQueue;
-    bool isWriting{false};
     
     // GUI components
     ConnDialog* connDialog;
@@ -64,21 +50,14 @@ private:
     void createMenuBar();
     void decorate();
     void setContactList();
-    void processMessage(Stream data);
     QListWidgetItem* makeContact(const QString& text);
     QListWidgetItem* getUser(QString name);
     
     //client.h
-    void initialize();
+    void initialize(QString userName, QString passwd);
     void reader();
-    void writer();
-    void processData(Stream);
-    void queueMessage(Stream);
-    void ping();
-    
-    //SQLite3 db
-    SQLite3DB db {"storage"};
-    void initDB();
+    void processData(Stream data);
+    void processMessage(Stream data);
 };
 
 #endif // MAINWINDOW_H
