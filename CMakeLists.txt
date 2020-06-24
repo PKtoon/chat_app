@@ -34,16 +34,6 @@ set(SERVER_SOURCES
 add_executable("server" ${SERVER_SOURCES})
 target_link_libraries( "server" ${LIB} ${PQXX_LIB})
 
-set(CLIENT_SOURCES
-    src/client/client.h
-    src/client/client.cpp
-    src/client/main.cpp
-    )
-    
-add_executable("client" ${CLIENT_SOURCES})
-target_link_libraries("client" ${LIB})
-
-
 # Find the QtWidgets library
 find_package(Qt5Widgets CONFIG REQUIRED)
 
@@ -62,17 +52,17 @@ set(SQLITEDB
     external/SQLite/sqlite3_wrap.h
     )
 
-set(CLIENT_GUI_SOURCES
-    src/client-gui/client.hpp
-    src/client-gui/client.cpp
-    src/client-gui/newcontactdialog.h
-    src/client-gui/newcontactdialog.cpp
-    src/client-gui/conndialog.h
-    src/client-gui/conndialog.cpp
-    src/client-gui/mainwindow.h
-    src/client-gui/mainwindow.cpp
-    src/client-gui/main-gui.cpp
+set(CLIENT_SOURCES
+    src/client/client.hpp
+    src/client/client.cpp
+    src/client/newcontactdialog.h
+    src/client/newcontactdialog.cpp
+    src/client/conndialog.h
+    src/client/conndialog.cpp
+    src/client/mainwindow.h
+    src/client/mainwindow.cpp
+    src/client/main.cpp
     )
 
-add_executable("client-gui" ${CLIENT_GUI_SOURCES} ${SQLITEDB})
-target_link_libraries("client-gui" Qt5::Widgets ${LIB} ${SQLite3_LIBRARIES})
+add_executable("client" ${CLIENT_SOURCES} ${SQLITEDB})
+target_link_libraries("client" Qt5::Widgets ${LIB} ${SQLite3_LIBRARIES})

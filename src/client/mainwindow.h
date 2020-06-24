@@ -8,7 +8,7 @@
 
 #include "conndialog.h"
 #include "newcontactdialog.h"
-#include "src/client-gui/client.hpp"
+#include "src/client/client.hpp"
 
 class MainWindow : public QMainWindow
 {
