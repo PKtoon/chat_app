@@ -157,6 +157,12 @@ void Client::ping()
     queueMessage(ping);
 }
 
+void Client::runIOContext()
+{
+    io_.run();
+    std::clog<<"IO_Context stopped"<<std::endl;
+}
+
 std::string Client::getDBError()
 {
     return db.getError();

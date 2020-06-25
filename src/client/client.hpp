@@ -11,11 +11,16 @@
 class Client
 {
     std::string name_;
+    asio::io_context io_;
     NetFace net;
     bool isWriting{false};
     std::deque<Stream> writeQueue;
     SQLite3DB db{"storage"};
 public:
+    Client() : net{io_}
+    {
+        initDB();
+    }
     Client(asio::io_context& io): net{io}
     {
         initDB();
@@ -30,6 +35,7 @@ public:
     void processMessage(Stream data);
     void queueMessage(Stream data);
     void ping();
+    void runIOContext();
 
     //networking
     void connect(std::string host, std::string port, std::function<void(asio::error_code)> callBack);

@@ -15,7 +15,6 @@ MainWindow::~MainWindow()
     if(isThreadRunning)
     {
         disConnect();
-        work.reset();
         ioThread.join();
     }
 }
@@ -159,8 +158,8 @@ void MainWindow::doConnect(const QString userName, const QString passwd, const Q
         return;
     }
 
-    if(!client.getSocket())
-        client.newSocket(io);
+//    if(!client.getSocket())
+//        client.newSocket(io);
 
     client.connect(host.toStdString(),port.toStdString(),[this,userName,passwd](asio::error_code error)
     {
@@ -184,7 +183,7 @@ void MainWindow::doConnect(const QString userName, const QString passwd, const Q
         ioThread = std::thread([this]()
         {
             isThreadRunning = true;
-            io.run();
+            client.runIOContext();
         });
     }
 }

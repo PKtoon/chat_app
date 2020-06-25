@@ -31,11 +31,9 @@ public slots:
 
 private:
     //networking scaffold
-    asio::io_context io;
-    Client client{io};
+    Client client{};
     std::thread ioThread;
     bool isThreadRunning{false};
-    asio::executor_work_guard<asio::io_context::executor_type> work = asio::make_work_guard(io);
     
     // GUI components
     ConnDialog* connDialog;
