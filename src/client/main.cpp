@@ -1,58 +1,27 @@
-#include <iostream>
-#include <string>
-#include <thread>
-
 #include <asio.hpp>
 
-#include "client.h"
+#include <QApplication>
 
-std::string readline()
-{
-    std::string temp="";
-    char i;
-    std::cin>>std::noskipws>>i;
-    if(i!='\n')
-        std::cin.unget();
-    while(std::cin>>std::noskipws>>i)
-    {
-        if(i=='\n')
-            break;
-        temp+=i;
-    }
-    return temp;
-}
+#include <thread>
+
+#include "mainwindow.h"
+
+Q_DECLARE_METATYPE(asio::error_code)
+Q_DECLARE_METATYPE(std::size_t)
+Q_DECLARE_METATYPE(Stream)
 
 int main(int argc, char* argv[])
 {
-    if (argc!=4)
-    {
-        std::cout<<"Usage: client id hostname port"<<std::endl;
-        exit(1);
-    }
-
-    std::string id{argv[1]};
-    std::string machine_name(argv[2]);
-    std::string port{argv[3]};
-    std::string receiver,msg;
-
-    asio::io_context io;
+    QApplication app(argc, argv);
+    QCoreApplication::setOrganizationName("PK2n");
+    QCoreApplication::setApplicationName("Chat app client");
+    QCoreApplication::setApplicationVersion(QT_VERSION_STR);
     
-    Client c{id,machine_name,port,io};
-    
-    io.run();
+    qRegisterMetaType<asio::error_code>();
+    qRegisterMetaType<std::size_t>();
+    qRegisterMetaType<Stream>();
 
-//     std::thread t {[&io](){ io.run(); }};
-
-//     while(true)
-//     {
-//         std::cout<<"To:: ";
-//         std::cin>>receiver;
-//         std::cout<<"Message:: ";
-//         msg = readline();
-// //         c.writer(Stream(c.getName(),receiver,msg));
-// //         c.printer();
-//     }
-// 
-//     t.join();
-    return 0;
+    MainWindow mainWin;
+    mainWin.show();
+    return app.exec();
 }

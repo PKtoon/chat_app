@@ -3,7 +3,6 @@
 
 User::User(asio::ip::tcp::socket socket, Server& serv) : net{std::move(socket)}, server{serv}
 {
-    log("User is created");
     timer.async_wait([this](const asio::error_code& error)
     {
         if(error != asio::error::operation_aborted)
@@ -25,7 +24,10 @@ void User::initialize()
             if(error)
             {
                 if(error != asio::error::operation_aborted)
+                {
+                    std::cerr<<"User::initialize()::net.receive(): "<<error.message()<<std::endl;
                     initialize();
+                }
             }
             else
             {
@@ -95,13 +97,16 @@ void User::checkPulse()
         server.removeMe(this);
     else
     {
-    pingMe();
-    timer.expires_after(asio::chrono::seconds(20));
-    timer.async_wait([this](const asio::error_code& error)
-    {
-        if(error != asio::error::operation_aborted)
-            checkPulse();
-    });
+        pingMe();
+        timer.expires_after(asio::chrono::seconds(20));
+        timer.async_wait([this](const asio::error_code& error)
+        {
+            if(error != asio::error::operation_aborted)
+            {
+                std::cerr<<name<<": User::checkPulse()::timer.async_wait(): "<<error.message()<<std::endl;
+                checkPulse();
+            }
+        });
     }
 }
 
@@ -127,7 +132,10 @@ void User::reader()
         if(error)
         {
             if(error != asio::error::operation_aborted)
+            {
+                std::cerr<<name<<": User::reader()::net.receive(): "<<error.message()<<std::endl;
                 reader();
+            }
         }
         else
         {
@@ -155,7 +163,10 @@ void User::writer()
             if(error)
             {
                 if(error != asio::error::operation_aborted)
+                {
+                    std::cerr<<name<<": User::writer()::net.send(): "<<error.message()<<std::endl;
                     writer();
+                }
             }
             else
             {
