@@ -5,7 +5,15 @@ void Client::connect(std::string host, std::string port, std::function<void (asi
 {
     net.connect(host,port,[this,callBack](asio::error_code error)
     {
-        if(error != asio::error::operation_aborted)
+        if(error)
+        {
+            if(error != asio::error::operation_aborted)
+            {
+                std::cerr<<"Client::connect()::net.connect(): "<<error.message()<<std::endl;
+                callBack(error);
+            }
+        }
+        else
         {
             callBack(error);
         }
@@ -39,7 +47,10 @@ void Client::init(std::string name, std::string password,std::function<void (asi
         if(error)
         {
             if(error != asio::error::operation_aborted)
+            {
+                std::cerr<<"Client::init()::net.send(): "<<error.message()<<std::endl;
                 callBack(error, Stream());
+            }
         }
         else
         {
@@ -68,15 +79,17 @@ void Client::reader(std::function<void (Stream data,asio::error_code,std::size_t
     {
         if(error)
         {
-//            if(error != asio::error::operation_aborted)
-//                callBack(data,error,read);
+            if(error != asio::error::operation_aborted)
+            {
+                std::cerr<<"Client::reader()::net.receive(): "<<error.message()<<std::endl;
+                callBack(data,error,read);
+            }
         }
         else
         {
             processData(data);
-        }
-        if(error != asio::error::operation_aborted)
             callBack(data,error,read);
+        }
     }
     );
 }
@@ -91,14 +104,18 @@ void Client::writer()
         {
             if(error)
             {
-
+                if(error != asio::error::operation_aborted)
+                {
+                    std::cerr<<"Client::writer()::net.send(): "<<error.message()<<std::endl;
+                    writer();
+                }
             }
             else
             {
                 writeQueue.pop_front();
-            }
-            if(error != asio::error::operation_aborted)
                 writer();
+            }
+
         });
     }
     else
@@ -159,6 +176,7 @@ void Client::ping()
 
 void Client::runIOContext()
 {
+    std::clog<<"IO_Context started"<<std::endl;
     io_.run();
     std::clog<<"IO_Context stopped"<<std::endl;
 }

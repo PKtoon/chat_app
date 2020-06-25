@@ -35,11 +35,11 @@ public:
     void processMessage(Stream data);
     void queueMessage(Stream data);
     void ping();
-    void runIOContext();
 
     //networking
     void connect(std::string host, std::string port, std::function<void(asio::error_code)> callBack);
     void disconnect();
+    void runIOContext();
     asio::ip::tcp::socket* getSocket();
     void newSocket(asio::io_context &io);
 
