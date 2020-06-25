@@ -45,8 +45,16 @@ void Client::init(std::string name, std::string password,std::function<void (asi
         {
             net.receive([this,callBack](Stream initAck, asio::error_code error, std::size_t read)
             {
-                if(error != asio::error::operation_aborted)
-                    callBack(error, Stream());
+                if (error)
+                {
+                    if(error != asio::error::operation_aborted)
+                    {
+                        std::cerr<<"Client::init()::net.receive(): "<<error.message()<<std::endl;
+                        callBack(error, Stream());
+                    }
+                }
+                else
+                    callBack(error, initAck);
             }
             );
         }
