@@ -8,7 +8,10 @@ void Server::accept()
         if (error)
         {
             if (error != asio::error::operation_aborted)
+            {
+                std::cerr<<"Server::accept()::async_accept(): "<<error.message()<<std::endl;
                 accept();
+            }
         }
         else
         {

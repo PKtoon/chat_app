@@ -184,6 +184,7 @@ void MainWindow::doConnect(const QString userName, const QString passwd, const Q
         {
             isThreadRunning = true;
             client.runIOContext();
+            isThreadRunning = false;
         });
     }
 }
