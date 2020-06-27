@@ -49,6 +49,8 @@ void User::initialize()
                     case 0:
                         server.addUser(data.sender,data.data1);
                         name = data.sender;
+                        reply.receiver = name;
+                        reply.head = static_cast<Header>(Header::INIT|Header::ACK);
                         reader();
                         break;
                     default:
