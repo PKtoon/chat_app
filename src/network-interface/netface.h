@@ -22,7 +22,7 @@ public:
             delete connMan;
     }
     
-    asio::ip::tcp::socket& getSocket() { return connMan->getSocket(); }
+    asio::ip::tcp::socket* getSocket();
     ConnectionManager* getConnMan() { return connMan; }
     void connect(std::string hostname, std::string port, std::function<void(asio::error_code)> callBack);
     void disconnect();

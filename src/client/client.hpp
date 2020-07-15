@@ -16,6 +16,7 @@ class Client
     bool isWriting{false};
     std::deque<Stream> writeQueue;
     SQLite3DB db{"storage"};
+    bool isConnected {false};
 public:
     Client() : net{io_}
     {
@@ -41,7 +42,7 @@ public:
     void disconnect();
     void runIOContext();
     asio::ip::tcp::socket* getSocket();
-    void newSocket(asio::io_context &io);
+    void newSocket();
 
     //db
     std::string getDBError();

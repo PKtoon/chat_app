@@ -36,7 +36,7 @@ void NetFace::disconnect()
 void NetFace::removeConnMan()
 {
     isTimerRunning = true;
-    timer.expires_after(asio::chrono::seconds(10));
+    timer.expires_after(asio::chrono::seconds(5));
     timer.async_wait([this](const asio::error_code& error)
     {
         if(error != asio::error::operation_aborted)
@@ -71,6 +71,14 @@ void NetFace::newConnection(asio::ip::tcp::socket sock)
     connMan = new ConnectionManager{std::move (sock)};
 //     connMan->newConnection(std::move(sock));
 }
+
+asio::ip::tcp::socket * NetFace::getSocket()
+{
+    if(connMan)
+        return &connMan->getSocket();
+    return nullptr;
+}
+
 
 void NetFace::send(Stream data, std::function<void(asio::error_code, std::size_t)> callBack)
 {

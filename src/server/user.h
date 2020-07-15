@@ -12,7 +12,7 @@ class Server;
 
 class User
 {
-    std::string name;
+    std::string name,name2;
     bool isAlive{false};
     bool isWriting{false};
     unsigned short count = 0;
@@ -22,7 +22,7 @@ class User
     asio::steady_timer timer {net.getSocket()->get_executor(),asio::chrono::seconds(20)};
 public:
     User(asio::ip::tcp::socket socket, Server& serv);
-    ~User() { log(name+" is destroyed");}
+    ~User() { log(name2+" is destroyed");}
     
     const std::string& getName() const { return name; }
     

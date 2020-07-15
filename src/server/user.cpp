@@ -33,6 +33,7 @@ void User::initialize()
             {
                 if(data.head == Header::INIT)
                 {
+//TODO:                     if there are any active user with same name then first disconnect them
                     isAlive = true;
                     pqxx::result res = server.getUser(data.sender);
                     switch (res.size())
@@ -41,6 +42,7 @@ void User::initialize()
                         if(server.authUser(data.sender,data.data1))
                         {
                             name = data.sender;
+                            name2 = name;
                             reply.receiver = name;
                             reply.head = static_cast<Header>(Header::INIT|Header::ACK);
                             reader();
@@ -87,6 +89,7 @@ void User::processData(Stream data)
         case Header::SOCKET_CLOSE:
             isAlive = false;
             name = "";
+//             net.disconnect();
             break;
         default:
             break;

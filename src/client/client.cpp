@@ -15,6 +15,7 @@ void Client::connect(std::string host, std::string port, std::function<void (asi
         }
         else
         {
+            isConnected = true;
             callBack(error);
         }
     });
@@ -22,17 +23,34 @@ void Client::connect(std::string host, std::string port, std::function<void (asi
 
 void Client::disconnect()
 {
-    net.disconnect();
+// TODO:      do something like this with new client
+    if(isConnected)
+    if(net.getConnMan())
+    {
+        Stream data;
+        data.head = Header::SOCKET_CLOSE;
+        net.send(data,[this](asio::error_code error, std::size_t)
+        {
+            if(error != asio::error::operation_aborted)
+            {
+                net.disconnect();
+                isConnected = false;
+            }
+        });
+    }
+//    also try to give enough time to disconnect to actually deliver message
+//     net.disconnect();
 }
 
-asio::ip::tcp::socket *Client::getSocket()
+asio::ip::tcp::socket* Client::getSocket()
 {
     return net.getSocket();
 }
 
-void Client::newSocket(asio::io_context &io)
+void Client::newSocket()
 {
-    net.newConnection(io);
+    disconnect();
+    net.newConnection(io_);
 }
 
 void Client::init(std::string name, std::string password,std::function<void (asio::error_code, Stream data)> callBack)
@@ -176,6 +194,7 @@ void Client::ping()
 
 void Client::runIOContext()
 {
+    io_.restart();
     std::clog<<"IO_Context started"<<std::endl;
     io_.run();
     std::clog<<"IO_Context stopped"<<std::endl;

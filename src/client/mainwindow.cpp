@@ -15,7 +15,6 @@ MainWindow::~MainWindow()
     if(isThreadRunning)
     {
         disConnect();
-        ioThread.join();
     }
 }
 
@@ -158,8 +157,9 @@ void MainWindow::doConnect(const QString userName, const QString passwd, const Q
         return;
     }
 
+//     TODO: make it so that, there is no call to client.getSocket(), as everytime using newSocket is better and make newSocket to disconnect old socket and do not initialize NetFace at start, it is unnecessary as we are using new socket so it will initialized again anyways
 //    if(!client.getSocket())
-//        client.newSocket(io);
+    client.newSocket();
 
     client.connect(host.toStdString(),port.toStdString(),[this,userName,passwd](asio::error_code error)
     {
@@ -184,22 +184,19 @@ void MainWindow::doConnect(const QString userName, const QString passwd, const Q
         {
             isThreadRunning = true;
             client.runIOContext();
-            isThreadRunning = false;
+//             isThreadRunning = false;
         });
     }
 }
 
 void MainWindow::disConnect()
 {
-    //do something like this with new client
-//    Stream data;
-//    data.head = Header::SOCKET_CLOSE;
-//    net.send(data,[this](asio::error_code error, std::size_t)
-//    {
-//       if(error != asio::error::operation_aborted)
-//           net.disconnect();
-//    });
     client.disconnect();
+    if(isThreadRunning)
+    {
+        ioThread.join();
+        isThreadRunning = false;
+    }
 }
 
 void MainWindow::displayMessage(QListWidgetItem* item)
