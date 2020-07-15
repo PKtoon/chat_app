@@ -7,7 +7,7 @@
 
 class ConnectionManager
 {
-    asio::ip::tcp::socket* socket;
+    asio::ip::tcp::socket socket;
     asio::ip::tcp::resolver resolver;
     asio::ip::tcp::resolver::results_type endpoints;
 
@@ -15,17 +15,15 @@ class ConnectionManager
     unsigned int inDataSize=0;
 
 public:
-    ConnectionManager(asio::io_context& io):socket{new asio::ip::tcp::socket{io}}, resolver{io}{}
-    ConnectionManager(asio::ip::tcp::socket sock) : socket{new asio::ip::tcp::socket{std::move(sock)}}, resolver{socket->get_executor()} {}
+    ConnectionManager(asio::io_context& io):socket{io}, resolver{io}{}
+    ConnectionManager(asio::ip::tcp::socket sock) : socket{std::move(sock)}, resolver{socket.get_executor()} {}
     ~ConnectionManager(){ disconnect(); }
-    asio::ip::tcp::socket* getSocket() { return socket; }
+    asio::ip::tcp::socket& getSocket() { return socket; }
     void setEndpoints(std::string hostname, std::string port)
     {
         endpoints = resolver.resolve(hostname,port);
     }
     
-    void newConnection(asio::io_context& io);
-    void newConnection(asio::ip::tcp::socket sock);
     void disconnect();
     void connector(std::function<void(asio::error_code, asio::ip::tcp::endpoint)> callBack);
     void writer(const std::vector<char> outData, std::function<void (asio::error_code,std::size_t)> callBack);
