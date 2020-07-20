@@ -1,3 +1,7 @@
+#ifdef __WIN32__
+#include <winsock2.h>
+#endif
+
 #include <asio.hpp>
 
 #include <QApplication>

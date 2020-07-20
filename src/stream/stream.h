@@ -6,23 +6,23 @@
 
 enum Header
 {
-    EMPTY = 0,
-    ACK = 1,
-    ERROR = 1<<1,
-    SOCKET_CLOSE = 1<<2,
-    PING = 1<<3,
-    INIT = 1<<4,
-    MESSAGE = 1<<5,
-    GROUP_MESSAGE = 1<<6,
-    LOCAL_FILE = 1<<7,
-    MESSAGE_OUT_OF_ORDER = 1<<8,
-    MESSAGE_CORRUPT = 1<<9
+    empty = 0,
+    ack = 1,
+    error = 1<<1,
+    socket_close = 1<<2,
+    ping = 1<<3,
+    init = 1<<4,
+    message = 1<<5,
+    group_message = 1<<6,
+    local_file = 1<<7,
+    message_out_of_order = 1<<8,
+    message_corrupt = 1<<9
 };
 
 class Stream
 {
     public:
-    Header head = Header::EMPTY;
+    Header head = Header::empty;
     std::string sender;
     std::string receiver;
     std::string data1;

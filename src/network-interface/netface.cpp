@@ -123,7 +123,7 @@ void NetFace::receive(std::function<void(Stream, asio::error_code, std::size_t)>
                     else
                     {
                         Stream data;
-                        data.head = static_cast<Header>(Header::ERROR|Header::MESSAGE_CORRUPT);
+                        data.head = static_cast<Header>(Header::error|Header::message_corrupt);
                         callBack(data,error,read);
                     }
                 }

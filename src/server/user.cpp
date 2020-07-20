@@ -19,7 +19,7 @@ void User::initialize()
         net.receive([this](Stream data, asio::error_code error, std::size_t read)
         {
             Stream reply;
-            reply.head = static_cast<Header>(Header::INIT|Header::ERROR);
+            reply.head = static_cast<Header>(Header::init|Header::error);
             reply.sender = "server";
             if(error)
             {
@@ -31,7 +31,7 @@ void User::initialize()
             }
             else
             {
-                if(data.head == Header::INIT)
+                if(data.head == Header::init)
                 {
 //TODO:                     if there are any active user with same name then first disconnect them
                     isAlive = true;
@@ -44,7 +44,7 @@ void User::initialize()
                             name = data.sender;
                             name2 = name;
                             reply.receiver = name;
-                            reply.head = static_cast<Header>(Header::INIT|Header::ACK);
+                            reply.head = static_cast<Header>(Header::init|Header::ack);
                             reader();
                         }
                         break;
@@ -52,7 +52,7 @@ void User::initialize()
                         server.addUser(data.sender,data.data1);
                         name = data.sender;
                         reply.receiver = name;
-                        reply.head = static_cast<Header>(Header::INIT|Header::ACK);
+                        reply.head = static_cast<Header>(Header::init|Header::ack);
                         reader();
                         break;
                     default:
@@ -61,11 +61,11 @@ void User::initialize()
                 }
                 else
                 {
-                    if(data.head == SOCKET_CLOSE)
+                    if(data.head == socket_close)
                         net.disconnect();
                     else
                     {
-                        reply.head = static_cast<Header>(Header::ERROR);
+                        reply.head = static_cast<Header>(Header::error);
                         reply.receiver = data.sender;
                         initialize();
                     }
@@ -80,13 +80,13 @@ void User::processData(Stream data)
 {
     switch(data.head)
     {
-        case Header::MESSAGE:
+        case Header::message:
             server.queueDelivery(data);
             break;
-        case Header::PING:
+        case Header::ping:
             isAlive = true;
             break;
-        case Header::SOCKET_CLOSE:
+        case Header::socket_close:
             isAlive = false;
             name = "";
 //             net.disconnect();
@@ -118,7 +118,7 @@ void User::checkPulse()
 void User::pingMe()
 {
     Stream ping;
-    ping.head = Header::PING;
+    ping.head = Header::ping;
     queueMessage(ping);
     isAlive = false;
 }

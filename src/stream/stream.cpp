@@ -6,21 +6,21 @@
 std::string Stream::getSerialized()
 {
     nlohmann::json j;
-    constexpr Header comp = static_cast<Header>(Header::ACK|Header::PING|Header::ERROR|Header::SOCKET_CLOSE);
+    constexpr Header comp = static_cast<Header>(Header::ack|Header::ping|Header::error|Header::socket_close);
 
     j["head"] = head;
 
-    if(!((head & comp) || head==Header::EMPTY))
+    if(!((head & comp) || head==Header::empty))
     {
         //switch has fall-through
         switch (head)
         {
-        case Header::LOCAL_FILE:
+        case Header::local_file:
             j["currentPart"] = currentPart;
             j["totalParts"] = totalParts;
-        case Header::GROUP_MESSAGE:
+        case Header::group_message:
             j["data2"] = data2;
-        case Header::MESSAGE: case Header::INIT:
+        case Header::message: case Header::init:
             j["data1"] = data1;
             j["receiver"] = receiver;
             j["sender"] = sender;
@@ -34,21 +34,21 @@ std::string Stream::getSerialized()
 void Stream::getUnSerialized(std::string& inData)
 {
     nlohmann::json j = nlohmann::json::parse(inData);
-    constexpr Header comp = static_cast<Header>(Header::ACK|Header::PING|Header::ERROR|Header::SOCKET_CLOSE);
+    constexpr Header comp = static_cast<Header>(Header::ack|Header::ping|Header::error|Header::socket_close);
 
     head = (j["head"]);
 
-    if(!((head & comp) || head==Header::EMPTY))
+    if(!((head & comp) || head==Header::empty))
     {
         //switch has fall-through
         switch (head)
         {
-        case Header::LOCAL_FILE:
+        case Header::local_file:
             currentPart = j["currentPart"];
             totalParts = j["totalParts"];
-        case Header::GROUP_MESSAGE:
+        case Header::group_message:
             data2 = j["data2"];
-        case Header::MESSAGE: case Header::INIT:
+        case Header::message: case Header::init:
             receiver = j["receiver"];
             data1 = j["data1"];
             sender = j["sender"];

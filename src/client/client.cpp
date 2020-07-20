@@ -28,7 +28,7 @@ void Client::disconnect()
     if(net.getConnMan())
     {
         Stream data;
-        data.head = Header::SOCKET_CLOSE;
+        data.head = Header::socket_close;
         net.send(data,[this](asio::error_code error, std::size_t)
         {
             if(error != asio::error::operation_aborted)
@@ -57,7 +57,7 @@ void Client::init(std::string name, std::string password,std::function<void (asi
 {
     name_ = name;
     Stream initPack;
-    initPack.head = Header::INIT;
+    initPack.head = Header::init;
     initPack.sender = name;
     initPack.data1 = password;
     net.send(initPack,[this,callBack](asio::error_code error, std::size_t sent)
@@ -151,10 +151,10 @@ void Client::processData(Stream data)
 {
     switch(data.head)
     {
-        case Header::PING:
+        case Header::ping:
             ping();
             break;
-        case Header::MESSAGE:
+        case Header::message:
             processMessage(data);
             break;
         default:
@@ -188,7 +188,7 @@ void Client::processMessage(Stream data)
 void Client::ping()
 {
     Stream ping;
-    ping.head = Header::PING;
+    ping.head = Header::ping;
     queueMessage(ping);
 }
 

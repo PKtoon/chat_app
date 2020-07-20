@@ -99,7 +99,7 @@ void MainWindow::initialize(QString userName, QString passwd)
         if(error)
             initialize(userName,passwd);
         else
-            if(initAck.head == static_cast<Header>(Header::INIT | Header::ACK))
+            if(initAck.head == static_cast<Header>(Header::init | Header::ack))
             {
                 reader();
             }
@@ -126,7 +126,7 @@ void MainWindow::processData(Stream data)
 {
     switch(data.head)
     {
-        case Header::MESSAGE:
+        case Header::message:
             processMessage(data);
             break;
         default:
@@ -226,7 +226,7 @@ void MainWindow::sendMessage()
     }
 
     Stream data;
-    data.head = Header::MESSAGE;
+    data.head = Header::message;
     data.sender = client.name();
     data.receiver = contactsListWidget->currentItem()->text().toStdString();
     data.data1 = msgIn->text().toStdString();
