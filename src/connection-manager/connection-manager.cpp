@@ -14,23 +14,10 @@ void ConnectionManager::connector(std::function<void(asio::error_code, asio::ip:
 {
     asio::async_connect(socket,endpoints,[this,callBack](const asio::error_code& error, const asio::ip::tcp::endpoint& endpoint)
         {
-            if(error)
+            if(error != asio::error::operation_aborted)
             {
-                if(error != asio::error::operation_aborted)
-                {
-                    if(endpoints == endpoints.end())
-                    {
-                        callBack(error,endpoint);
-                    }
-                    else
-                    {
-                        endpoints++;
-                        connector(callBack);
-                    }
-                }
-            }
-            else
                 callBack(error,endpoint);
+            }
         });
 }
 
