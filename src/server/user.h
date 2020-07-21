@@ -1,12 +1,10 @@
 #ifndef USER_H
 #define USER_H
 
+#include <iostream>
 #include <deque>
 
-#include <asio.hpp>
-
 #include "../network-interface/netface.h"
-#include "../logger.hpp"
 
 class Server;
 
@@ -22,7 +20,7 @@ class User
     asio::steady_timer timer {net.getSocket()->get_executor(),asio::chrono::seconds(20)};
 public:
     User(asio::ip::tcp::socket socket, Server& serv);
-    ~User() { log(name2+" is destroyed");}
+    ~User() { std::clog<<name2+" is destroyed"<<std::endl;}
     
     const std::string& getName() const { return name; }
     

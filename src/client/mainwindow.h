@@ -1,14 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <deque>
-
 #include <QMainWindow>
-#include <QListWidget>
 
 #include "conndialog.h"
 #include "newcontactdialog.h"
-#include "src/client/client.hpp"
+#include "client.hpp"
 
 class MainWindow : public QMainWindow
 {

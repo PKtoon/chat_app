@@ -27,7 +27,6 @@ public:
         accept();
         io.run();
     }
-
   
     User* getActiveUser(std::string);
     void removeMe(User*);

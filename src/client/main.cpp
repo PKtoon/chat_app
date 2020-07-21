@@ -2,17 +2,11 @@
 #include <winsock2.h>
 #endif
 
-#include <asio.hpp>
+#include "mainwindow.h"
 
 #include <QApplication>
 
-#include <thread>
-
-#include "mainwindow.h"
-
-Q_DECLARE_METATYPE(asio::error_code)
-Q_DECLARE_METATYPE(std::size_t)
-Q_DECLARE_METATYPE(Stream)
+//Q_DECLARE_METATYPE(asio::error_code)
 
 int main(int argc, char* argv[])
 {
@@ -21,9 +15,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("Chat app client");
     QCoreApplication::setApplicationVersion(QT_VERSION_STR);
     
-    qRegisterMetaType<asio::error_code>();
-    qRegisterMetaType<std::size_t>();
-    qRegisterMetaType<Stream>();
+//    qRegisterMetaType<asio::error_code>();
 
     MainWindow mainWin;
     mainWin.show();
