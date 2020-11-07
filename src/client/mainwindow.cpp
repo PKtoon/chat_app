@@ -85,7 +85,7 @@ void MainWindow::processMessage(Stream data)
 
 QListWidgetItem* MainWindow::getUser(QString user)
 {
-    auto list = contactsListWidget->findItems(user,0);
+    auto list = contactsListWidget->findItems(user,Qt::MatchExactly);
     if(!list.isEmpty())
         return (*(list.begin()));
     return nullptr;
