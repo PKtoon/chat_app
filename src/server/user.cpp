@@ -51,6 +51,7 @@ void User::initialize()
                     case 0:
                         server.addUser(data.sender,data.data1);
                         name = data.sender;
+                        name2 = name;
                         reply.receiver = name;
                         reply.head = static_cast<Header>(Header::init|Header::ack);
                         reader();
@@ -65,7 +66,6 @@ void User::initialize()
                         net.disconnect();
                     else
                     {
-                        reply.head = static_cast<Header>(Header::error);
                         reply.receiver = data.sender;
                         initialize();
                     }
