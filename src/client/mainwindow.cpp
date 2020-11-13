@@ -1,3 +1,6 @@
+//TODO: clear contactListWidget when user is changed
+//TODO: allow multiple users
+
 #include <QDebug>
 
 #include "mainwindow.h"
@@ -7,7 +10,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setCentralWidget(center);
     createMenuBar();
     decorate();
-    setContactList();
 }
 
 MainWindow::~MainWindow()
@@ -65,8 +67,14 @@ void MainWindow::setContactList()
 
     if(!client.getContactList(list))
         qInfo()<<client.getDBError().c_str();
+
+    //Experimental:
+    contactsListWidget->clear();
+
+    //TODO: possible memory leak
     for(auto& a : list)
         new QListWidgetItem(a.c_str(),contactsListWidget);
+    emit contactsListWidget->itemClicked(contactsListWidget->item(0));
 }
 
 QListWidgetItem* MainWindow::makeContact(const QString& text)
@@ -94,7 +102,9 @@ QListWidgetItem* MainWindow::getUser(QString user)
 //client core
 void MainWindow::initialize(QString userName, QString passwd)
 {
-    client.init(userName.toStdString(),passwd.toStdString(),[this,userName,passwd](asio::error_code error, Stream initAck)
+    client.init(userName.toStdString());
+    setContactList();
+    client.start(passwd.toStdString(),[this,userName,passwd](asio::error_code error, Stream initAck)
     {
         if(error)
             initialize(userName,passwd);

@@ -53,12 +53,16 @@ void Client::newSocket()
     net.newConnection(io_);
 }
 
-void Client::init(std::string name, std::string password,std::function<void (asio::error_code, Stream data)> callBack)
+void Client::start(std::string password,std::function<void (asio::error_code, Stream data)> callBack)
 {
-    name_ = name;
+    if(name_.empty())
+    {
+        std::cerr<<"Client is not initialized";
+        return;
+    }
     Stream initPack;
     initPack.head = Header::init;
-    initPack.sender = name;
+    initPack.sender = name_;
     initPack.data1 = password;
     net.send(initPack,[this,callBack](asio::error_code error, std::size_t sent)
     {
@@ -192,6 +196,12 @@ void Client::ping()
     queueMessage(ping);
 }
 
+void Client::init(std::string name)
+{
+    name_ = name;
+    initDB();
+}
+
 void Client::runIOContext()
 {
     io_.restart();
@@ -210,7 +220,7 @@ std::string Client::getDBError()
 
 void Client::initDB()
 {
-    std::string query {"SELECT COUNT(name) FROM sqlite_master WHERE name=\"user\";"};
+    std::string query {"SELECT COUNT(name) FROM sqlite_master WHERE name=\"users\";"};
     {
         auto func = [this](int numOfColumns, char **columnData, char **columnName)->int
             {
@@ -218,7 +228,7 @@ void Client::initDB()
                 std::string colData{columnData[0]};
                 if(colName == "COUNT(name)" && colData == "0")
                 {
-                    if(!db.queryExec("CREATE TABLE user (name TEXT PRIMARY KEY);"))
+                    if(!db.queryExec("CREATE TABLE users (name TEXT PRIMARY KEY);"))
                         std::cerr<<db.getError();
                 }
                 return 0;
@@ -226,7 +236,7 @@ void Client::initDB()
         if(!db.queryExec(query,func))
             std::cerr<<db.getError();
     }
-    query ="SELECT COUNT(name) FROM sqlite_master WHERE name=\"contacts\";";
+    query ="SELECT COUNT(name) FROM sqlite_master WHERE name=\"contacts_"+name_+"\";";
     {
         auto func = [this](int numOfColumns, char **columnData, char **columnName)->int
         {
@@ -234,7 +244,7 @@ void Client::initDB()
             std::string colData{columnData[0]};
             if(colName == "COUNT(name)" && colData == "0")
             {
-                if(!db.queryExec("CREATE TABLE contacts (name TEXT PRIMARY KEY);"))
+                if(!db.queryExec("CREATE TABLE contacts_"+name_+" (name TEXT PRIMARY KEY);"))
                     std::cerr<<db.getError();
             }
                 return 0;
@@ -242,7 +252,7 @@ void Client::initDB()
         if(!db.queryExec(query,func))
             std::cerr<<db.getError();
     }
-    query ="SELECT COUNT(name) FROM sqlite_master WHERE name=\"messages\";";
+    query ="SELECT COUNT(name) FROM sqlite_master WHERE name=\"messages_"+name_+"\";";
     {
         auto func = [this](int numOfColumns, char **columnData, char **columnName)->int
             {
@@ -250,7 +260,7 @@ void Client::initDB()
                 std::string colData{columnData[0]};
                 if(colName == "COUNT(name)" && colData == "0")
                 {
-                    if(!db.queryExec("CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, contact TEXT, sender TEXT, message TEXT, time TEXT);"))
+                    if(!db.queryExec("CREATE TABLE messages_"+name_+" (id INTEGER PRIMARY KEY AUTOINCREMENT, contact TEXT, sender TEXT, message TEXT, time TEXT);"))
                         std::cerr<<db.getError();
                 }
                     return 0;
@@ -261,7 +271,7 @@ void Client::initDB()
 }
 bool Client::getContact(std::string name, bool& result)
 {
-    std::string query {"SELECT name FROM contacts WHERE name = \""+name+"\";"};
+    std::string query {"SELECT name FROM contacts_"+name_+" WHERE name = \""+name+"\";"};
 
     auto func = [&name,&result](int numOfColumns, char **columnData, char **columnName)->int
         {
@@ -276,7 +286,7 @@ bool Client::getContact(std::string name, bool& result)
 }
 bool Client::getContactList(std::vector<std::string>& list)
 {
-    std::string query {"SELECT name FROM contacts;"};
+    std::string query {"SELECT name FROM contacts_"+name_+";"};
 
     auto func = [&list](int numOfColumns, char **columnData, char **columnName)->int
         {
@@ -292,7 +302,7 @@ bool Client::getContactList(std::vector<std::string>& list)
 
 bool Client::getMessages(std::string contact, std::vector<std::pair<std::string,std::string>>& msg)
 {
-    std::string query = "SELECT sender,message FROM messages WHERE contact=\""+contact+"\";";
+    std::string query = "SELECT sender,message FROM messages_"+name_+" WHERE contact=\""+contact+"\";";
 
     auto func = [&msg](int numOfColumns,char **columnData, char **columnName)->int
     {
@@ -305,12 +315,12 @@ bool Client::getMessages(std::string contact, std::vector<std::pair<std::string,
 
 bool Client::insertContact(std::string name)
 {
-    std::string query{"INSERT INTO contacts VALUES (\""+name+"\");"};
+    std::string query{"INSERT INTO contacts_"+name_+" VALUES (\""+name+"\");"};
     return db.queryExec(query);
 }
 
 bool Client::insertMessage(std::string contact, std::string sender, std::string msg)
 {
-    std::string query {"INSERT INTO messages (contact,sender,message,time) VALUES (\""+contact+"\", \""+sender+"\", \""+msg+"\",datetime(\"now\"));"};
+    std::string query {"INSERT INTO messages_"+name_+" (contact,sender,message,time) VALUES (\""+contact+"\", \""+sender+"\", \""+msg+"\",datetime(\"now\"));"};
     return db.queryExec(query);
 }

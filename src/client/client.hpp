@@ -18,17 +18,19 @@ class Client
     SQLite3DB db{"storage"};
     bool isConnected {false};
 public:
-    Client() : net{io_}
+    Client(std::string name = "") : net{io_}
     {
-        initDB();
+        if(!name.empty())
+            init(name);
     }
-    Client(asio::io_context& io): net{io}
+    Client(asio::io_context& io,std::string name = ""): net{io}
     {
-        initDB();
+        if(!name.empty())
+            init(name);
     }
     
     //client
-    void init(std::string name,std::string password,std::function<void (asio::error_code, Stream data)> callBack);
+    void start(std::string password,std::function<void (asio::error_code, Stream data)> callBack);
     std::string name() { return name_; }
     void reader(std::function<void (Stream data,asio::error_code,std::size_t)> callBack);
     void writer();
@@ -36,6 +38,7 @@ public:
     void processMessage(Stream data);
     void queueMessage(Stream data);
     void ping();
+    void init(std::string name);
 
     //networking
     void connect(std::string host, std::string port, std::function<void(asio::error_code)> callBack);
