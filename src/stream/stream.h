@@ -26,10 +26,10 @@ class Stream
     std::string sender;
     std::string receiver;
     std::string data1;
-    unsigned int msgID;
-    unsigned int currentPart;
-    unsigned int totalParts;
-    std::vector<char> data2;
+    unsigned int msgID = 0;
+    unsigned int currentPart = 0;
+    unsigned int totalParts = 0;
+    std::string data2;
 
     Stream(){}
     Stream(std::string s) { getUnSerialized(s);}
