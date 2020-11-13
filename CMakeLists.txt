@@ -64,6 +64,9 @@ set(SQLITEDB
 set(CLIENT_SOURCES
     src/client/client.hpp
     src/client/client.cpp
+    )
+
+set(GUI_SOURCES
     src/client/newcontactdialog.h
     src/client/newcontactdialog.cpp
     src/client/conndialog.h
@@ -73,5 +76,18 @@ set(CLIENT_SOURCES
     src/client/main.cpp
     )
 
-add_executable("client" ${CLIENT_SOURCES} ${SQLITEDB})
+add_executable("client" ${CLIENT_SOURCES} ${GUI_SOURCES} ${SQLITEDB})
 target_link_libraries("client" Qt5::Widgets ${LIB} ${SQLite3_LIBRARIES})
+
+# Instruct CMake to run moc automatically when needed.
+set(CMAKE_AUTOMOC OFF)
+# Instruct CMake to create code from Qt designer ui files
+set(CMAKE_AUTOUIC OFF)
+
+enable_testing()
+
+add_executable("clientMessageExchange" "tests/clientMessageExchange.cpp" ${CLIENT_SOURCES} ${SQLITEDB})
+target_link_libraries("clientMessageExchange" ${LIB} ${SQLite3_LIBRARIES})
+
+add_test(NAME clientMessageExchange
+    COMMAND clientMessageExchange)
