@@ -3,8 +3,8 @@
 
 #include <QMainWindow>
 
-#include "conndialog.h"
-#include "newcontactdialog.h"
+#include "conndialog.hpp"
+#include "newcontactdialog.hpp"
 #include "client.hpp"
 
 class MainWindow : public QMainWindow

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <deque>
 
-#include "../network-interface/netface.h"
+#include "network-interface/netface.hpp"
 
 class Server;
 

@@ -1,4 +1,4 @@
-#include "conndialog.h"
+#include "conndialog.hpp"
 
 ConnDialog::ConnDialog(QWidget* parent) : QDialog(parent)
 {

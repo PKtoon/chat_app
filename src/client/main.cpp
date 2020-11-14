@@ -2,7 +2,7 @@
 #include <winsock2.h>
 #endif
 
-#include "mainwindow.h"
+#include "mainwindow.hpp"
 
 #include <QApplication>
 

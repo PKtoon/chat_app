@@ -4,7 +4,7 @@
 #include <vector>
 #include <deque>
 
-#include "user.h"
+#include "user.hpp"
 #include "psql-wrap.hpp"
 
 class Server

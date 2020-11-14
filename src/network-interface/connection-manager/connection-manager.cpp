@@ -1,4 +1,4 @@
-#include "connection-manager.h"
+#include "connection-manager.hpp"
 
 void ConnectionManager::disconnect()
 {

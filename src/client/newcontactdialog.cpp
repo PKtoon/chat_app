@@ -1,4 +1,4 @@
-#include "newcontactdialog.h"
+#include "newcontactdialog.hpp"
 
 NewContactDialog::NewContactDialog(QWidget* parent) : QDialog(parent)
 {

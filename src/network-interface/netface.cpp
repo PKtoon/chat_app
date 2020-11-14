@@ -1,6 +1,6 @@
 #include <iomanip>
 
-#include "netface.h"
+#include "network-interface/netface.hpp"
 
 NetFace::NetFace(asio::io_context& io) : connMan(new ConnectionManager{io}),timer{io}
 {

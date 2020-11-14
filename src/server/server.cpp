@@ -1,5 +1,5 @@
-#include "server.h"
-#include "user.h"
+#include "server.hpp"
+#include "user.hpp"
 
 void Server::accept()
 {

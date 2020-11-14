@@ -2,7 +2,7 @@
 #include <map>
 #include <iostream>
 
-#include "src/client/client.hpp"
+#include "../src/client/client.hpp"
 
 std::vector<std::unique_ptr<Client>> clients;
 std::map<std::string,Stream> sent;

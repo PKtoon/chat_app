@@ -1,8 +1,8 @@
 #ifndef NETFACE_H
 #define NETFACE_H
 
-#include "../connection-manager/connection-manager.h"
-#include "../stream/stream.h"
+#include "../src/network-interface/connection-manager/connection-manager.hpp"
+#include "../src/network-interface/stream/stream.hpp"
 
 #include <deque>
 

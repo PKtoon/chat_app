@@ -1,5 +1,5 @@
-#include "server.h"
-#include "user.h"
+#include "server.hpp"
+#include "user.hpp"
 
 User::User(asio::ip::tcp::socket socket, Server& serv) : net{std::move(socket)}, server{serv}
 {

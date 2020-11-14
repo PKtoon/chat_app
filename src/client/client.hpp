@@ -3,8 +3,8 @@
 
 #include <deque>
 
-#include "external/SQLite/sqlite3_wrap.h"
-#include "src/network-interface/netface.h"
+#include <sqlite3_wrap.h>
+#include "network-interface/netface.hpp"
 /**
  * @todo write docs
  */
