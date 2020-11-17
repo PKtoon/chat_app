@@ -108,7 +108,7 @@ void User::checkPulse()
         {
             if(error != asio::error::operation_aborted)
             {
-                std::cerr<<name<<": User::checkPulse()::timer.async_wait(): "<<error.message()<<std::endl;
+                std::cerr<<name2<<": User::checkPulse()::timer.async_wait(): "<<error.message()<<std::endl;
                 checkPulse();
             }
         });
@@ -138,7 +138,7 @@ void User::reader()
         {
             if(error != asio::error::operation_aborted)
             {
-                std::cerr<<name<<": User::reader()::net.receive(): "<<error.message()<<std::endl;
+                std::cerr<<name2<<": User::reader()::net.receive(): "<<error.message()<<std::endl;
                 reader();
             }
         }
@@ -169,7 +169,7 @@ void User::writer()
             {
                 if(error != asio::error::operation_aborted)
                 {
-                    std::cerr<<name<<": User::writer()::net.send(): "<<error.message()<<std::endl;
+                    std::cerr<<name2<<": User::writer()::net.send(): "<<error.message()<<std::endl;
                     writer();
                 }
             }
