@@ -74,7 +74,8 @@ void MainWindow::setContactList()
     //TODO: possible memory leak
     for(auto& a : list)
         new QListWidgetItem(a.c_str(),contactsListWidget);
-    emit contactsListWidget->itemClicked(contactsListWidget->item(0));
+    if(!list.empty())
+        emit contactsListWidget->itemClicked(contactsListWidget->item(0));
 }
 
 QListWidgetItem* MainWindow::makeContact(const QString& text)
