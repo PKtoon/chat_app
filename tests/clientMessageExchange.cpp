@@ -79,13 +79,7 @@ int main()
 
     for(int i = 0; i < maxClients; i++)
     {
-        int nameLength = rand() % 10 + 1;
-        std::string name = "";
-        for(int j=0; j<nameLength; j++)
-        {
-            name += ((rand()%26)+97);
-
-        }
+        std::string name = std::to_string(i);
         clients.emplace_back(std::make_unique<Client>(io,name));
     }
 
