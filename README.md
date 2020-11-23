@@ -2,7 +2,7 @@
 
 Simple chat application with server and client.
 
-Self hosting server. Client able to connect to any given server address. 
+Self hosting server. Client is able to connect to any given server address. 
 
 Client have simple interface and easy to understand. With Qt's environment variable a dark mode is possible.
 
