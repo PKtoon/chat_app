@@ -1,6 +1,7 @@
 find_library(PQXX_LIB pqxx)
 
 set(SERVER_SOURCES
+    psql-wrap.hpp
     user.hpp
     user.cpp
     server.hpp

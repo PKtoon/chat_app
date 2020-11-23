@@ -15,12 +15,8 @@ target_link_libraries(clientlib netface ${SQLite3_LIBRARIES})
 # Find the QtWidgets library
 find_package(Qt5Widgets CONFIG REQUIRED)
 
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
-# Instruct CMake to create code from Qt designer ui files
-set(CMAKE_AUTOUIC ON)
 
 set(GUI_SOURCES
     newcontactdialog.hpp
