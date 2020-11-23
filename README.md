@@ -1,25 +1,28 @@
 # chat_app
 
-Just a project to learn about boost libraries and C++.
-Inspired from boost::asio tutorials from boost.org.
+Simple chat application with server and client.
 
-This project is mostly a feature creep. Got an Idea about something new then try to implement it.
+Self hosting server. Client able to connect to any given server address. 
+
+Client have simple interface and easy to understand. With Qt's environment variable a dark mode is possible.
 
 
-Requirements:
-1. CMake
-2. Any C++ compiler (I am using g++ and clang++)
 
-  For Server:
+# Requirements:
+  1. CMake
+  2. Any C++ compiler with support for C++ 17 (Tested with g++, clang++ and MinGW64 on MSYS2)
+  
+For Server:
   1. PostgreSQL
   2. libPQXX
 
-  For Client:
+For Client:
   1. SQLite3
   2. Qt5
 
-Building on linux:
-1. mkdir build
-2. cd build
-3. cmake ..
-4. make
+# Building:
+On linux:
+  1. mkdir build
+  2. cd build
+  3. cmake ..
+  4. make
