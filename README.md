@@ -6,7 +6,7 @@ Self hosting server. Client able to connect to any given server address.
 
 Client have simple interface and easy to understand. With Qt's environment variable a dark mode is possible.
 
-
+<img src="images/connect_window.png" width=400> <img src="images/chat_window.png" width=400>
 
 # Requirements:
   1. CMake
