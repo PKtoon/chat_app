@@ -16,13 +16,13 @@ class Server
     std::vector<std::unique_ptr<User>> userList;
     std::deque<Stream> deliveryQueue;
     bool isDelivering{false};
-    pk::PSQLdb db{"postgresql://postgres@localhost:5432/chat"};
+    pk::PSQLdb db;
 
     void accept();
     void deliverMessages();
 
 public:
-    Server(unsigned short port): endpoint{asio::ip::tcp::v6(),port}, acceptor{io,endpoint} 
+    Server(unsigned short port, std::string dbUri) : endpoint{asio::ip::tcp::v6(),port}, acceptor{io,endpoint}, db{dbUri}
     {
         accept();
         io.run();

@@ -9,10 +9,8 @@ namespace pk
 class PSQLdb
 {
     pqxx::connection connection;
-//    pqxx::work work{connection};
     
 public:
-    PSQLdb();
     PSQLdb(std::string param) : connection{param} {}
     
     pqxx::result exec(std::string query)
@@ -28,11 +26,6 @@ public:
         work.commit();
         return r;
     }
-    
-//    void commit()
-//    {
-//        work.commit();
-//    }
 };
 
 }
