@@ -108,7 +108,6 @@ void User::checkPulse()
         {
             if(error != asio::error::operation_aborted)
             {
-                std::cerr<<name2<<": User::checkPulse()::timer.async_wait(): "<<error.message()<<std::endl;
                 checkPulse();
             }
         });
@@ -163,23 +162,36 @@ void User::writer()
     isWriting = true;
     if(!writeQueue.empty())
     {
-        net.send(*writeQueue.begin(),[this](asio::error_code error, std::size_t sent)
+        if(currentQueueIndex < 0)
+            currentQueueIndex = 0;
+        auto itr = writeQueue.begin();
+        for(int i = 0; i < currentQueueIndex; i++)
+            itr++;
+        net.send(*itr,[this,itr](asio::error_code error, std::size_t sent)
         {
+            if(error == asio::error::operation_aborted)
+                return;
+
+            currentQueueIndex++;
+            if(currentQueueIndex >= writeQueue.size())
+                currentQueueIndex = 0;
+
             if(error)
             {
-                if(error != asio::error::operation_aborted)
-                {
-                    std::cerr<<name2<<": User::writer()::net.send(): "<<error.message()<<std::endl;
-                    writer();
-                }
+                std::cerr<<name2<<": User::writer()::net.send(): "<<error.message()<<std::endl;
+                writer();
             }
             else
             {
-                writeQueue.pop_front();
+//                writeQueue.pop_front();
+                writeQueue.erase(itr);
                 writer();
             }
         });
     }
     else
+    {
         isWriting = false;
+        currentQueueIndex = -1;
+    }
 }

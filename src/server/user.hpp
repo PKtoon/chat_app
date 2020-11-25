@@ -2,7 +2,7 @@
 #define USER_H
 
 #include <iostream>
-#include <deque>
+#include <list>
 
 #include "network-interface/netface.hpp"
 
@@ -14,7 +14,8 @@ class User
     bool isAlive{false};
     bool isWriting{false};
     unsigned short count = 0;
-    std::deque<Stream> writeQueue;
+    std::list<Stream> writeQueue;
+    int currentQueueIndex = -1;
     NetFace net;
     Server& server;
     asio::steady_timer timer {net.getSocket()->get_executor(),asio::chrono::seconds(20)};
