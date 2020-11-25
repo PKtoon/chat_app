@@ -124,7 +124,11 @@ void User::pingMe()
 
 void User::queueMessage(Stream data)
 {
-    writeQueue.push_back(data);
+    {
+        //scope for lock_guard so that it can unlock the mutex after use as there is writer which will again need lock. Async nature of writer will make it difficult to detect deadlock.
+        std::lock_guard<std::mutex> lock(writeQueueMutex);
+        writeQueue.push_back(data);
+    }
     if(!isWriting)
         writer();
 }
@@ -184,6 +188,7 @@ void User::writer()
             else
             {
 //                writeQueue.pop_front();
+                std::lock_guard<std::mutex> lock(writeQueueMutex);
                 writeQueue.erase(itr);
                 writer();
             }

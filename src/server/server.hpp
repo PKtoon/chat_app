@@ -14,6 +14,7 @@ class Server
     asio::ip::tcp::acceptor acceptor;
      
     std::vector<std::unique_ptr<User>> userList;
+    std::mutex userListMutex;
     std::deque<Stream> deliveryQueue;
     bool isDelivering{false};
     pk::PSQLdb db;

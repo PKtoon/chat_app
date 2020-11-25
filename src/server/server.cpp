@@ -15,7 +15,11 @@ void Server::accept()
         }
         else
         {
-            userList.emplace_back(std::make_unique<User>(std::move(socket),*this));
+            {
+                //scope for lock_guard so that it can unlock the mutex after use as there is accept which will again need lock. Async nature of accept will make it difficult to detect deadlock.
+                std::lock_guard<std::mutex> lock(userListMutex);
+                userList.emplace_back(std::make_unique<User>(std::move(socket),*this));
+            }
             accept();
         }
     });
@@ -23,10 +27,13 @@ void Server::accept()
 
 void Server::removeMe(User* user)
 {
+    std::lock_guard<std::mutex> lock(userListMutex);
     for(int i=0; i<userList.size(); i++)
     {
         if(userList[i].get()==user)
+        {
             userList.erase(userList.begin()+i);
+        }
     }
 }
 
@@ -82,6 +89,8 @@ bool Server::authUser(std::string name, std::string passwd)
 
 User* Server::getActiveUser(std::string name)
 {
+    //We surely do not want a pointer erased User
+    std::lock_guard<std::mutex> lock(userListMutex);
     for(auto& a:userList)
         if(a->getName()==name)
             return a.get();

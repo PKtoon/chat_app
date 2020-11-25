@@ -1,4 +1,4 @@
-#ifndef USER_H
+﻿#ifndef USER_H
 #define USER_H
 
 #include <iostream>
@@ -15,6 +15,7 @@ class User
     bool isWriting{false};
     unsigned short count = 0;
     std::list<Stream> writeQueue;
+    std::mutex writeQueueMutex;
     int currentQueueIndex = -1;
     NetFace net;
     Server& server;
