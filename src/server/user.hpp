@@ -19,7 +19,8 @@ class User
     int currentQueueIndex = -1;
     NetFace net;
     Server& server;
-    asio::steady_timer timer {net.getSocket()->get_executor(),asio::chrono::seconds(20)};
+    asio::steady_timer pulseTimer {net.getSocket()->get_executor(),asio::chrono::seconds(20)};
+    asio::steady_timer writeTimer {net.getSocket()->get_executor(),asio::chrono::seconds(20)};
 public:
     User(asio::ip::tcp::socket socket, Server& serv);
     ~User() { std::clog<<name2+" is destroyed"<<std::endl;}
@@ -33,6 +34,9 @@ public:
     void processData(Stream);
     void pingMe();
     void checkPulse();
+
+private:
+    void writeScheduler();
 };
 
 #endif

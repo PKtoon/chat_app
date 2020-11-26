@@ -3,7 +3,7 @@
 
 User::User(asio::ip::tcp::socket socket, Server& serv) : net{std::move(socket)}, server{serv}
 {
-    timer.async_wait([this](const asio::error_code& error)
+    pulseTimer.async_wait([this](const asio::error_code& error)
     {
         if(error != asio::error::operation_aborted)
             checkPulse();
@@ -46,6 +46,7 @@ void User::initialize()
                             reply.receiver = name;
                             reply.head = static_cast<Header>(Header::init|Header::ack);
                             reader();
+                            writeScheduler();
                         }
                         break;
                     case 0:
@@ -55,6 +56,7 @@ void User::initialize()
                         reply.receiver = name;
                         reply.head = static_cast<Header>(Header::init|Header::ack);
                         reader();
+                        writeScheduler();
                         break;
                     default:
                         break;
@@ -103,8 +105,8 @@ void User::checkPulse()
     else
     {
         pingMe();
-        timer.expires_after(asio::chrono::seconds(20));
-        timer.async_wait([this](const asio::error_code& error)
+        pulseTimer.expires_after(asio::chrono::seconds(20));
+        pulseTimer.async_wait([this](const asio::error_code& error)
         {
             if(error != asio::error::operation_aborted)
             {
@@ -112,6 +114,18 @@ void User::checkPulse()
             }
         });
     }
+}
+
+void User::writeScheduler()
+{
+    writeTimer.expires_after(asio::chrono::seconds(2));
+    writeTimer.async_wait([this](const asio::error_code& error)
+    {
+        if(error != asio::error::operation_aborted)
+        {
+            writer();
+        }
+    });
 }
 
 void User::pingMe()
@@ -124,13 +138,9 @@ void User::pingMe()
 
 void User::queueMessage(Stream data)
 {
-    {
-        //scope for lock_guard so that it can unlock the mutex after use as there is writer which will again need lock. Async nature of writer will make it difficult to detect deadlock.
-        std::lock_guard<std::mutex> lock(writeQueueMutex);
-        writeQueue.push_back(data);
-    }
-    if(!isWriting)
-        writer();
+    //scope for lock_guard so that it can unlock the mutex after use as there is writer which will again need lock. Async nature of writer will make it difficult to detect deadlock.
+    std::lock_guard<std::mutex> lock(writeQueueMutex);
+    writeQueue.push_back(data);
 }
 
 void User::reader()
@@ -166,7 +176,7 @@ void User::writer()
     isWriting = true;
     if(!writeQueue.empty())
     {
-        if(currentQueueIndex < 0)
+        if(currentQueueIndex >= writeQueue.size() || currentQueueIndex < 0)
             currentQueueIndex = 0;
         auto itr = writeQueue.begin();
         for(int i = 0; i < currentQueueIndex; i++)
@@ -176,27 +186,24 @@ void User::writer()
             if(error == asio::error::operation_aborted)
                 return;
 
-            currentQueueIndex++;
-            if(currentQueueIndex >= writeQueue.size())
-                currentQueueIndex = 0;
-
             if(error)
             {
                 std::cerr<<name2<<": User::writer()::net.send(): "<<error.message()<<std::endl;
-                writer();
+                currentQueueIndex++;
             }
             else
             {
 //                writeQueue.pop_front();
                 std::lock_guard<std::mutex> lock(writeQueueMutex);
                 writeQueue.erase(itr);
-                writer();
             }
+            writer();
         });
     }
     else
     {
         isWriting = false;
         currentQueueIndex = -1;
+        writeScheduler();
     }
 }
