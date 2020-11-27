@@ -1,3 +1,9 @@
+set(LIB "-pthread")
+if(WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWIN32_LEAN_AND_MEAN")
+    set(LIB "${LIB}" "-lws2_32")
+endif(WIN32)
+
 set(NETWORK_INTERFACE
     stream/stream.hpp
     stream/stream.cpp
