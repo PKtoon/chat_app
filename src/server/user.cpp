@@ -196,7 +196,6 @@ void User::writer()
     }
     else
     {
-        isWriting = false;
         currentQueueIndex = 0;
         writeScheduler();
     }

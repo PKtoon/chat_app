@@ -12,7 +12,6 @@ class User
 {
     std::string name,name2;
     bool isAlive{false};
-    bool isWriting{false};
     unsigned short count = 0;
     std::list<Stream> writeQueue;
     std::mutex writeQueueMutex;
