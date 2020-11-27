@@ -2,7 +2,6 @@
 #define SERVER_H
 
 #include <vector>
-#include <deque>
 
 #include "user.hpp"
 #include "psql-wrap.hpp"
@@ -15,17 +14,21 @@ class Server
      
     std::vector<std::unique_ptr<User>> userList;
     std::mutex userListMutex;
-    std::deque<Stream> deliveryQueue;
-    bool isDelivering{false};
+    std::list<Stream> deliveryList;
+    std::mutex deliveryListMutex;
+    asio::steady_timer deliveryTimer {io,asio::chrono::seconds(1)};
+
     pk::PSQLdb db;
 
     void accept();
     void deliverMessages();
+    void deliveryScheduler();
 
 public:
     Server(unsigned short port, std::string dbUri) : endpoint{asio::ip::tcp::v6(),port}, acceptor{io,endpoint}, db{dbUri}
     {
         accept();
+        deliveryScheduler();
         io.run();
     }
   

@@ -37,16 +37,16 @@ void Server::removeMe(User* user)
     }
 }
 
-//this deliverMessages function has same problems as User::writer()
-//debatable architecture question here. rather than giving message delivery to server and making one more buffer, just make user class to access other user class' message queue like old design.
-//but this will have problem when all of this become concurrent when many Users try to access same User's message queue. this problem will persist even if server is used for message delivery
-
 void Server::deliverMessages()
 {
-    isDelivering = true;
-    while(!deliveryQueue.empty())
+    std::list<Stream> immediateList;
     {
-        Stream data = (*deliveryQueue.begin());
+        std::lock_guard<std::mutex> lock(deliveryListMutex);
+        immediateList.swap(deliveryList);
+    }
+    while(!immediateList.empty())
+    {
+        Stream data = (*immediateList.begin());
         User* user = getActiveUser(data.receiver);
         if(!user)
         {
@@ -56,16 +56,27 @@ void Server::deliverMessages()
             data.sender = "server";
         }
         user->queueMessage(data);
-        deliveryQueue.pop_front();
+        immediateList.pop_front();
     }
-    isDelivering = false;
+    deliveryScheduler();
+}
+
+void Server::deliveryScheduler()
+{
+    deliveryTimer.expires_after(asio::chrono::seconds(1));
+    deliveryTimer.async_wait([this](const asio::error_code& error)
+    {
+        if(error != asio::error::operation_aborted)
+        {
+            deliverMessages();
+        }
+    });
 }
 
 void Server::queueDelivery(Stream data)
 {
-    deliveryQueue.push_back(data);
-    if(!isDelivering)
-        deliverMessages();
+    std::lock_guard<std::mutex> lock(deliveryListMutex);
+    deliveryList.push_back(data);
 }
 
 void Server::addUser(std::string name, std::string passwd)
@@ -89,7 +100,7 @@ bool Server::authUser(std::string name, std::string passwd)
 
 User* Server::getActiveUser(std::string name)
 {
-    //We surely do not want a pointer erased User
+    //We surely do not want a pointer to erased User
     std::lock_guard<std::mutex> lock(userListMutex);
     for(auto& a:userList)
         if(a->getName()==name)
