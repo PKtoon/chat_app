@@ -16,27 +16,25 @@ class User
     unsigned short count = 0;
     std::list<Stream> writeQueue;
     std::mutex writeQueueMutex;
-    int currentQueueIndex = -1;
+    unsigned int currentQueueIndex = 0;
     NetFace net;
     Server& server;
     asio::steady_timer pulseTimer {net.getSocket()->get_executor(),asio::chrono::seconds(20)};
-    asio::steady_timer writeTimer {net.getSocket()->get_executor(),asio::chrono::seconds(20)};
+    asio::steady_timer writeTimer {net.getSocket()->get_executor()};
 public:
     User(asio::ip::tcp::socket socket, Server& serv);
     ~User() { std::clog<<name2+" is destroyed"<<std::endl;}
     
     const std::string& getName() const { return name; }
-    
-    void initialize();
-    void writer();
-    void reader();
     void queueMessage(Stream);
+private:
+    void initialize();
+    void reader();
+    void writer();
+    void writeScheduler();
     void processData(Stream);
     void pingMe();
     void checkPulse();
-
-private:
-    void writeScheduler();
 };
 
 #endif

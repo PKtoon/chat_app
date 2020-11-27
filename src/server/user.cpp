@@ -138,7 +138,6 @@ void User::pingMe()
 
 void User::queueMessage(Stream data)
 {
-    //scope for lock_guard so that it can unlock the mutex after use as there is writer which will again need lock. Async nature of writer will make it difficult to detect deadlock.
     std::lock_guard<std::mutex> lock(writeQueueMutex);
     writeQueue.push_back(data);
 }
@@ -164,20 +163,16 @@ void User::reader()
     );
 }
 
-//todo:
-//writer if unable to write due to error will repeat indefinitely and other messages will stall rather than sending others
-//one thing I can do is make a pending buffer which will store failed messages. then whenever next invocation of writer occurs all pending will be appended to writeQueue
-//well appending at front can make writer face same error over and over again, and appending at end will mess up message order unless a sequence number for message is used
-//multiple failure can result in long wait time for failed message and beyond that removal of message
-//todo end
-
 void User::writer()
 {
-    isWriting = true;
     if(!writeQueue.empty())
     {
-        if(currentQueueIndex >= writeQueue.size() || currentQueueIndex < 0)
+        if(currentQueueIndex >= writeQueue.size())
             currentQueueIndex = 0;
+
+        //here writeQueue is not in any danger of multithreading
+        //because write function will execute in only one thread
+        //and this is the only function that removes the element from list which can invalidate the iterator.
         auto itr = writeQueue.begin();
         for(int i = 0; i < currentQueueIndex; i++)
             itr++;
@@ -193,7 +188,6 @@ void User::writer()
             }
             else
             {
-//                writeQueue.pop_front();
                 std::lock_guard<std::mutex> lock(writeQueueMutex);
                 writeQueue.erase(itr);
             }
@@ -203,7 +197,7 @@ void User::writer()
     else
     {
         isWriting = false;
-        currentQueueIndex = -1;
+        currentQueueIndex = 0;
         writeScheduler();
     }
 }
