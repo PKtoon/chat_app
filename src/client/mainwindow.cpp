@@ -1,7 +1,7 @@
 //TODO: clear contactListWidget when user is changed
 //TODO: allow multiple users
 
-#include <QDebug>
+//#include <QDebug>
 
 #include "mainwindow.hpp"
 

@@ -1,6 +1,12 @@
 #ifndef CONNECTIONMANAGER_H
 #define CONNECTIONMANAGER_H
 
+#ifdef __WIN32__
+
+#include <winsock2.h>
+
+#endif
+
 #include <functional>
 
 #include <asio.hpp>

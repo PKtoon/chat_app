@@ -1,7 +1,3 @@
-#ifdef __WIN32__
-#include <winsock2.h>
-#endif
-
 #include "mainwindow.hpp"
 
 #include <QApplication>
