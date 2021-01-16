@@ -10,5 +10,5 @@ add_subdirectory(src/network-interface)
 add_subdirectory(src/server)
 add_subdirectory(src/client)
 
-enable_testing()
-add_subdirectory(tests/)
+#enable_testing()
+#add_subdirectory(tests/)

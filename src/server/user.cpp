@@ -29,14 +29,14 @@ void User::initialize(Stream data)
         switch (res.size())
         {
         case 1:
-            if(!server.authUser(data.sender,data.data1))
-                return;
-
-            name = data.sender;
-            name2 = name;
-            reply.receiver = name;
-            reply.head = static_cast<Header>(Header::init|Header::ack);
-            isAlive = true;
+            if(server.authUser(data.sender,data.data1))
+            {
+                name = data.sender;
+                name2 = name;
+                reply.receiver = name;
+                reply.head = static_cast<Header>(Header::init|Header::ack);
+                isAlive = true;
+            }
             break;
         case 0:
             server.addUser(data.sender,data.data1);

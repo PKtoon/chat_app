@@ -53,46 +53,18 @@ void Client::newSocket()
     net.newConnection(io_);
 }
 
-void Client::start(std::string password,std::function<void (asio::error_code, Stream data)> callBack)
+void Client::signInInit(std::string name, std::string password)
 {
-    if(name_.empty())
-    {
-        std::cerr<<"Client is not initialized";
+    if(name.empty() || password.empty()){
+        std::cerr<<"Name or password is empty\n";
         return;
     }
+    name_ = name;
     Stream initPack;
     initPack.head = Header::init;
     initPack.sender = name_;
     initPack.data1 = password;
-    net.send(initPack,[this,callBack](asio::error_code error, std::size_t sent)
-    {
-        if(error)
-        {
-            if(error != asio::error::operation_aborted)
-            {
-                std::cerr<<"Client::init()::net.send(): "<<error.message()<<std::endl;
-                callBack(error, Stream());
-            }
-        }
-        else
-        {
-            net.receive([this,callBack](Stream initAck, asio::error_code error, std::size_t read)
-            {
-                if (error)
-                {
-                    if(error != asio::error::operation_aborted)
-                    {
-                        std::cerr<<"Client::init()::net.receive(): "<<error.message()<<std::endl;
-                        callBack(error, Stream());
-                    }
-                }
-                else
-                    callBack(error, initAck);
-            }
-            );
-        }
-    }
-    );
+    queueMessage(initPack);
 }
 
 void Client::reader(std::function<void (Stream data,asio::error_code,std::size_t)> callBack)
@@ -194,12 +166,6 @@ void Client::ping()
     Stream ping;
     ping.head = Header::ping;
     queueMessage(ping);
-}
-
-void Client::init(std::string name)
-{
-    name_ = name;
-    initDB();
 }
 
 void Client::runIOContext()

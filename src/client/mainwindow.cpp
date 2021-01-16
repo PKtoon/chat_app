@@ -1,8 +1,6 @@
 //TODO: clear contactListWidget when user is changed
 //TODO: allow multiple users
 
-//#include <QDebug>
-
 #include "mainwindow.hpp"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -103,20 +101,7 @@ QListWidgetItem* MainWindow::getUser(QString user)
 //client core
 void MainWindow::initialize(QString userName, QString passwd)
 {
-    client.init(userName.toStdString());
-    setContactList();
-    client.start(passwd.toStdString(),[this,userName,passwd](asio::error_code error, Stream initAck)
-    {
-        if(error)
-            initialize(userName,passwd);
-        else
-            if(initAck.head == static_cast<Header>(Header::init | Header::ack))
-            {
-                reader();
-            }
-            else
-                initialize(userName,passwd);
-    });
+    client.signInInit(userName.toStdString(), passwd.toStdString());
 }
 
 void MainWindow::reader()
@@ -139,6 +124,15 @@ void MainWindow::processData(Stream data)
     {
         case Header::message:
             processMessage(data);
+            break;
+        case Header::init|Header::ack:
+            connDialog->setCancelButtonText("Close");
+            connDialog->setInform("Connected Successfully");
+            client.initDB();
+            setContactList();
+            break;
+        case Header::init|Header::error:
+            connDialog->setInform("Sign In Failed");
             break;
         default:
             break;
@@ -169,34 +163,38 @@ void MainWindow::doConnect(const QString userName, const QString passwd, const Q
     }
 
 //     TODO: make it so that, there is no call to client.getSocket(), as everytime using newSocket is better and make newSocket to disconnect old socket and do not initialize NetFace at start, it is unnecessary as we are using new socket so it will initialized again anyways
-//    if(!client.getSocket())
-    client.newSocket();
-
-    client.connect(host.toStdString(),port.toStdString(),[this,userName,passwd](asio::error_code error)
+    if(!client.getSocket()->is_open())
     {
-        if(error)
+        client.newSocket();
+
+        client.connect(host.toStdString(),port.toStdString(),[this,userName,passwd](asio::error_code error)
         {
-            if(error != asio::error::operation_aborted)
+            if(error)
             {
-                connDialog->setInform("Connection Error");
+                if(error != asio::error::operation_aborted)
+                {
+                    connDialog->setInform("Connection Error");
+                }
+            }
+            else
+            {
+                reader();
+                initialize(userName,passwd);
             }
         }
-        else
+        );
+        if(!isThreadRunning)
         {
-            connDialog->setCancelButtonText("Close");
-            connDialog->setInform("Connected Successfully");
-            initialize(userName,passwd);
+            ioThread = std::thread([this]()
+            {
+                isThreadRunning = true;
+                client.runIOContext();
+                //isThreadRunning = false;
+            });
         }
     }
-    );
-    if(!isThreadRunning)
-    {
-        ioThread = std::thread([this]()
-        {
-            isThreadRunning = true;
-            client.runIOContext();
-//             isThreadRunning = false;
-        });
+    else{
+        initialize(userName,passwd);
     }
 }
 

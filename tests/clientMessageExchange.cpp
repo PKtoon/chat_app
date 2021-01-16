@@ -87,7 +87,7 @@ int main()
     {
         std::cout<<a->name()<<'\n';
         a->connect("localhost","1098",[&a](asio::error_code){
-            a->start("111",[&a](asio::error_code error, Stream data){
+            a->signInInit("111",[&a](asio::error_code error, Stream data){
                 reader(*a);
                 connectedClients++;
             });
