@@ -27,7 +27,7 @@ public:
     const std::string& getName() const { return name; }
     void queueMessage(Stream);
 private:
-    void initialize(Stream data);
+    void authHandler(Stream data);
     void reader();
     void writer();
     void writeScheduler();

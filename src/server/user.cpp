@@ -13,38 +13,48 @@ User::User(asio::ip::tcp::socket socket, Server& serv) : net{std::move(socket)},
     writeScheduler();
 }
 
-void User::initialize(Stream data)
+void User::authHandler(Stream data)
 {
     Stream reply;
-    reply.head = static_cast<Header>(Header::init|Header::error);
+    reply.head = static_cast<Header>(data.head|Header::error);
     reply.sender = "server";
 
     if(count < 5 && name.empty())
     {
+        //TODO: if there are any active user with same name then first disconnect them
+        //TODO: after five counts disconnect
+
         count++;
-
-        //TODO:                     if there are any active user with same name then first disconnect them
-
-        pqxx::result res = server.getUser(data.sender);
-        switch (res.size())
+        switch (data.head)
         {
-        case 1:
+        case Header::signin:
             if(server.authUser(data.sender,data.data1))
             {
                 name = data.sender;
                 name2 = name;
                 reply.receiver = name;
-                reply.head = static_cast<Header>(Header::init|Header::ack);
+                reply.head = static_cast<Header>(Header::signin|Header::ack);
                 isAlive = true;
             }
+            else{
+                reply.data1 = "Username or password is incorrect";
+            }
             break;
-        case 0:
-            server.addUser(data.sender,data.data1);
-            name = data.sender;
-            name2 = name;
-            reply.receiver = name;
-            reply.head = static_cast<Header>(Header::init|Header::ack);
-            isAlive = true;
+        case Header::signup:
+        {
+            pqxx::result res = server.getUser(data.sender);
+            if(res.size() == 0){
+                server.addUser(data.sender,data.data1);
+                name = data.sender;
+                name2 = name;
+                reply.receiver = name;
+                reply.head = static_cast<Header>(Header::signup|Header::ack);
+                isAlive = true;
+            }
+            else{
+                reply.data1 = "Username not available";
+            }
+        }
             break;
         default:
             break;
@@ -68,8 +78,9 @@ void User::processData(Stream data)
             name = "";
 //             net.disconnect();
             break;
-        case Header::init:
-            initialize(data);
+        case Header::signin:
+        case Header::signup:
+            authHandler(data);
             break;
         default:
             break;

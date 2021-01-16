@@ -12,11 +12,13 @@ enum Header
     socket_close = 1<<2,
     ping = 1<<3,
     init = 1<<4,
-    message = 1<<5,
-    group_message = 1<<6,
-    local_file = 1<<7,
-    message_out_of_order = 1<<8,
-    message_corrupt = 1<<9
+    signin = 1<<5,
+    signup = 1<<6,
+    message = 1<<7,
+    group_message = 1<<8,
+    local_file = 1<<9,
+    message_out_of_order = 1<<10,
+    message_corrupt = 1<<11
 };
 
 class Stream
