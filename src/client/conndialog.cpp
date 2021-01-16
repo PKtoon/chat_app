@@ -8,7 +8,7 @@ ConnDialog::ConnDialog(QWidget* parent) : QDialog(parent)
 
 void ConnDialog::decorate()
 {   
-    connect(connButton,&QPushButton::clicked, this,&ConnDialog::connInit);
+
     connect(cancel,&QPushButton::clicked,this, &QWidget::close);
     
     grid->addWidget(name,0,0);
@@ -29,6 +29,16 @@ void ConnDialog::connInit()
     emit doConnect(nameInput->text(),passwdInput->text(), hostInput->text(),portInput->text());
 }
 
+void ConnDialog::signInInit()
+{
+    emit doUserAuth(nameInput->text(),passwdInput->text(), false);
+}
+
+void ConnDialog::signUpInit()
+{
+    emit doUserAuth(nameInput->text(),passwdInput->text(), true);
+}
+
 void ConnDialog::setInform(QString text)
 {
     inform->setText(text);
@@ -47,5 +57,34 @@ void ConnDialog::setPortInputText(QString text)
 void ConnDialog::setCancelButtonText(QString text)
 {
     cancel->setText(text);
+}
+
+void ConnDialog::userAuthBox(bool flag)
+{
+    hostLabel->hide();
+    portLabel->hide();
+    hostInput->hide();
+    portInput->hide();
+    name->show();
+    nameInput->show();
+    passwd->show();
+    passwdInput->show();
+    if(flag)
+        connect(connButton,&QPushButton::clicked, this,&ConnDialog::signUpInit);
+    else
+        connect(connButton,&QPushButton::clicked,this,&ConnDialog::signInInit);
+}
+
+void ConnDialog::connectBox()
+{
+    hostLabel->show();
+    portLabel->show();
+    hostInput->show();
+    portInput->show();
+    name->hide();
+    nameInput->hide();
+    passwd->hide();
+    passwdInput->hide();
+    connect(connButton,&QPushButton::clicked, this,&ConnDialog::connInit);
 }
 

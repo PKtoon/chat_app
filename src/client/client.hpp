@@ -23,7 +23,7 @@ public:
     Client(asio::io_context& io,std::string name = ""): net{io} {}
     
     //client
-    void signInInit(std::string name, std::string password);
+    void userAuthInit(std::string name, std::string password, Header head);
     std::string name() { return name_; }
     void reader(std::function<void (Stream data,asio::error_code,std::size_t)> callBack);
     void writer();

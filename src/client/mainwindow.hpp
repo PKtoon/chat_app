@@ -26,6 +26,9 @@ public slots:
     void sendMessage();
     void newContact();
     void createContact(const QString& text);
+    void initSignIn();
+    void initSignUp();
+    void doUserAuth(const QString userName, const QString passWD, const bool flag);
 
 private:
     //networking scaffold
@@ -50,7 +53,7 @@ private:
     QListWidgetItem* getUser(QString name);
     
     //client.h
-    void initialize(QString userName, QString passwd);
+    void initialize(QString userName, QString passwd, Header head);
     void reader();
     void processData(Stream data);
     void processMessage(Stream data);

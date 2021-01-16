@@ -28,6 +28,14 @@ void MainWindow::createMenuBar()
     connect(connAct,&QAction::triggered,this,&MainWindow::initConnect);
     connMenu->addAction(connAct);
     
+    QAction *signInAct = new QAction(connIcon,tr("Sign &In"),this);
+    connect(signInAct,&QAction::triggered,this,&MainWindow::initSignIn);
+    connMenu->addAction(signInAct);
+
+    QAction *signUpAct = new QAction(connIcon,tr("Sign &Up"),this);
+    connect(signUpAct,&QAction::triggered,this,&MainWindow::initSignUp);
+    connMenu->addAction(signUpAct);
+
     QAction *disConnAct = new QAction(connIcon,tr("&Disconnect"),this);
     connect(disConnAct,&QAction::triggered,this,&MainWindow::disConnect);
     connMenu->addAction(disConnAct);
@@ -99,9 +107,9 @@ QListWidgetItem* MainWindow::getUser(QString user)
 }
 
 //client core
-void MainWindow::initialize(QString userName, QString passwd)
+void MainWindow::initialize(QString userName, QString passwd, Header head)
 {
-    client.signInInit(userName.toStdString(), passwd.toStdString());
+    client.userAuthInit(userName.toStdString(), passwd.toStdString(), head);
 }
 
 void MainWindow::reader()
@@ -125,14 +133,21 @@ void MainWindow::processData(Stream data)
         case Header::message:
             processMessage(data);
             break;
-        case Header::init|Header::ack:
+        case Header::signin|Header::ack:
             connDialog->setCancelButtonText("Close");
-            connDialog->setInform("Connected Successfully");
+            connDialog->setInform("Signed In Successfully");
             client.initDB();
             setContactList();
             break;
-        case Header::init|Header::error:
-            connDialog->setInform("Sign In Failed");
+        case Header::signup|Header::ack:
+            connDialog->setCancelButtonText("Close");
+            connDialog->setInform("Signed Up Successfully");
+            client.initDB();
+            setContactList();
+            break;
+        case Header::signin|Header::error:
+        case Header::signup|Header::error:
+            connDialog->setInform(data.data1.c_str());
             break;
         default:
             break;
@@ -144,7 +159,7 @@ void MainWindow::initConnect()
 {
     connDialog = new ConnDialog(this);
     connDialog->setWindowTitle("Connect");
-
+    connDialog->connectBox();
     connect(connDialog,&ConnDialog::doConnect, this, &MainWindow::doConnect);
     
     //values below are for testing purpose
@@ -156,7 +171,7 @@ void MainWindow::initConnect()
 
 void MainWindow::doConnect(const QString userName, const QString passwd, const QString host, const QString port)
 {
-    if(userName.isEmpty() || passwd.isEmpty() || host.isEmpty() || port.isEmpty())
+    if(host.isEmpty() || port.isEmpty())
     {
         connDialog->setInform("All fields are necessary");
         return;
@@ -173,13 +188,14 @@ void MainWindow::doConnect(const QString userName, const QString passwd, const Q
             {
                 if(error != asio::error::operation_aborted)
                 {
-                    connDialog->setInform("Connection Error");
+                    connDialog->setInform(std::string("Connection Error"+ error.message()).c_str());
                 }
             }
             else
             {
                 reader();
-                initialize(userName,passwd);
+                connDialog->setCancelButtonText("Close");
+                connDialog->setInform("Connected Successfully");
             }
         }
         );
@@ -192,9 +208,6 @@ void MainWindow::doConnect(const QString userName, const QString passwd, const Q
                 //isThreadRunning = false;
             });
         }
-    }
-    else{
-        initialize(userName,passwd);
     }
 }
 
@@ -267,4 +280,36 @@ void MainWindow::createContact(const QString& text)
 
     newContactDialog->close();      
     emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution
+}
+
+void MainWindow::initSignIn()
+{
+    connDialog = new ConnDialog(this);
+    connDialog->setWindowTitle("Sign In");
+
+    connDialog->userAuthBox(false);
+
+    connect(connDialog,&ConnDialog::doUserAuth, this, &MainWindow::doUserAuth);
+
+    connDialog->show();
+}
+
+void MainWindow::initSignUp()
+{
+    connDialog = new ConnDialog(this);
+    connDialog->setWindowTitle("Sign Up");
+
+    connDialog->userAuthBox(true);
+
+    connect(connDialog,&ConnDialog::doUserAuth, this, &MainWindow::doUserAuth);
+
+    connDialog->show();
+}
+
+void MainWindow::doUserAuth(const QString userName, const QString passWD, const bool flag)
+{
+    if(flag)
+        initialize(userName,passWD,Header::signup);
+    else
+        initialize(userName,passWD,Header::signin);
 }

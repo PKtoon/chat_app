@@ -29,12 +29,17 @@ public:
     void setHostInputText(QString text);
     void setPortInputText(QString text);
     void setCancelButtonText(QString text);
+    void userAuthBox(bool flag);
+    void connectBox();
 
 signals:
     void doConnect(const QString name, const QString passwd, const QString host, const QString port);
+    void doUserAuth(const QString name, const QString passwd, const bool flag);
 
 public slots:
     void connInit();
+    void signInInit();
+    void signUpInit();
 };
 
 #endif // CONNDIALOG_H

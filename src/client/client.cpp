@@ -53,7 +53,7 @@ void Client::newSocket()
     net.newConnection(io_);
 }
 
-void Client::signInInit(std::string name, std::string password)
+void Client::userAuthInit(std::string name, std::string password, Header head)
 {
     if(name.empty() || password.empty()){
         std::cerr<<"Name or password is empty\n";
@@ -61,7 +61,7 @@ void Client::signInInit(std::string name, std::string password)
     }
     name_ = name;
     Stream initPack;
-    initPack.head = Header::init;
+    initPack.head = head;
     initPack.sender = name_;
     initPack.data1 = password;
     queueMessage(initPack);
