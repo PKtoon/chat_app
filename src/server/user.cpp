@@ -3,79 +3,54 @@
 
 User::User(asio::ip::tcp::socket socket, Server& serv) : net{std::move(socket)}, server{serv}
 {
+    //First invocation of pulseTimer acts as sign in timeout. That is why it is 300 seconds for first time and then 20 seconds
     pulseTimer.async_wait([this](const asio::error_code& error)
     {
         if(error != asio::error::operation_aborted)
             checkPulse();
     });
-    initialize();
+    reader();
+    writeScheduler();
 }
 
-void User::initialize()
+void User::initialize(Stream data)
 {
-    if(count < 5)
+    Stream reply;
+    reply.head = static_cast<Header>(Header::init|Header::error);
+    reply.sender = "server";
+
+    if(count < 5 && name.empty())
     {
         count++;
-        net.receive([this](Stream data, asio::error_code error, std::size_t read)
+
+        //TODO:                     if there are any active user with same name then first disconnect them
+
+        pqxx::result res = server.getUser(data.sender);
+        switch (res.size())
         {
-            Stream reply;
-            reply.head = static_cast<Header>(Header::init|Header::error);
-            reply.sender = "server";
-            if(error)
-            {
-                if(error != asio::error::operation_aborted)
-                {
-                    std::cerr<<"User::initialize()::net.receive(): "<<error.message()<<std::endl;
-                    initialize();
-                }
-            }
-            else
-            {
-                if(data.head == Header::init)
-                {
-//TODO:                     if there are any active user with same name then first disconnect them
-                    isAlive = true;
-                    pqxx::result res = server.getUser(data.sender);
-                    switch (res.size())
-                    {
-                    case 1:
-                        if(server.authUser(data.sender,data.data1))
-                        {
-                            name = data.sender;
-                            name2 = name;
-                            reply.receiver = name;
-                            reply.head = static_cast<Header>(Header::init|Header::ack);
-                            reader();
-                            writeScheduler();
-                        }
-                        break;
-                    case 0:
-                        server.addUser(data.sender,data.data1);
-                        name = data.sender;
-                        name2 = name;
-                        reply.receiver = name;
-                        reply.head = static_cast<Header>(Header::init|Header::ack);
-                        reader();
-                        writeScheduler();
-                        break;
-                    default:
-                        break;
-                    }
-                }
-                else
-                {
-                    if(data.head == socket_close)
-                        net.disconnect();
-                    else
-                    {
-                        reply.receiver = data.sender;
-                        initialize();
-                    }
-                }
-                queueMessage(reply);
-            }
-        });
+        case 1:
+            if(!server.authUser(data.sender,data.data1))
+                return;
+
+            name = data.sender;
+            name2 = name;
+            reply.receiver = name;
+            reply.head = static_cast<Header>(Header::init|Header::ack);
+            isAlive = true;
+            break;
+        case 0:
+            server.addUser(data.sender,data.data1);
+            name = data.sender;
+            name2 = name;
+            reply.receiver = name;
+            reply.head = static_cast<Header>(Header::init|Header::ack);
+            isAlive = true;
+            break;
+        default:
+            break;
+        }
     }
+    queueMessage(reply);
 }
 
 void User::processData(Stream data)
@@ -92,6 +67,9 @@ void User::processData(Stream data)
             isAlive = false;
             name = "";
 //             net.disconnect();
+            break;
+        case Header::init:
+            initialize(data);
             break;
         default:
             break;
@@ -118,7 +96,7 @@ void User::checkPulse()
 
 void User::writeScheduler()
 {
-    writeTimer.expires_after(asio::chrono::seconds(2));
+    writeTimer.expires_after(asio::chrono::seconds(1));
     writeTimer.async_wait([this](const asio::error_code& error)
     {
         if(error != asio::error::operation_aborted)
@@ -156,8 +134,8 @@ void User::reader()
         }
         else
         {
-            processData(data);
             reader();
+            processData(data);
         }
     }
     );

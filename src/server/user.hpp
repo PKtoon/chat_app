@@ -18,7 +18,7 @@ class User
     unsigned int currentQueueIndex = 0;
     NetFace net;
     Server& server;
-    asio::steady_timer pulseTimer {net.getSocket()->get_executor(),asio::chrono::seconds(20)};
+    asio::steady_timer pulseTimer {net.getSocket()->get_executor(),asio::chrono::seconds(300)};
     asio::steady_timer writeTimer {net.getSocket()->get_executor()};
 public:
     User(asio::ip::tcp::socket socket, Server& serv);
@@ -27,7 +27,7 @@ public:
     const std::string& getName() const { return name; }
     void queueMessage(Stream);
 private:
-    void initialize();
+    void initialize(Stream data);
     void reader();
     void writer();
     void writeScheduler();
