@@ -188,7 +188,7 @@ void MainWindow::doConnect(const QString userName, const QString passwd, const Q
             {
                 if(error != asio::error::operation_aborted)
                 {
-                    connDialog->setInform(std::string("Connection Error"+ error.message()).c_str());
+                    connDialog->setInform(std::string("Connection Error: "+ error.message()).c_str());
                 }
             }
             else
@@ -308,6 +308,16 @@ void MainWindow::initSignUp()
 
 void MainWindow::doUserAuth(const QString userName, const QString passWD, const bool flag)
 {
+    if(userName.isEmpty() || passWD.isEmpty())
+    {
+        connDialog->setInform("All fields are necessary");
+        return;
+    }
+    if(!client.getSocket()->is_open())
+    {
+        connDialog->setInform("Client is not connected");
+        return;
+    }
     if(flag)
         initialize(userName,passWD,Header::signup);
     else
