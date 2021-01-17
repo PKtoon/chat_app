@@ -125,7 +125,6 @@ void MainWindow::reader()
         else
             processData(data);
         reader();
-        qInfo()<<data.getSerialized().c_str();
     });
 }
 
@@ -253,7 +252,7 @@ void MainWindow::displayMessage(QListWidgetItem* item)
 
 void MainWindow::sendMessage()
 {
-    if(msgIn->text().isEmpty() || !(contactsListWidget->currentItem()))
+    if(msgIn->text().isEmpty() || !(contactsListWidget->currentItem()) || client.name().empty())
     {
         return;
     }
@@ -296,6 +295,11 @@ void MainWindow::createContact(const QString& text)
 
 void MainWindow::findContact(const QString &text)
 {
+    if(!client.getSocket()->is_open() || client.name().empty())
+    {
+        newContactDialog->setInform("Client is not connected");
+        return;
+    }
     Stream data;
     data.head = Header::find;
     data.sender = client.name();

@@ -65,28 +65,43 @@ void User::authHandler(Stream data)
 
 void User::processData(Stream data)
 {
-    switch(data.head)
+    if(name.empty())
     {
-        case Header::message:
-            server.queueDelivery(data);
-            break;
-        case Header::ping:
-            isAlive = true;
-            break;
-        case Header::socket_close:
-            isAlive = false;
-            name = "";
-//             net.disconnect();
-            break;
-        case Header::signin:
-        case Header::signup:
-            authHandler(data);
-            break;
-        case Header::find:
-            findContact(data);
-            break;
-        default:
-            break;
+        switch(data.head)
+        {
+            case Header::signin:
+            case Header::signup:
+                authHandler(data);
+                break;
+            default:
+                break;
+        }
+    }
+    else
+    {
+        switch(data.head)
+        {
+            case Header::message:
+                server.queueDelivery(data);
+                break;
+            case Header::ping:
+                isAlive = true;
+                break;
+            case Header::socket_close:
+                isAlive = false;
+                name = "";
+                //net.disconnect();
+                break;
+            case Header::find:
+                findContact(data);
+                break;
+//            case Header::signin:
+//            case Header::signup:
+//                authHandler(data);
+//                break;
+            default:
+                break;
+        }
     }
 }
 
