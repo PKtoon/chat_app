@@ -34,6 +34,7 @@ private:
     void processData(Stream);
     void pingMe();
     void checkPulse();
+    void findContact(Stream data);
 };
 
 #endif

@@ -26,6 +26,7 @@ public slots:
     void sendMessage();
     void newContact();
     void createContact(const QString& text);
+    void findContact(const QString& text);
     void initSignIn();
     void initSignUp();
     void doUserAuth(const QString userName, const QString passWD, const bool flag);

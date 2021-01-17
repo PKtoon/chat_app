@@ -18,7 +18,8 @@ enum Header
     group_message = 1<<8,
     local_file = 1<<9,
     message_out_of_order = 1<<10,
-    message_corrupt = 1<<11
+    message_corrupt = 1<<11,
+    find = 1<<12
 };
 
 class Stream

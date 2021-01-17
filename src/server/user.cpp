@@ -82,6 +82,9 @@ void User::processData(Stream data)
         case Header::signup:
             authHandler(data);
             break;
+        case Header::find:
+            findContact(data);
+            break;
         default:
             break;
     }
@@ -103,6 +106,21 @@ void User::checkPulse()
             }
         });
     }
+}
+
+void User::findContact(Stream data)
+{
+    Stream reply;
+    reply.head = static_cast<Header>(Header::find|Header::error);
+    reply.sender = "server";
+    reply.receiver = name;
+    reply.data1 = data.data1;
+
+    pqxx::result res = server.getUser(data.data1);
+    if(res.size() == 1 && res[0][0].c_str() == data.data1){
+        reply.head = static_cast<Header>(Header::find|Header::ack);
+    }
+    queueMessage(reply);
 }
 
 void User::writeScheduler()

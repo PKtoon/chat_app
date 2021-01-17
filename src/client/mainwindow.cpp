@@ -1,6 +1,6 @@
 //TODO: clear contactListWidget when user is changed
 //TODO: allow multiple users
-
+#include <QDebug>
 #include "mainwindow.hpp"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -28,17 +28,19 @@ void MainWindow::createMenuBar()
     connect(connAct,&QAction::triggered,this,&MainWindow::initConnect);
     connMenu->addAction(connAct);
     
-    QAction *signInAct = new QAction(connIcon,tr("Sign &In"),this);
-    connect(signInAct,&QAction::triggered,this,&MainWindow::initSignIn);
-    connMenu->addAction(signInAct);
-
-    QAction *signUpAct = new QAction(connIcon,tr("Sign &Up"),this);
-    connect(signUpAct,&QAction::triggered,this,&MainWindow::initSignUp);
-    connMenu->addAction(signUpAct);
-
     QAction *disConnAct = new QAction(connIcon,tr("&Disconnect"),this);
     connect(disConnAct,&QAction::triggered,this,&MainWindow::disConnect);
     connMenu->addAction(disConnAct);
+
+    QMenu* userMenu = menuBar()->addMenu(tr("&User"));
+
+    QAction *signInAct = new QAction(connIcon,tr("Sign &In"),this);
+    connect(signInAct,&QAction::triggered,this,&MainWindow::initSignIn);
+    userMenu->addAction(signInAct);
+
+    QAction *signUpAct = new QAction(connIcon,tr("Sign &Up"),this);
+    connect(signUpAct,&QAction::triggered,this,&MainWindow::initSignUp);
+    userMenu->addAction(signUpAct);
     
     QMenu* msgMenu = menuBar()->addMenu(tr("&Message"));
     
@@ -123,6 +125,7 @@ void MainWindow::reader()
         else
             processData(data);
         reader();
+        qInfo()<<data.getSerialized().c_str();
     });
 }
 
@@ -149,6 +152,14 @@ void MainWindow::processData(Stream data)
         case Header::signup|Header::error:
             connDialog->setInform(data.data1.c_str());
             break;
+        case Header::find|Header::ack:
+            if(newContactDialog->text().toStdString() == data.data1){
+                newContactDialog->setInform("User found");
+                newContactDialog->setCreateEnable(true);
+            }
+            break;
+        case Header::find|Header::error:
+            newContactDialog->setInform(std::string(data.data1+" not found").c_str());
         default:
             break;
     }
@@ -265,6 +276,7 @@ void MainWindow::newContact()
 {
     newContactDialog = new NewContactDialog(this);
     connect(newContactDialog,&NewContactDialog::createContact,this,&MainWindow::createContact);
+    connect(newContactDialog,&NewContactDialog::findContact,this,&MainWindow::findContact);
 
     newContactDialog->show();
 }
@@ -280,6 +292,16 @@ void MainWindow::createContact(const QString& text)
 
     newContactDialog->close();      
     emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution
+}
+
+void MainWindow::findContact(const QString &text)
+{
+    Stream data;
+    data.head = Header::find;
+    data.sender = client.name();
+    data.receiver = "server";
+    data.data1 = text.toStdString();
+    client.queueMessage(data);
 }
 
 void MainWindow::initSignIn()
