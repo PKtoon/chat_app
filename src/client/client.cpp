@@ -10,6 +10,7 @@ void Client::connect(std::string host, std::string port, std::function<void (asi
             if(error != asio::error::operation_aborted)
             {
                 std::cerr<<"Client::connect()::net.connect(): "<<error.message()<<std::endl;
+
                 callBack(error);
             }
         }
@@ -118,6 +119,15 @@ void Client::writer()
 
 void Client::queueMessage(Stream data)
 {
+    switch(data.head){
+        case Header::message:
+            if(!insertMessage(data.receiver,data.sender,data.data1))
+                std::cerr<<getDBError().c_str();
+            break;
+        default:
+            break;
+    }
+
     writeQueue.push_back(data);
     if(!isWriting)
         writer();
@@ -132,6 +142,10 @@ void Client::processData(Stream data)
             break;
         case Header::message:
             processMessage(data);
+            break;
+        case Header::signin|Header::ack:
+        case Header::signup|Header::ack:
+            initDB();
             break;
         default:
             break;

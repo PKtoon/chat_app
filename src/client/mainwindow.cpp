@@ -138,13 +138,11 @@ void MainWindow::processData(Stream data)
         case Header::signin|Header::ack:
             connDialog->setCancelButtonText("Close");
             connDialog->setInform("Signed In Successfully");
-            client.initDB();
             setContactList();
             break;
         case Header::signup|Header::ack:
             connDialog->setCancelButtonText("Close");
             connDialog->setInform("Signed Up Successfully");
-            client.initDB();
             setContactList();
             break;
         case Header::signin|Header::error:
@@ -187,37 +185,31 @@ void MainWindow::doConnect(const QString userName, const QString passwd, const Q
         return;
     }
 
-//     TODO: make it so that, there is no call to client.getSocket(), as everytime using newSocket is better and make newSocket to disconnect old socket and do not initialize NetFace at start, it is unnecessary as we are using new socket so it will initialized again anyways
-    if(!client.getSocket()->is_open())
+    client.connect(host.toStdString(),port.toStdString(),[this,userName,passwd](asio::error_code error)
     {
-        client.newSocket();
-
-        client.connect(host.toStdString(),port.toStdString(),[this,userName,passwd](asio::error_code error)
+        if(error)
         {
-            if(error)
+            if(error != asio::error::operation_aborted)
             {
-                if(error != asio::error::operation_aborted)
-                {
-                    connDialog->setInform(std::string("Connection Error: "+ error.message()).c_str());
-                }
-            }
-            else
-            {
-                reader();
-                connDialog->setCancelButtonText("Close");
-                connDialog->setInform("Connected Successfully");
+                connDialog->setInform(std::string("Connection Error: "+ error.message()).c_str());
             }
         }
-        );
-        if(!isThreadRunning)
+        else
         {
-            ioThread = std::thread([this]()
-            {
-                isThreadRunning = true;
-                client.runIOContext();
-                //isThreadRunning = false;
-            });
+            reader();
+            connDialog->setCancelButtonText("Close");
+            connDialog->setInform("Connected Successfully");
         }
+    }
+    );
+    if(!isThreadRunning)
+    {
+        ioThread = std::thread([this]()
+        {
+            isThreadRunning = true;
+            client.runIOContext();
+            //isThreadRunning = false;
+        });
     }
 }
 
@@ -263,12 +255,9 @@ void MainWindow::sendMessage()
     data.receiver = contactsListWidget->currentItem()->text().toStdString();
     data.data1 = msgIn->text().toStdString();
     QListWidgetItem* user = contactsListWidget->currentItem();
-    
-    if(!client.insertMessage(data.receiver,data.sender,data.data1))
-        qInfo()<<client.getDBError().c_str();
+    client.queueMessage(data);
     emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution else it will fail in runtime with 'unable to create child' error
     msgIn->clear();
-    client.queueMessage(data);
 }
 
 void MainWindow::newContact()
