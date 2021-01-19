@@ -8,6 +8,7 @@
 /**
  * @todo write docs
  */
+
 class Client
 {
     std::string name_;
@@ -22,6 +23,9 @@ public:
 
     Client(asio::io_context& io,std::string name = ""): net{io} {}
     
+    enum class Error{
+        ok, db_error
+    };
     //client
     void userAuthInit(std::string name, std::string password, Header head);
     std::string name() { return name_; }
@@ -29,7 +33,7 @@ public:
     void writer();
     void processData(Stream data);
     void processMessage(Stream data);
-    void queueMessage(Stream data);
+    Client::Error queueMessage(Stream data);
     void ping();
 
     //networking

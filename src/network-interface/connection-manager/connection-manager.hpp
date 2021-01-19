@@ -30,7 +30,7 @@ public:
         endpoints = resolver.resolve(asio::ip::tcp::v6(),hostname,port);
     }
     
-    void disconnect();
+    asio::error_code disconnect();
     void connector(std::function<void(asio::error_code, asio::ip::tcp::endpoint)> callBack);
     void writer(const std::vector<char> outData, std::function<void (asio::error_code,std::size_t)> callBack);
     void writer(const std::vector<asio::const_buffer> buffer, std::function<void (asio::error_code,std::size_t)> callBack);

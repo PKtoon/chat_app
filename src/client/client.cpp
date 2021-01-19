@@ -5,20 +5,9 @@ void Client::connect(std::string host, std::string port, std::function<void (asi
 {
     net.connect(host,port,[this,callBack](asio::error_code error)
     {
-        if(error)
-        {
-            if(error != asio::error::operation_aborted)
-            {
-                std::cerr<<"Client::connect()::net.connect(): "<<error.message()<<std::endl;
-
-                callBack(error);
-            }
-        }
-        else
-        {
+        if(!error)
             isConnected = true;
-            callBack(error);
-        }
+        callBack(error);
     });
 }
 
@@ -72,19 +61,9 @@ void Client::reader(std::function<void (Stream data,asio::error_code,std::size_t
 {
     net.receive([this,callBack](Stream data, asio::error_code error, std::size_t read)
     {
-        if(error)
-        {
-            if(error != asio::error::operation_aborted)
-            {
-                std::cerr<<"Client::reader()::net.receive(): "<<error.message()<<std::endl;
-                callBack(data,error,read);
-            }
-        }
-        else
-        {
+        if(!error)
             processData(data);
-            callBack(data,error,read);
-        }
+        callBack(data,error,read);
     }
     );
 }
@@ -97,32 +76,21 @@ void Client::writer()
     {
         net.send(*writeQueue.begin(),[this](asio::error_code error, std::size_t sent)
         {
-            if(error)
-            {
-                if(error != asio::error::operation_aborted)
-                {
-                    std::cerr<<"Client::writer()::net.send(): "<<error.message()<<std::endl;
-                    writer();
-                }
-            }
-            else
-            {
+            if(!error)
                 writeQueue.pop_front();
-                writer();
-            }
-
+            writer();
         });
     }
     else
         isWriting = false;
 }
 
-void Client::queueMessage(Stream data)
+Client::Error Client::queueMessage(Stream data)
 {
     switch(data.head){
         case Header::message:
             if(!insertMessage(data.receiver,data.sender,data.data1))
-                std::cerr<<getDBError().c_str();
+                return Error::db_error;
             break;
         default:
             break;
@@ -131,6 +99,7 @@ void Client::queueMessage(Stream data)
     writeQueue.push_back(data);
     if(!isWriting)
         writer();
+    return Error::ok;
 }
 
 void Client::processData(Stream data)
@@ -185,9 +154,13 @@ void Client::ping()
 void Client::runIOContext()
 {
     io_.restart();
+#ifndef NDEBUG
     std::clog<<"IO_Context started"<<std::endl;
+#endif
     io_.run();
+#ifndef NDEBUG
     std::clog<<"IO_Context stopped"<<std::endl;
+#endif
 }
 
 std::string Client::getDBError()

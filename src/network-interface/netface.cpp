@@ -22,15 +22,16 @@ void NetFace::connect(std::string host, std::string portNum, std::function<void(
     });
 }
 
-void NetFace::disconnect()
+asio::error_code NetFace::disconnect()
 {
     if(!isTimerRunning)
     {
         removeConnMan();
     }
     socketQueue.emplace_back(std::unique_ptr<ConnectionManager>(connMan));
-    connMan->disconnect();
+    asio::error_code error = connMan->disconnect();
     connMan = nullptr;
+    return error;
 }
 
 void NetFace::removeConnMan()
