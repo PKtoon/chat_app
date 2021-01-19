@@ -58,6 +58,7 @@ private:
     void reader();
     void processData(Stream data);
     void processMessage(Stream data);
+    void initUserAuth(bool flag);
 };
 
 #endif // MAINWINDOW_H

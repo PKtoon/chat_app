@@ -168,21 +168,14 @@ void User::reader()
 {
     net.receive([this](Stream data, asio::error_code error, std::size_t read)
     {
-        if(error)
-        {
-            if(error != asio::error::operation_aborted)
-            {
-                std::cerr<<name2<<": User::reader()::net.receive(): "<<error.message()<<std::endl;
-                reader();
-            }
-        }
-        else
-        {
-            reader();
+        if(!error)
             processData(data);
-        }
-    }
-    );
+#ifndef NDEBUG
+         if(error)
+            std::cerr<<name2<<": User::reader()::net.receive(): "<<error.message()<<std::endl;
+#endif
+        reader();
+    });
 }
 
 void User::writer()
@@ -200,12 +193,13 @@ void User::writer()
             itr++;
         net.send(*itr,[this,itr](asio::error_code error, std::size_t sent)
         {
-            if(error == asio::error::operation_aborted)
-                return;
-
             if(error)
             {
+                if(error == asio::error::operation_aborted)
+                    return;
+#ifndef NDEBUG
                 std::cerr<<name2<<": User::writer()::net.send(): "<<error.message()<<std::endl;
+#endif
                 currentQueueIndex++;
             }
             else

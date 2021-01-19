@@ -1,6 +1,6 @@
 //TODO: clear contactListWidget when user is changed
 //TODO: allow multiple users
-#include <QDebug>
+
 #include "mainwindow.hpp"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -100,6 +100,20 @@ void MainWindow::processMessage(Stream data)
     emit contactsListWidget->itemChanged(user);
 }
 
+void MainWindow::initUserAuth(bool flag)
+{
+    connDialog = new ConnDialog(this);
+    if(flag)
+        connDialog->setWindowTitle("Sign Up");
+    else
+        connDialog->setWindowTitle("Sign In");
+    connDialog->userAuthBox(flag);
+
+    connect(connDialog,&ConnDialog::doUserAuth, this, &MainWindow::doUserAuth);
+
+    connDialog->show();
+}
+
 QListWidgetItem* MainWindow::getUser(QString user)
 {
     auto list = contactsListWidget->findItems(user,Qt::MatchExactly);
@@ -189,10 +203,7 @@ void MainWindow::doConnect(const QString userName, const QString passwd, const Q
     {
         if(error)
         {
-            if(error != asio::error::operation_aborted)
-            {
-                connDialog->setInform(std::string("Connection Error: "+ error.message()).c_str());
-            }
+            connDialog->setInform(std::string("Connection Error: "+ error.message()).c_str());
         }
         else
         {
@@ -299,26 +310,28 @@ void MainWindow::findContact(const QString &text)
 
 void MainWindow::initSignIn()
 {
-    connDialog = new ConnDialog(this);
-    connDialog->setWindowTitle("Sign In");
+    initUserAuth(false);
+//    connDialog = new ConnDialog(this);
+//    connDialog->setWindowTitle("Sign In");
 
-    connDialog->userAuthBox(false);
+//    connDialog->userAuthBox(false);
 
-    connect(connDialog,&ConnDialog::doUserAuth, this, &MainWindow::doUserAuth);
+//    connect(connDialog,&ConnDialog::doUserAuth, this, &MainWindow::doUserAuth);
 
-    connDialog->show();
+//    connDialog->show();
 }
 
 void MainWindow::initSignUp()
 {
-    connDialog = new ConnDialog(this);
-    connDialog->setWindowTitle("Sign Up");
+    initUserAuth(true);
+//    connDialog = new ConnDialog(this);
+//    connDialog->setWindowTitle("Sign Up");
 
-    connDialog->userAuthBox(true);
+//    connDialog->userAuthBox(true);
 
-    connect(connDialog,&ConnDialog::doUserAuth, this, &MainWindow::doUserAuth);
+//    connect(connDialog,&ConnDialog::doUserAuth, this, &MainWindow::doUserAuth);
 
-    connDialog->show();
+//    connDialog->show();
 }
 
 void MainWindow::doUserAuth(const QString userName, const QString passWD, const bool flag)

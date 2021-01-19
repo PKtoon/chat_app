@@ -5,23 +5,18 @@ void Server::accept()
 {
     acceptor.async_accept([this](asio::error_code error, asio::ip::tcp::socket socket)
     {
-        if (error)
+        if (!error)
         {
-            if (error != asio::error::operation_aborted)
-            {
-                std::cerr<<"Server::accept()::async_accept(): "<<error.message()<<std::endl;
-                accept();
-            }
+            std::lock_guard<std::mutex> lock(userListMutex);
+            userList.emplace_back(std::make_unique<User>(std::move(socket),*this));
         }
-        else
-        {
-            {
-                //scope for lock_guard so that it can unlock the mutex after use as there is accept which will again need lock. Async nature of accept will make it difficult to detect deadlock.
-                std::lock_guard<std::mutex> lock(userListMutex);
-                userList.emplace_back(std::make_unique<User>(std::move(socket),*this));
-            }
-            accept();
+#ifndef NDEBUG
+        else{
+            std::cerr<<"Server::accept()::async_accept(): "<<error.message()<<std::endl;
         }
+#endif
+        accept();
+
     });
 }
 

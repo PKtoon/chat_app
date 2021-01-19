@@ -1,7 +1,10 @@
 ﻿#ifndef USER_H
 #define USER_H
 
+#ifndef NDEBUG
 #include <iostream>
+#endif
+
 #include <list>
 
 #include "network-interface/netface.hpp"
@@ -22,8 +25,12 @@ class User
     asio::steady_timer writeTimer {net.getSocket()->get_executor()};
 public:
     User(asio::ip::tcp::socket socket, Server& serv);
-    ~User() { std::clog<<name2+" is destroyed"<<std::endl;}
-    
+    ~User()
+    {
+#ifndef NDEBUG
+        std::clog<<name2+" is destroyed"<<std::endl;
+#endif
+    }
     const std::string& getName() const { return name; }
     void queueMessage(Stream);
 private:
