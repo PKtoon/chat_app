@@ -184,10 +184,11 @@ void MainWindow::initConnect()
     connDialog->connectBox();
     connect(connDialog,&ConnDialog::doConnect, this, &MainWindow::doConnect);
     
+#ifndef NDEBUG
     //values below are for testing purpose
     connDialog->setHostInputText("localhost");
     connDialog->setPortInputText("1098");
-
+#endif
     connDialog->show();
 }
 
