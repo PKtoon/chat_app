@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>ContactList.qml</file>
+        <file>MessageArea.qml</file>
+        <file>MenusArea.qml</file>
+    </qresource>
+</RCC>
