@@ -33,7 +33,7 @@ public:
     void connectBox();
 
 signals:
-    void doConnect(const QString name, const QString passwd, const QString host, const QString port);
+    void doConnect(const QString host, const QString port);
     void doUserAuth(const QString name, const QString passwd, const bool flag);
 
 public slots:

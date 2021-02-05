@@ -192,7 +192,7 @@ void MainWindow::initConnect()
     connDialog->show();
 }
 
-void MainWindow::doConnect(const QString userName, const QString passwd, const QString host, const QString port)
+void MainWindow::doConnect(const QString host, const QString port)
 {
     if(host.isEmpty() || port.isEmpty())
     {
@@ -200,7 +200,7 @@ void MainWindow::doConnect(const QString userName, const QString passwd, const Q
         return;
     }
 
-    client.connect(host.toStdString(),port.toStdString(),[this,userName,passwd](asio::error_code error)
+    client.connect(host.toStdString(),port.toStdString(),[this](asio::error_code error)
     {
         if(error)
         {
@@ -312,27 +312,11 @@ void MainWindow::findContact(const QString &text)
 void MainWindow::initSignIn()
 {
     initUserAuth(false);
-//    connDialog = new ConnDialog(this);
-//    connDialog->setWindowTitle("Sign In");
-
-//    connDialog->userAuthBox(false);
-
-//    connect(connDialog,&ConnDialog::doUserAuth, this, &MainWindow::doUserAuth);
-
-//    connDialog->show();
 }
 
 void MainWindow::initSignUp()
 {
     initUserAuth(true);
-//    connDialog = new ConnDialog(this);
-//    connDialog->setWindowTitle("Sign Up");
-
-//    connDialog->userAuthBox(true);
-
-//    connect(connDialog,&ConnDialog::doUserAuth, this, &MainWindow::doUserAuth);
-
-//    connDialog->show();
 }
 
 void MainWindow::doUserAuth(const QString userName, const QString passWD, const bool flag)

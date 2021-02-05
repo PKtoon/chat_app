@@ -26,7 +26,7 @@ void ConnDialog::decorate()
 
 void ConnDialog::connInit()
 {
-    emit doConnect(nameInput->text(),passwdInput->text(), hostInput->text(),portInput->text());
+    emit doConnect(hostInput->text(),portInput->text());
 }
 
 void ConnDialog::signInInit()

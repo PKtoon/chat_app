@@ -20,7 +20,7 @@ signals:
 
 public slots:
     void initConnect();
-    void doConnect(const QString userName, const QString passWD, const QString host, const QString portNum);
+    void doConnect(const QString host, const QString portNum);
     void disConnect();
     void displayMessage(QListWidgetItem* item);
     void sendMessage();
