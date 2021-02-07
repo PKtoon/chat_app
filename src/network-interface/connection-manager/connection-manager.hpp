@@ -27,7 +27,7 @@ public:
     asio::ip::tcp::socket& getSocket() { return socket; }
     void setEndpoints(std::string hostname, std::string port)
     {
-        endpoints = resolver.resolve(asio::ip::tcp::v6(),hostname,port);
+        endpoints = resolver.resolve(/*asio::ip::tcp::v4(),*/hostname,port);
     }
     
     asio::error_code disconnect();
