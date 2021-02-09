@@ -4,10 +4,6 @@ project(ChatAppGui LANGUAGES CXX)
 
 include_directories(${CMAKE_SOURCE_DIR}/external/SQLite/)
 
-# Find SQLite3
-find_package(SQLite3 REQUIRED)
-include_directories(${SQLite3_INCLUDE_DIRS})
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
@@ -21,27 +17,29 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Check http://doc.qt.io/qt-5/deployment-android.html for more information.
 # They need to be set before the find_package(Qt5 ...) call.
 
-#if(ANDROID)
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-#    if (ANDROID_ABI STREQUAL "armeabi-v7a")
-#        set(ANDROID_EXTRA_LIBS
-#            ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libcrypto.so
-#            ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libssl.so)
-#    endif()
-#endif()
+if(ANDROID)
+    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+    if (ANDROID_ABI STREQUAL "armeabi-v7a")
+        set(ANDROID_EXTRA_LIBS
+            ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libcrypto.so
+            ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libssl.so)
+    endif()
+endif()
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 
-#ist(APPEND QML_DIRS "dir1")
-#list(APPEND QML_DIRS "~/workspace/projects/chat_app/src/")
-#set(QML_IMPORT_PATH "${QML_DIRS}" CACHE STRING "Qt Creator 4.1 extra qml import paths")
-
-
 if(ANDROID)
     add_library(ChatAppGui SHARED
-      main.cpp
-      qml.qrc
+        main.cpp
+        messagelistmodel.cpp
+        messagelistmodel.hpp
+        contactlistmodel.cpp
+        contactlistmodel.hpp
+        guibridge.hpp
+        guibridge.cpp
+        ../client/client.hpp
+        qml.qrc
     )
 else()
     add_executable(ChatAppGui
