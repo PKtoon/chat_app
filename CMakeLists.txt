@@ -7,9 +7,14 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(include/ external/asio/asio/include/ external/json/single_include/)
 
 add_subdirectory(src/network-interface)
-add_subdirectory(src/server)
+add_subdirectory(src/sqlite3)
 add_subdirectory(src/client)
 add_subdirectory(src/qml)
+add_subdirectory(src/kirigami)
+if(NOT ANDROID)
+    add_subdirectory(src/server)
+endif()
+
 
 #enable_testing()
 #add_subdirectory(tests/)
