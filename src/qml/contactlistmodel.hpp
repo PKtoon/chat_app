@@ -9,7 +9,10 @@
 class ContactListModel : public QAbstractListModel
 {
     Q_OBJECT
+#if (QT_VERSION > QT_VERSION_CHECK(5, 12, 10))
     QML_ELEMENT
+#endif
+
     QVector<QString> contactList_;
 
 public:
