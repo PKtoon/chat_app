@@ -1,17 +1,14 @@
 include_directories(${CMAKE_SOURCE_DIR}/external/SQLite/)
 
-# Find SQLite3
-find_package(SQLite3 REQUIRED)
-include_directories(${SQLite3_INCLUDE_DIRS})
-
 set(CLIENT_SOURCES
     client.hpp
     client.cpp
     )
 
 add_library(clientlib ${CLIENT_SOURCES})
-target_link_libraries(clientlib netface ${SQLite3_LIBRARIES})
+target_link_libraries(clientlib netface sqlite)
 
+if(NOT ANDROID)
 # Find the QtWidgets library
 find_package(Qt5Widgets CONFIG REQUIRED)
 
@@ -30,3 +27,5 @@ set(GUI_SOURCES
 
 add_executable("client" ${GUI_SOURCES})
 target_link_libraries("client" Qt5::Widgets clientlib)
+
+endif()
