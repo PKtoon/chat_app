@@ -9,6 +9,7 @@ include_directories(include/ external/asio/asio/include/ external/json/single_in
 add_subdirectory(src/network-interface)
 add_subdirectory(external/sqlite3)
 add_subdirectory(src/client)
+add_subdirectory(src/widgetgui)
 add_subdirectory(src/qml)
 #add_subdirectory(src/kirigami)
 if(NOT ANDROID)

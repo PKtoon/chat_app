@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "client.hpp"
+#include "../client/client.hpp"
 
 #include <QMainWindow>
 
