@@ -1,6 +1,8 @@
 //TODO: clear contactListWidget when user is changed
 //TODO: allow multiple users
-
+#ifndef NDEBUG
+#include <iostream>
+#endif
 #include "mainwindow.hpp"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -132,6 +134,9 @@ void MainWindow::reader()
 {
     client.reader([this](Stream data, asio::error_code error, std::size_t read)
     {
+#ifndef NDEBUG
+        std::cerr<<"received: "<<data.getSerialized()<<std::endl;
+#endif
         if(error)
         {
 
@@ -268,6 +273,9 @@ void MainWindow::sendMessage()
     data.data1 = msgIn->text().toStdString();
     QListWidgetItem* user = contactsListWidget->currentItem();
     client.queueMessage(data);
+#ifndef NDEBUG
+    std::cerr<<"queued:   "<<data.getSerialized()<<std::endl;
+#endif
     emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution else it will fail in runtime with 'unable to create child' error
     msgIn->clear();
 }
@@ -307,6 +315,9 @@ void MainWindow::findContact(const QString &text)
     data.receiver = "server";
     data.data1 = text.toStdString();
     client.queueMessage(data);
+#ifndef NDEBUG
+    std::cerr<<"queued:   "<<data.getSerialized()<<std::endl;
+#endif    
 }
 
 void MainWindow::initSignIn()

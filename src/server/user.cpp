@@ -173,6 +173,7 @@ void User::reader()
 #ifndef NDEBUG
          if(error)
             std::cerr<<name2<<": User::reader()::net.receive(): "<<error.message()<<std::endl;
+         std::cerr<<name2<<" received: "<<data.getSerialized()<<std::endl;
 #endif
         reader();
     });
@@ -193,6 +194,9 @@ void User::writer()
             itr++;
         net.send(*itr,[this,itr](asio::error_code error, std::size_t sent)
         {
+#ifndef NDEBUG
+            std::cerr<<name2<<" sent:     "<<itr->getSerialized()<<std::endl;
+#endif            
             if(error)
             {
                 if(error == asio::error::operation_aborted)
