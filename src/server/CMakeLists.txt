@@ -1,9 +1,9 @@
 find_library(PQXX_LIB pqxx)
 
-set(SERVER_LIB netface ${PQXX_LIB})
+set(SERVER_LIB netface ${PQXX_LIB} "-lpq")
 
 if(WIN32)
-    set(SERVER_LIB "${SERVER_LIB}" "-lpq" "-lwsock32")
+    set(SERVER_LIB "${SERVER_LIB}"  "-lwsock32")
 endif(WIN32)
 
 set(SERVER_SOURCES
