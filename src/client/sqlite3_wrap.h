@@ -4,7 +4,7 @@
 #include <string>
 #include <functional>
 
-#include <sqlite3.h>
+#include "../../external/sqlite3/sqlite3.h"
 
 class FunObj
 {

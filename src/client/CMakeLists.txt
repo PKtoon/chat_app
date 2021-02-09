@@ -1,6 +1,7 @@
-include_directories(${CMAKE_SOURCE_DIR}/external/SQLite/)
+#include_directories(${CMAKE_SOURCE_DIR}/external/sqlite3/)
 
 set(CLIENT_SOURCES
+    sqlite3_wrap.h
     client.hpp
     client.cpp
     )
