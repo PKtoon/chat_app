@@ -25,12 +25,12 @@ class User
     asio::steady_timer writeTimer {net.getSocket()->get_executor()};
 public:
     User(asio::ip::tcp::socket socket, Server& serv);
+#ifndef NDEBUG
     ~User()
     {
-#ifndef NDEBUG
         std::clog<<name2+" is destroyed"<<std::endl;
-#endif
     }
+#endif
     const std::string& getName() const { return name; }
     void queueMessage(Stream);
 private:
@@ -42,6 +42,7 @@ private:
     void pingMe();
     void checkPulse();
     void findContact(Stream data);
+    void checkPendingMessages();
 };
 
 #endif

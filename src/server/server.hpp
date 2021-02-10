@@ -39,6 +39,8 @@ public:
     void addUser(std::string name, std::string passwd);
     pqxx::result getUser(std::string name);
     bool authUser(std::string name, std::string passwd);
+    std::list<Stream> getPendingMessages(std::string name);
+    void storePendingMessage(Stream data);
 };
 
 #endif // SERVER_H

@@ -21,8 +21,7 @@ void User::authHandler(Stream data)
 
     if(count < 5 && name.empty())
     {
-        //TODO: if there are any active user with same name then first disconnect them
-        //TODO: after five counts disconnect
+        //TODO: if there are any active user with same name then first disconnect them after five counts disconnect
 
         count++;
         switch (data.head)
@@ -39,6 +38,8 @@ void User::authHandler(Stream data)
             else{
                 reply.data1 = "Username or password is incorrect";
             }
+            queueMessage(reply);
+            checkPendingMessages();
             break;
         case Header::signup:
         {
@@ -54,13 +55,13 @@ void User::authHandler(Stream data)
             else{
                 reply.data1 = "Username not available";
             }
+            queueMessage(reply);
         }
             break;
         default:
             break;
         }
     }
-    queueMessage(reply);
 }
 
 void User::processData(Stream data)
@@ -82,23 +83,36 @@ void User::processData(Stream data)
         switch(data.head)
         {
             case Header::message:
-                server.queueDelivery(data);
+            {
+                pqxx::result res = server.getUser(data.receiver);
+                if(!(res.size() == 1 && res[0][0].c_str() == data.receiver)) {
+                    data.data1 = data.receiver+" not found";
+                    data.receiver = data.sender;
+                    data.sender = "server";
+                    queueMessage(data);
+                }
+                else
+                    server.queueDelivery(data);
                 break;
+            }
             case Header::ping:
                 isAlive = true;
                 break;
             case Header::socket_close:
                 isAlive = false;
                 name = "";
+                {
+                    std::lock_guard<std::mutex> lock(writeQueueMutex);
+                    for(auto& a : writeQueue) {
+                        server.storePendingMessage(a);
+                    }
+                    writeQueue.clear();
+                }
                 //net.disconnect();
                 break;
             case Header::find:
                 findContact(data);
                 break;
-//            case Header::signin:
-//            case Header::signup:
-//                authHandler(data);
-//                break;
             default:
                 break;
         }
@@ -195,7 +209,7 @@ void User::writer()
         net.send(*itr,[this,itr](asio::error_code error, std::size_t sent)
         {
 #ifndef NDEBUG
-            std::cerr<<name2<<" sent:     "<<itr->getSerialized()<<std::endl;
+            std::cerr<<name2<<" sent    : "<<itr->getSerialized()<<std::endl;
 #endif            
             if(error)
             {
@@ -218,5 +232,20 @@ void User::writer()
     {
         currentQueueIndex = 0;
         writeScheduler();
+    }
+}
+
+void User::checkPendingMessages()
+{
+    std::list<Stream> list;
+    list = server.getPendingMessages(name);
+    {
+        std::lock_guard<std::mutex> lock(writeQueueMutex);
+        if ( writeQueue.empty())
+            writeQueue.swap(list);
+        else
+            for(auto& a : list) {
+                writeQueue.push_back(a);
+            }
     }
 }

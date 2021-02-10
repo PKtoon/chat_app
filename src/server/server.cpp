@@ -43,14 +43,10 @@ void Server::deliverMessages()
     {
         Stream data = (*immediateList.begin());
         User* user = getActiveUser(data.receiver);
-        if(!user)
-        {
-            user = getActiveUser(data.sender);
-            data.data1 = data.receiver+" not found";
-            data.receiver = data.sender;
-            data.sender = "server";
-        }
-        user->queueMessage(data);
+        if(user)
+            user->queueMessage(data);
+        else
+            storePendingMessage(data);            
         immediateList.pop_front();
     }
     deliveryScheduler();
@@ -101,4 +97,21 @@ User* Server::getActiveUser(std::string name)
         if(a->getName()==name)
             return a.get();
     return nullptr;
+}
+
+void Server::storePendingMessage(Stream data)
+{
+    db.execCommit("INSERT INTO pending (name,message,timestamp) VALUES ('"+data.receiver+"','"+data.getSerialized()+"','now()');");
+}
+
+std::list<Stream> Server::getPendingMessages ( std::string name )
+{
+    std::list<Stream> list;
+    pqxx::result res = db.exec("SELECT message FROM pending WHERE name = '"+name+"' ORDER BY timestamp;");
+    for(unsigned int i = 0; i < res.size(); i++) {
+        Stream data(res[i][0].c_str());
+        list.push_back(data);
+    }
+    db.execCommit("DELETE FROM pending WHERE name = '"+name+"';");
+    return list;
 }
