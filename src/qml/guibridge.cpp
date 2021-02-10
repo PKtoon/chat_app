@@ -60,7 +60,7 @@ void GuiBridge::writer(int receiver, QString message)
     data.data1 = message.toStdString();
     client.queueMessage(data);
 #ifndef NDEBUG
-    std::cerr<<"queued:   "<<data.getSerialized()<<std::endl;
+    std::cerr<<"queued  : "<<data.getSerialized()<<std::endl;
 #endif
     emit resetMessageModel(data.receiver.c_str());
 }
