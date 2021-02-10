@@ -26,8 +26,8 @@ if(ANDROID)
     endif()
 endif()
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick Multimedia REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick Multimedia REQUIRED)
 
 if(ANDROID)
     add_library(ChatAppGui SHARED
@@ -40,6 +40,7 @@ if(ANDROID)
         guibridge.cpp
         ../client/client.hpp
         qml.qrc
+        ../../resources.qrc
     )
 else()
     add_executable(ChatAppGui
@@ -52,10 +53,11 @@ else()
       guibridge.cpp
       ../client/client.hpp
       qml.qrc
+      ../../resources.qrc
     )
 endif()
 
 target_compile_definitions(ChatAppGui
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(ChatAppGui
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick clientlib)
+  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::Multimedia clientlib)

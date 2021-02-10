@@ -2,7 +2,8 @@
 #define GUIBRIDGE_HPP
 
 #include <QObject>
-#include <qqml.h>
+#include <QtQml>
+#include <QtMultimedia/QMediaPlayer>
 
 #include "../client/client.hpp"
 #include "contactlistmodel.hpp"
@@ -51,6 +52,7 @@ private:
     std::thread ioThread;
     bool isThreadRunning{false};
     QString contactName;
+    QMediaPlayer player;
 
     ContactListModel* contactListModel_;
 

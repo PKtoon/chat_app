@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>assets/Done_for_You/done-for-you-612.ogg</file>
+    </qresource>
+</RCC>

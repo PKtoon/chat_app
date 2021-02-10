@@ -6,7 +6,7 @@
 
 GuiBridge::GuiBridge(QObject *parent) : QObject(parent)
 {
-
+    player.setMedia(QUrl("qrc:/resources/assets/Done_for_You/done-for-you-612.ogg"));
 }
 
 void GuiBridge::initSignIn(QString userName, QString passwd)
@@ -74,6 +74,7 @@ void GuiBridge::processData(Stream data)
                 emit resetContactModel();
             processMessage(data);
             emit messageReceivedSignal(data.sender.c_str());
+            player.play();
             break;
         case Header::signin|Header::ack:
         case Header::signup|Header::ack:
