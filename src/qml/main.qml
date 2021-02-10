@@ -1,7 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.12
-//import org.kde.kirigami 2.12 as Kirigami
 import pkChat.GuiBridge 1.0
 import pkChat.ContactListModel 1.0
 import pkChat.MessageListModel 1.0
@@ -27,9 +26,13 @@ ApplicationWindow {
         onSetConnectInformSignal: menuBar.informConnect.text = text
         onSetSignInUpInformSignal: menuBar.informSignInUp.text = text
         onFindContactSuccessSignal: {
-            menuBar.addButton.enable = true
-            menuBar.informFindContact.text = "Found Contact"
+            if(menuBar.findContactTextField.text === text)
+            {
+                menuBar.addButton.enabled=true
+                menuBar.informFindContact.text = text+" found"
+            }
         }
+
         onFindContactFailureSignal: menuBar.informFindContact.text = error
         onMessageReceivedSignal: {
             if (contactView.contactList.currentUser === name)

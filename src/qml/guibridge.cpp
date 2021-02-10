@@ -1,5 +1,9 @@
 #include "guibridge.hpp"
 
+#ifndef NDEBUG
+#include <iostream>
+#endif
+
 GuiBridge::GuiBridge(QObject *parent) : QObject(parent)
 {
 
@@ -34,6 +38,9 @@ void GuiBridge::reader()
 {
     client.reader([this](Stream data, asio::error_code error, std::size_t read)
     {
+#ifndef NDEBUG
+        std::cerr<<"received: "<<data.getSerialized()<<std::endl;
+#endif
         if(error)
         {
 
@@ -52,6 +59,9 @@ void GuiBridge::writer(int receiver, QString message)
     data.receiver = contactListModel_->getContact(receiver).toStdString();
     data.data1 = message.toStdString();
     client.queueMessage(data);
+#ifndef NDEBUG
+    std::cerr<<"queued:   "<<data.getSerialized()<<std::endl;
+#endif
     emit resetMessageModel(data.receiver.c_str());
 }
 
@@ -76,8 +86,7 @@ void GuiBridge::processData(Stream data)
             emit setSignInUpInformSignal(QString(data.data1.c_str()));
             break;
         case Header::find|Header::ack:
-            contactName = data.data1.c_str();
-            emit findContactSuccessSignal();
+            emit findContactSuccessSignal(QString(data.data1.c_str()));
             break;
         case Header::find|Header::error:
             emit findContactFailureSignal(QString(std::string(data.data1+" not found").c_str()));
@@ -89,11 +98,7 @@ void GuiBridge::processData(Stream data)
 
 void GuiBridge::processMessage(Stream data)
 {
-//    QListWidgetItem* user = getUser(QString(data.sender.c_str()));
-//    if(!user)
-//        user = makeContact(data.sender.c_str());
 
-    //    emit contactsListWidget->itemChanged(user);
 }
 
 void GuiBridge::currentUser(int index)
@@ -103,8 +108,6 @@ void GuiBridge::currentUser(int index)
 
 void GuiBridge::insertContact(QString name)
 {
-    if(name != contactName)
-        return;
     client.insertContact(name.toStdString());
     emit resetContactModel();
 }

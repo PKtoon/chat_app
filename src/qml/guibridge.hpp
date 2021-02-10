@@ -37,7 +37,7 @@ public:
 signals:
     void setConnectInformSignal(QString text);
     void setSignInUpInformSignal(QString text);
-    void findContactSuccessSignal();
+    void findContactSuccessSignal(QString text);
     void findContactFailureSignal(QString error);
     void messageReceivedSignal(QString name);
     void resetContactModel();

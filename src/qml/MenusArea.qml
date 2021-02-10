@@ -7,6 +7,7 @@ Item {
     property Label informSignInUp: signInUpDialog.informSignInUp
     property Label informFindContact: findContactDialog.informFindContact
     property Button addButton: findContactDialog.addButton
+    property TextField findContactTextField: findContactDialog.findContactTextField
 
     Action {
         id: connectAction
@@ -169,6 +170,7 @@ Item {
         id: findContactDialog
         property Label informFindContact: informFindContact
         property Button addButton: addButton
+        property TextField findContactTextField: findContactTextField
         ColumnLayout {
             anchors.fill: parent
             Label {
@@ -184,7 +186,10 @@ Item {
                     id: addButton
                     text: "Add"
                     enabled: false
-                    onClicked: guiB.insertContact(findContactTextField.text)
+                    onClicked: {
+                        informFindContact.text="Contact Added"
+                        guiB.insertContact(findContactTextField.text)
+                    }
                 }
                 Button {
                     text: "Find"
