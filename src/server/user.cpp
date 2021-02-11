@@ -104,6 +104,9 @@ void User::processData(Stream data)
             case Header::find:
                 findContact(data);
                 break;
+            case Header::group_create:
+                server.createGroup(data);
+                break;
             default:
                 break;
         }

@@ -44,6 +44,7 @@ public:
     void sendUserMessage(Stream data);
     void sendGroupMessage(Stream data);
     std::list<std::string> getGroupMembers(std::string groupName);
+    void createGroup(Stream data);
 };
 
 #endif // SERVER_H

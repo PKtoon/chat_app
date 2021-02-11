@@ -165,3 +165,40 @@ void Server::sendGroupMessage ( Stream data )
         }
     }
 }
+
+void Server::createGroup ( Stream data )
+{
+    Stream reply;
+    pqxx::result res = db.exec("SELECT groupname FROM group_members WHERE groupname = '"+data.data1+"';");
+    if(res.size() != 0) {
+        reply.head = static_cast<Header>(Header::group_create|Header::error);
+        reply.sender = "server";
+        reply.receiver = data.sender;
+        reply.data1 = "Group already exist.";
+    }
+    else {
+        std::list<std::string> list;
+        std::string temp{""};
+        for(auto itr = data.data2.begin(); itr != data.data2.end(); itr++) {
+            if(*itr != ';') {
+                temp += *itr;
+            }
+            else {
+                list.push_back(temp);
+                temp.clear();
+            }
+        }
+        db.execCommit("INSET INTO group_members (username,groupname) VALUES ('"+data.sender+"','"+data.data1+"');");
+        for(auto& username : list) {
+            pqxx::result res = getUser(username);
+            if(res.size() == 1 && res[0][0].c_str() == username) {
+                db.execCommit("INSET INTO group_members (username,groupname) VALUES ('"+username+"','"+data.data1+"');");
+            }
+        }
+        reply.head = Header::group_message;
+        reply.sender = "server";
+        reply.receiver = data.data1;
+        reply.data1 = "Group created";
+    }
+    queueDelivery(reply);
+}
