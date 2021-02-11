@@ -83,6 +83,7 @@ void User::processData(Stream data)
         switch(data.head)
         {
             case Header::message:
+            case Header::group_message:
                 server.queueDelivery(data);
                 break;
             case Header::ping:
