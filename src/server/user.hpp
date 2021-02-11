@@ -39,7 +39,6 @@ private:
     void writer();
     void writeScheduler();
     void processData(Stream);
-    void processMessage(Stream);
     void pingMe();
     void checkPulse();
     void findContact(Stream data);

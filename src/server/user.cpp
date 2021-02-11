@@ -83,7 +83,7 @@ void User::processData(Stream data)
         switch(data.head)
         {
             case Header::message:
-                processMessage(data);
+                server.queueDelivery(data);
                 break;
             case Header::ping:
                 isAlive = true;
@@ -238,17 +238,4 @@ void User::checkPendingMessages()
                 writeQueue.push_back(a);
             }
     }
-}
-
-void User::processMessage(Stream data)
-{
-    pqxx::result res = server.getUser(data.receiver);
-    if(!(res.size() == 1 && res[0][0].c_str() == data.receiver)) {
-        data.data1 = data.receiver+" not found";
-        data.receiver = data.sender;
-        data.sender = "server";
-        queueMessage(data);
-    }
-    else
-        server.queueDelivery(data);
 }

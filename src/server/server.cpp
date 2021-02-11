@@ -45,8 +45,18 @@ void Server::deliverMessages()
         User* user = getActiveUser(data.receiver);
         if(user)
             user->queueMessage(data);
-        else
-            storePendingMessage(data);            
+        else {
+            pqxx::result res = getUser(data.receiver);
+            if(res.size() == 1 && res[0][0].c_str() == data.receiver) {
+                storePendingMessage(data);
+            }
+            else {
+                data.data1 = data.receiver+" not found";
+                data.receiver = data.sender;
+                data.sender = "server";
+                queueDelivery(data);
+            }
+        }
         immediateList.pop_front();
     }
     deliveryScheduler();
