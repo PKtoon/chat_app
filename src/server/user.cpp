@@ -104,6 +104,9 @@ void User::processData(Stream data)
             case Header::find_contact:
                 findContact(data);
                 break;
+            case Header::find_group:
+                findGroup(data);
+                break;
             case Header::group_create:
                 server.createGroup(data);
                 break;
@@ -254,7 +257,7 @@ void User::findGroup(Stream data)
 
     pqxx::result res = server.getGroup(data.data1);
     if(res.size() != 0 && res[0][0].c_str() == data.data1){
-        reply.head = static_cast<Header>(Header::find_contact|Header::ack);
+        reply.head = static_cast<Header>(Header::find_group|Header::ack);
     }
     queueMessage(reply);
 }
