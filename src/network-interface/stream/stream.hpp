@@ -19,8 +19,9 @@ enum Header
     local_file = 1<<9,
     message_out_of_order = 1<<10,
     message_corrupt = 1<<11,
-    find = 1<<12,
-    group_create = 1<<13
+    find_contact = 1<<12,
+    group_create = 1<<13,
+    find_group = 1<<14
 };
 
 class Stream

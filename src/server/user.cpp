@@ -101,7 +101,7 @@ void User::processData(Stream data)
                 }
                 //net.disconnect();
                 break;
-            case Header::find:
+            case Header::find_contact:
                 findContact(data);
                 break;
             case Header::group_create:
@@ -134,14 +134,14 @@ void User::checkPulse()
 void User::findContact(Stream data)
 {
     Stream reply;
-    reply.head = static_cast<Header>(Header::find|Header::error);
+    reply.head = static_cast<Header>(Header::find_contact|Header::error);
     reply.sender = "server";
     reply.receiver = name;
     reply.data1 = data.data1;
 
     pqxx::result res = server.getUser(data.data1);
     if(res.size() == 1 && res[0][0].c_str() == data.data1){
-        reply.head = static_cast<Header>(Header::find|Header::ack);
+        reply.head = static_cast<Header>(Header::find_contact|Header::ack);
     }
     queueMessage(reply);
 }
@@ -242,4 +242,19 @@ void User::checkPendingMessages()
                 writeQueue.push_back(a);
             }
     }
+}
+
+void User::findGroup(Stream data)
+{
+    Stream reply;
+    reply.head = static_cast<Header>(Header::find_group|Header::error);
+    reply.sender = "server";
+    reply.receiver = name;
+    reply.data1 = data.data1;
+
+    pqxx::result res = server.getGroup(data.data1);
+    if(res.size() != 0 && res[0][0].c_str() == data.data1){
+        reply.head = static_cast<Header>(Header::find_contact|Header::ack);
+    }
+    queueMessage(reply);
 }

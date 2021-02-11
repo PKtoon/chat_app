@@ -45,6 +45,7 @@ public:
     void sendGroupMessage(Stream data);
     std::list<std::string> getGroupMembers(std::string groupName);
     void createGroup(Stream data);
+    pqxx::result getGroup(std::string groupName);
 };
 
 #endif // SERVER_H

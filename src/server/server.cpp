@@ -169,7 +169,7 @@ void Server::sendGroupMessage ( Stream data )
 void Server::createGroup ( Stream data )
 {
     Stream reply;
-    pqxx::result res = db.exec("SELECT groupname FROM group_members WHERE groupname = '"+data.data1+"';");
+    pqxx::result res = getGroup(data.data1);
     if(res.size() != 0) {
         reply.head = static_cast<Header>(Header::group_create|Header::error);
         reply.sender = "server";
@@ -202,3 +202,9 @@ void Server::createGroup ( Stream data )
     }
     queueDelivery(reply);
 }
+
+pqxx::result Server::getGroup(std::string groupName)
+{
+    return db.exec("SELECT groupname FROM group_members WHERE name = '"+groupName+"';");
+}
+

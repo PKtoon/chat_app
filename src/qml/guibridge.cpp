@@ -27,7 +27,7 @@ void GuiBridge::findContact(QString contactName)
         return;
     }
     Stream data;
-    data.head = Header::find;
+    data.head = Header::find_contact;
     data.sender = client.name();
     data.receiver = "server";
     data.data1 = contactName.toStdString();
@@ -86,10 +86,10 @@ void GuiBridge::processData(Stream data)
         case Header::signup|Header::error:
             emit setSignInUpInformSignal(QString(data.data1.c_str()));
             break;
-        case Header::find|Header::ack:
+        case Header::find_contact|Header::ack:
             emit findContactSuccessSignal(QString(data.data1.c_str()));
             break;
-        case Header::find|Header::error:
+        case Header::find_contact|Header::error:
             emit findContactFailureSignal(QString(std::string(data.data1+" not found").c_str()));
             break;
         default:

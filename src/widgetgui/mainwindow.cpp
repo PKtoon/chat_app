@@ -168,13 +168,13 @@ void MainWindow::processData(Stream data)
         case Header::signup|Header::error:
             connDialog->setInform(data.data1.c_str());
             break;
-        case Header::find|Header::ack:
+        case Header::find_contact|Header::ack:
             if(newContactDialog->text().toStdString() == data.data1){
                 newContactDialog->setInform("User found");
                 newContactDialog->setCreateEnable(true);
             }
             break;
-        case Header::find|Header::error:
+        case Header::find_contact|Header::error:
             newContactDialog->setInform(std::string(data.data1+" not found").c_str());
         default:
             break;
@@ -310,7 +310,7 @@ void MainWindow::findContact(const QString &text)
         return;
     }
     Stream data;
-    data.head = Header::find;
+    data.head = Header::find_contact;
     data.sender = client.name();
     data.receiver = "server";
     data.data1 = text.toStdString();

@@ -43,6 +43,7 @@ private:
     void checkPulse();
     void findContact(Stream data);
     void checkPendingMessages();
+    void findGroup(Stream data);
 };
 
 #endif
