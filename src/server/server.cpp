@@ -42,20 +42,15 @@ void Server::deliverMessages()
     while(!immediateList.empty())
     {
         Stream data = (*immediateList.begin());
-        User* user = getActiveUser(data.receiver);
-        if(user)
-            user->queueMessage(data);
-        else {
-            pqxx::result res = getUser(data.receiver);
-            if(res.size() == 1 && res[0][0].c_str() == data.receiver) {
-                storePendingMessage(data);
-            }
-            else {
-                data.data1 = data.receiver+" not found";
-                data.receiver = data.sender;
-                data.sender = "server";
-                queueDelivery(data);
-            }
+        switch(data.head) {
+            case Header::message:
+                sendUserMessage(data);
+                break;
+            case Header::group_message:
+                sendGroupMessage(data);
+                break;
+            default:
+                break;
         }
         immediateList.pop_front();
     }
@@ -124,4 +119,49 @@ std::list<Stream> Server::getPendingMessages ( std::string name )
     }
     db.execCommit("DELETE FROM pending WHERE name = '"+name+"';");
     return list;
+}
+
+std::list<std::string> Server::getGroupMembers ( std::string groupName )
+{
+    std::list<std::string> list;
+    pqxx::result res = db.exec("SELECT username FROM group_members WHERE groupname = '"+groupName+"';");
+    for(unsigned int i =0; i < res.size(); i++) {
+        list.push_back(res[i][0].c_str());
+    }
+    return list;
+}
+
+void Server::sendUserMessage ( Stream data )
+{
+    User* user = getActiveUser(data.receiver);
+    if(user)
+        user->queueMessage(data);
+    else {
+        pqxx::result res = getUser(data.receiver);
+        if(res.size() == 1 && res[0][0].c_str() == data.receiver) {
+            storePendingMessage(data);
+        }
+        else {
+            data.data1 = data.receiver+" not found";
+            data.receiver = data.sender;
+            data.sender = "server";
+            queueDelivery(data);
+        }
+    }
+}
+
+void Server::sendGroupMessage ( Stream data )
+{
+    std::list<std::string> list {getGroupMembers(data.receiver)};
+    for(auto& username : list) {
+        User* user = getActiveUser(username);
+        if(user)
+            user->queueMessage(data);
+        else {
+            pqxx::result res = getUser(username);
+            if(res.size() == 1 && res[0][0].c_str() == username) {
+                storePendingMessage(data);
+            }
+        }
+    }
 }

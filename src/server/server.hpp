@@ -41,6 +41,9 @@ public:
     bool authUser(std::string name, std::string passwd);
     std::list<Stream> getPendingMessages(std::string name);
     void storePendingMessage(Stream data);
+    void sendUserMessage(Stream data);
+    void sendGroupMessage(Stream data);
+    std::list<std::string> getGroupMembers(std::string groupName);
 };
 
 #endif // SERVER_H
