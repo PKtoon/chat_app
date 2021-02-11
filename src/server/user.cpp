@@ -95,7 +95,7 @@ void User::processData(Stream data)
                 {
                     std::lock_guard<std::mutex> lock(writeQueueMutex);
                     for(auto& a : writeQueue) {
-                        server.storePendingMessage(a);
+                        server.storePendingMessage(a.receiver,a);
                     }
                     writeQueue.clear();
                 }

@@ -104,9 +104,9 @@ User* Server::getActiveUser(std::string name)
     return nullptr;
 }
 
-void Server::storePendingMessage(Stream data)
+void Server::storePendingMessage(std::string subject, Stream data)
 {
-    db.execCommit("INSERT INTO pending (name,message,timestamp) VALUES ('"+data.receiver+"','"+data.getSerialized()+"','now()');");
+    db.execCommit("INSERT INTO pending (name,message,timestamp) VALUES ('"+subject+"','"+data.getSerialized()+"','now()');");
 }
 
 std::list<Stream> Server::getPendingMessages ( std::string name )
@@ -139,7 +139,7 @@ void Server::sendUserMessage ( Stream data )
     else {
         pqxx::result res = getUser(data.receiver);
         if(res.size() == 1 && res[0][0].c_str() == data.receiver) {
-            storePendingMessage(data);
+            storePendingMessage(data.receiver,data);
         }
         else {
             data.data1 = data.receiver+" not found";
@@ -154,13 +154,15 @@ void Server::sendGroupMessage ( Stream data )
 {
     std::list<std::string> list {getGroupMembers(data.receiver)};
     for(auto& username : list) {
+        if (username == data.sender)
+            continue;
         User* user = getActiveUser(username);
         if(user)
             user->queueMessage(data);
         else {
             pqxx::result res = getUser(username);
             if(res.size() == 1 && res[0][0].c_str() == username) {
-                storePendingMessage(data);
+                storePendingMessage(username,data);
             }
         }
     }
@@ -205,6 +207,6 @@ void Server::createGroup ( Stream data )
 
 pqxx::result Server::getGroup(std::string groupName)
 {
-    return db.exec("SELECT groupname FROM group_members WHERE name = '"+groupName+"';");
+    return db.exec("SELECT groupname FROM group_members WHERE groupname = '"+groupName+"';");
 }
 

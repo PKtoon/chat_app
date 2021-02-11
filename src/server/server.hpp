@@ -40,7 +40,7 @@ public:
     pqxx::result getUser(std::string name);
     bool authUser(std::string name, std::string passwd);
     std::list<Stream> getPendingMessages(std::string name);
-    void storePendingMessage(Stream data);
+    void storePendingMessage(std::string subject,Stream data);
     void sendUserMessage(Stream data);
     void sendGroupMessage(Stream data);
     std::list<std::string> getGroupMembers(std::string groupName);
