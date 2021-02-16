@@ -34,6 +34,15 @@ ApplicationWindow {
         }
 
         onFindContactFailureSignal: menuBar.informFindContact.text = error
+        onFindGroupSuccessSignal: {
+            if(menuBar.findGroupTextField.text === text)
+            {
+                menuBar.addGroupButton.enabled=true
+                menuBar.informFindGroup.text = text+" found"
+            }
+        }
+
+        onFindGroupFailureSignal: menuBar.informFindGroup.text = error
         onMessageReceivedSignal: {
             if (contactView.contactList.currentUser === name)
                 guiB.currentUser(contactView.contactList.currentIndex)

@@ -34,6 +34,21 @@ void GuiBridge::findContact(QString contactName)
     client.queueMessage(data);
 }
 
+void GuiBridge::findGroup(QString groupName)
+{
+    if(!client.getSocket()->is_open() || client.name().empty())
+    {
+//        newContactDialog->setInform("Client is not connected");
+        return;
+    }
+    Stream data;
+    data.head = Header::find_group;
+    data.sender = client.name();
+    data.receiver = "server";
+    data.data1 = groupName.toStdString();
+    client.queueMessage(data);
+}
+
 void GuiBridge::reader()
 {
     client.reader([this](Stream data, asio::error_code error, std::size_t read)
@@ -54,9 +69,12 @@ void GuiBridge::reader()
 void GuiBridge::writer(int receiver, QString message)
 {
     Stream data;
-    data.head = Header::message;
     data.sender = client.name();
     data.receiver = contactListModel_->getContact(receiver).toStdString();
+    if(contactListModel_->getType(receiver) == "group")
+        data.head = Header::group_message;
+    else
+        data.head = Header::message;
     data.data1 = message.toStdString();
     client.queueMessage(data);
 #ifndef NDEBUG
@@ -72,6 +90,13 @@ void GuiBridge::processData(Stream data)
         case Header::message:
             if(!contactListModel_->findContact(data.sender.c_str()))
                 emit resetContactModel();
+            processMessage(data);
+            emit messageReceivedSignal(data.sender.c_str());
+            player.play();
+            break;
+        case Header::group_message:
+            if(!contactListModel_->findContact(data.receiver.c_str()))
+                 emit resetContactModel();
             processMessage(data);
             emit messageReceivedSignal(data.sender.c_str());
             player.play();
@@ -92,6 +117,12 @@ void GuiBridge::processData(Stream data)
         case Header::find_contact|Header::error:
             emit findContactFailureSignal(QString(std::string(data.data1+" not found").c_str()));
             break;
+        case Header::find_group|Header::ack:
+            emit findGroupSuccessSignal(QString(data.data1.c_str()));
+            break;
+        case Header::find_group|Header::error:
+            emit findGroupFailureSignal(QString(std::string(data.data1+" not found").c_str()));
+            break;
         default:
             break;
     }
@@ -109,7 +140,13 @@ void GuiBridge::currentUser(int index)
 
 void GuiBridge::insertContact(QString name)
 {
-    client.insertContact(name.toStdString());
+    client.insertContact(name.toStdString(),"individual");
+    emit resetContactModel();
+}
+
+void GuiBridge::insertGroup(QString name)
+{
+    client.insertContact(name.toStdString(),"group");
     emit resetContactModel();
 }
 

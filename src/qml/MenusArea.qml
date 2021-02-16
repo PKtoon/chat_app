@@ -5,9 +5,14 @@ import QtQuick.Layouts 1.1
 Item {
     property Label informConnect: connectDialog.informConnect
     property Label informSignInUp: signInUpDialog.informSignInUp
+
     property Label informFindContact: findContactDialog.informFindContact
     property Button addButton: findContactDialog.addButton
     property TextField findContactTextField: findContactDialog.findContactTextField
+
+    property Label informFindGroup: findGroupDialog.informFindGroup
+    property Button addGroupButton: findGroupDialog.addGroupButton
+    property TextField findGroupTextField: findGroupDialog.findGroupTextField
 
     Action {
         id: connectAction
@@ -24,6 +29,11 @@ Item {
         text: "&Find Contact"
         onTriggered: findContactDialog.open()
     }
+    Action {
+        id: findGroupAction
+        text: "&Find Group"
+        onTriggered: findGroupDialog.open()
+    }
 
     MenuBar {
         Layout.fillWidth: true
@@ -38,6 +48,7 @@ Item {
         Menu {
             title: "&Message"
             MenuItem { action: findContactAction }
+            MenuItem { action: findGroupAction }
         }
     }
 
@@ -203,4 +214,42 @@ Item {
             }
         }
     }
+    Dialog {
+        id: findGroupDialog
+        property Label informFindContact: informFindGroup
+        property Button addGroupButton: addGroupButton
+        property TextField findGroupTextField: findGroupTextField
+        ColumnLayout {
+            anchors.fill: parent
+            Label {
+                Layout.alignment: Qt.AlignCenter
+                text: "Group Name"
+            }
+            TextField {
+                id: findGroupTextField
+                Layout.alignment: Qt.AlignCenter
+            }
+            RowLayout {
+                Button {
+                    id: addGroupButton
+                    text: "Add"
+                    enabled: false
+                    onClicked: {
+                        informFindGroup.text="Group Added"
+                        guiB.insertGroup(findGroupTextField.text)
+                    }
+                }
+                Button {
+                    text: "Find"
+                    onClicked: guiB.findGroup(findGroupTextField.text)
+                }
+            }
+            Label {
+                id: informFindGroup
+                Layout.alignment: Qt.AlignCenter
+                text: ""
+            }
+        }
+    }
+
 }

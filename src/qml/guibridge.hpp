@@ -40,6 +40,8 @@ signals:
     void setSignInUpInformSignal(QString text);
     void findContactSuccessSignal(QString text);
     void findContactFailureSignal(QString error);
+    void findGroupSuccessSignal(QString text);
+    void findGroupFailureSignal(QString error);
     void messageReceivedSignal(QString name);
     void resetContactModel();
     void resetMessageModel(QString subject);
@@ -51,7 +53,7 @@ private:
     Client client{};
     std::thread ioThread;
     bool isThreadRunning{false};
-    QString contactName;
+//    QString contactName;
     QMediaPlayer player;
 
     ContactListModel* contactListModel_;
@@ -64,12 +66,14 @@ public slots:
     void initSignIn(QString userName, QString passwd);
     void initSignUp(QString userName, QString passwd);
     void findContact(QString contactName);
+    void findGroup(QString groupName);
     void reader();
     void writer(int receiver, QString message);
     void processData(Stream data);
     void processMessage(Stream data);
     void currentUser(int index);
     void insertContact(QString name);
+    void insertGroup(QString name);
 
     //gui
     void setContactListModel(ContactListModel* contactListModel);

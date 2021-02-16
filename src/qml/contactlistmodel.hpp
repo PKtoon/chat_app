@@ -13,7 +13,7 @@ class ContactListModel : public QAbstractListModel
     QML_ELEMENT
 #endif
 
-    QVector<QString> contactList_;
+    QVector<QPair<QString,QString>> contactList_;
 
 public:
     Client* client_;
@@ -37,7 +37,10 @@ public:
 
     void resetList();
     QString getContact(int index){
-        return contactList_[index];
+        return contactList_[index].first;
+    }
+    QString getType(int index) {
+        return contactList_[index].second;
     }
     bool findContact(QString name);
 

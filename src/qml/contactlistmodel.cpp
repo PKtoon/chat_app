@@ -26,7 +26,7 @@ QVariant ContactListModel::data(const QModelIndex &index, int role) const
     case Qt::TextAlignmentRole:
         return Qt::AlignCenter;
     case NameRole:
-        return contactList_[index.row()];
+        return contactList_[index.row()].first;
         break;
     }
     return QVariant();
@@ -48,21 +48,25 @@ bool ContactListModel::removeRows(int row, int count, const QModelIndex &parent)
 
 void ContactListModel::resetList()
 {
-    std::vector<std::string> vlist;
+    std::vector<std::pair<std::string,std::string>> vlist;
 
     client_->getContactList(vlist);
 
     beginResetModel();
     contactList_.clear();
     for(auto& a : vlist){
-        contactList_.push_back(a.c_str());
+        contactList_.push_back(QPair<QString,QString>(a.first.c_str(),a.second.c_str()));
     }
     endResetModel();
 }
 
 bool ContactListModel::findContact(QString name)
 {
-    return contactList_.contains(name);
+    for(auto& a : contactList_) {
+        if(a.first == name)
+            return true;
+    }
+    return false;
 }
 
 void ContactListModel::resetModel()
