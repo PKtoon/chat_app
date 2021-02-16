@@ -88,7 +88,8 @@ void Client::writer()
 Client::Error Client::queueMessage(Stream data)
 {
     switch(data.head){
-        case Header::message:
+        case Header::message:     
+        case Header::group_message:
             if(!insertMessage(data.receiver,data.sender,data.data1))
                 return Error::db_error;
             break;
@@ -110,6 +111,7 @@ void Client::processData(Stream data)
             ping();
             break;
         case Header::message:
+        case Header::group_message:
             processMessage(data);
             break;
         case Header::signin|Header::ack:
@@ -123,21 +125,32 @@ void Client::processData(Stream data)
 
 void Client::processMessage(Stream data)
 {
+    std::string subject,type;
     bool result;
-    if(!getContact(data.sender,result))
+    switch (data.head) {
+    case Header::message:
+        subject = data.sender;
+        type = "individual";
+        break;
+    case Header::group_message:
+        subject = data.receiver;
+        type = "group";
+        break;
+    }
+    if(!getContact(subject,result))
     {
         std::cerr<<db.getError();
         return;
     }
     if(!result)
     {
-        if(!insertContact(data.sender))
+        if(!insertContact(subject,type))
         {
             std::cerr<<db.getError();
             return;
         }
     }
-    if(!insertMessage(data.sender,data.sender,data.data1))
+    if(!insertMessage(subject,data.sender,data.data1))
     {
         std::cerr<<db.getError();
         return;
@@ -197,7 +210,7 @@ void Client::initDB()
             std::string colData{columnData[0]};
             if(colName == "COUNT(name)" && colData == "0")
             {
-                if(!db.queryExec("CREATE TABLE contacts_"+name_+" (name TEXT PRIMARY KEY);"))
+                if(!db.queryExec("CREATE TABLE contacts_"+name_+" (name TEXT PRIMARY KEY,type TEXT);"))
                     std::cerr<<db.getError();
             }
                 return 0;
@@ -237,16 +250,15 @@ bool Client::getContact(std::string name, bool& result)
 
     return db.queryExec(query,func);
 }
-bool Client::getContactList(std::vector<std::string>& list)
+bool Client::getContactList(std::vector<std::pair<std::string, std::string> > &list)
 {
-    std::string query {"SELECT name FROM contacts_"+name_+";"};
+    std::string query {"SELECT name,type FROM contacts_"+name_+";"};
 
     auto func = [&list](int numOfColumns, char **columnData, char **columnName)->int
         {
             std::string colName {columnName[0]};            //need to store in a string first as columnName[0]=="name" always fails
             if(colName=="name")
-                list.push_back(std::string(columnData[0]));
-
+                list.push_back(std::pair<std::string,std::string>(std::string(columnData[0]),std::string(columnData[1])));
             return 0;
         };
 
@@ -266,14 +278,14 @@ bool Client::getMessages(std::string contact, std::vector<std::pair<std::string,
     return db.queryExec(query,func);
 }
 
-bool Client::insertContact(std::string name)
+bool Client::insertContact(std::string name, std::string type)
 {
-    std::string query{"INSERT INTO contacts_"+name_+" VALUES (\""+name+"\");"};
+    std::string query{"INSERT INTO contacts_"+name_+" VALUES (\""+name+"\",\""+type+"\");"};
     return db.queryExec(query);
 }
 
-bool Client::insertMessage(std::string contact, std::string sender, std::string msg)
+bool Client::insertMessage(std::string subject, std::string sender, std::string msg)
 {
-    std::string query {"INSERT INTO messages_"+name_+" (contact,sender,message,time) VALUES (\""+contact+"\", \""+sender+"\", \""+msg+"\",datetime(\"now\"));"};
+    std::string query {"INSERT INTO messages_"+name_+" (contact,sender,message,time) VALUES (\""+subject+"\", \""+sender+"\", \""+msg+"\",datetime(\"now\"));"};
     return db.queryExec(query);
 }

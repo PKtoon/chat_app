@@ -47,9 +47,9 @@ public:
     std::string getDBError();
     void initDB();
     bool getContact(std::string name, bool& result);
-    bool getContactList(std::vector<std::string>& list);
+    bool getContactList(std::vector<std::pair<std::string, std::string> > &list);
     bool getMessages(std::string subject, std::vector<std::pair<std::string,std::string>>& msg);
-    bool insertContact(std::string name);
+    bool insertContact(std::string name, std::string type);
     bool insertMessage(std::string subject, std::string sender, std::string msg);
 };
 
