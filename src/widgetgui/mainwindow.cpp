@@ -73,7 +73,7 @@ void MainWindow::decorate()
 
 void MainWindow::setContactList()
 {
-    std::vector<std::string> list;
+    std::vector<std::pair<std::string, int>> list;
 
     if(!client.getContactList(list))
         qInfo()<<client.getDBError().c_str();
@@ -83,7 +83,7 @@ void MainWindow::setContactList()
 
     //TODO: possible memory leak
     for(auto& a : list)
-        new QListWidgetItem(a.c_str(),contactsListWidget);
+        new QListWidgetItem(a.first.c_str(),contactsListWidget);
     if(!list.empty())
         emit contactsListWidget->itemClicked(contactsListWidget->item(0));
 }
@@ -294,7 +294,7 @@ void MainWindow::createContact(const QString& text)
     QListWidgetItem* user = getUser(text);
     if(!user)
     {
-        client.insertContact(text.toStdString());
+        client.insertContact(text.toStdString(), Client::ContactType::individual);
         user = makeContact(text);
     }
 
