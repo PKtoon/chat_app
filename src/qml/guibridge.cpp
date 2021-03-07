@@ -140,13 +140,13 @@ void GuiBridge::currentUser(int index)
 
 void GuiBridge::insertContact(QString name)
 {
-    client.insertContact(name.toStdString(),"individual");
+    client.insertContact(name.toStdString(),Client::ContactType::individual);
     emit resetContactModel();
 }
 
 void GuiBridge::insertGroup(QString name)
 {
-    client.insertContact(name.toStdString(),"group");
+    client.insertContact(name.toStdString(),Client::ContactType::group);
     emit resetContactModel();
 }
 

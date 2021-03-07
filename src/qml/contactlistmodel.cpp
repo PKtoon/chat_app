@@ -48,14 +48,14 @@ bool ContactListModel::removeRows(int row, int count, const QModelIndex &parent)
 
 void ContactListModel::resetList()
 {
-    std::vector<std::pair<std::string,std::string>> vlist;
+    std::vector<std::pair<std::string,int>> vlist;
 
     client_->getContactList(vlist);
 
     beginResetModel();
     contactList_.clear();
     for(auto& a : vlist){
-        contactList_.push_back(QPair<QString,QString>(a.first.c_str(),a.second.c_str()));
+        contactList_.push_back(QPair<QString,QString>(a.first.c_str(),std::to_string(a.second).c_str()));
     }
     endResetModel();
 }
