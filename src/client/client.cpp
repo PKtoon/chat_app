@@ -125,17 +125,20 @@ void Client::processData(Stream data)
 
 void Client::processMessage(Stream data)
 {
-    std::string subject,type;
+    std::string subject;
+    ContactType type;
     bool result;
     switch (data.head) {
     case Header::message:
         subject = data.sender;
-        type = "individual";
+        type = ContactType::individual;
         break;
     case Header::group_message:
         subject = data.receiver;
-        type = "group";
+        type = ContactType::group;
         break;
+    default:
+        return;
     }
     if(!getContact(subject,result))
     {
@@ -210,7 +213,7 @@ void Client::initDB()
             std::string colData{columnData[0]};
             if(colName == "COUNT(name)" && colData == "0")
             {
-                if(!db.queryExec("CREATE TABLE contacts_"+name_+" (name TEXT PRIMARY KEY,type TEXT);"))
+                if(!db.queryExec("CREATE TABLE contacts_"+name_+" (name TEXT PRIMARY KEY,type INTEGER);"))
                     std::cerr<<db.getError();
             }
                 return 0;
@@ -250,7 +253,7 @@ bool Client::getContact(std::string name, bool& result)
 
     return db.queryExec(query,func);
 }
-bool Client::getContactList(std::vector<std::pair<std::string, std::string> > &list)
+bool Client::getContactList(std::vector<std::pair<std::string, int> > &list)
 {
     std::string query {"SELECT name,type FROM contacts_"+name_+";"};
 
@@ -258,7 +261,7 @@ bool Client::getContactList(std::vector<std::pair<std::string, std::string> > &l
         {
             std::string colName {columnName[0]};            //need to store in a string first as columnName[0]=="name" always fails
             if(colName=="name")
-                list.push_back(std::pair<std::string,std::string>(std::string(columnData[0]),std::string(columnData[1])));
+                list.push_back(std::pair<std::string,int>(std::string(columnData[0]),std::atoi(columnData[1])));
             return 0;
         };
 
@@ -278,9 +281,9 @@ bool Client::getMessages(std::string contact, std::vector<std::pair<std::string,
     return db.queryExec(query,func);
 }
 
-bool Client::insertContact(std::string name, std::string type)
+bool Client::insertContact(std::string name, ContactType type)
 {
-    std::string query{"INSERT INTO contacts_"+name_+" VALUES (\""+name+"\",\""+type+"\");"};
+    std::string query{"INSERT INTO contacts_"+name_+" VALUES (\""+name+"\",\""+std::to_string(type)+"\");"};
     return db.queryExec(query);
 }
 

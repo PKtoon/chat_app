@@ -18,7 +18,13 @@ class Client
     std::deque<Stream> writeQueue;
     SQLite3DB db{"storage"};
     bool isConnected {false};
+    
 public:
+     enum ContactType {
+        individual,
+        group 
+    };
+    
     Client(std::string name = "") : net{io_} {}
 
     Client(asio::io_context& io,std::string name = ""): net{io} {}
@@ -47,9 +53,9 @@ public:
     std::string getDBError();
     void initDB();
     bool getContact(std::string name, bool& result);
-    bool getContactList(std::vector<std::pair<std::string, std::string> > &list);
+    bool getContactList(std::vector<std::pair<std::string, int> > &list);
     bool getMessages(std::string subject, std::vector<std::pair<std::string,std::string>>& msg);
-    bool insertContact(std::string name, std::string type);
+    bool insertContact(std::string name, ContactType type);
     bool insertMessage(std::string subject, std::string sender, std::string msg);
 };
 
