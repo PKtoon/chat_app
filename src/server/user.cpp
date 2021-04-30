@@ -30,7 +30,9 @@ void User::authHandler(Stream data)
             if(server.authUser(data.sender,data.data1))
             {
                 name = data.sender;
+#ifndef NDEBUG
                 name2 = name;
+#endif
                 reply.receiver = name;
                 reply.head = static_cast<Header>(Header::signin|Header::ack);
                 isAlive = true;
@@ -47,7 +49,9 @@ void User::authHandler(Stream data)
             if(res.size() == 0){
                 server.addUser(data.sender,data.data1);
                 name = data.sender;
+#ifndef NDEBUG
                 name2 = name;
+#endif
                 reply.receiver = name;
                 reply.head = static_cast<Header>(Header::signup|Header::ack);
                 isAlive = true;

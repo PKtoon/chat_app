@@ -13,7 +13,10 @@ class Server;
 
 class User
 {
-    std::string name,name2;
+    std::string name;
+#ifndef NDEBUG
+    std::string name2;
+#endif
     bool isAlive{false};
     unsigned short count = 0;
     std::list<Stream> writeQueue;
