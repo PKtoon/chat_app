@@ -77,17 +77,17 @@ void Server::queueDelivery(Stream data)
 
 void Server::addUser(std::string name, std::string passwd)
 {
-    db.execCommit("INSERT INTO users (name,passwd) VALUES ('"+name+"','"+passwd+"');");
+    db.execCommit("INSERT INTO users (username,passwd) VALUES ('"+name+"','"+passwd+"');");
 }
 
 pqxx::result Server::getUser(std::string name)
 {
-    return db.exec("SELECT name FROM users WHERE name = '"+name+"';");
+    return db.exec("SELECT username FROM users WHERE username = '"+name+"';");
 }
 
 bool Server::authUser(std::string name, std::string passwd)
 {
-    pqxx::result res = db.exec("SELECT name,passwd FROM users WHERE name = '"+name+"';");
+    pqxx::result res = db.exec("SELECT username,passwd FROM users WHERE username = '"+name+"';");
     if(res.size() == 1)
         if(res[0][0].c_str() == name && res[0][1].c_str() == passwd)
             return true;
@@ -106,18 +106,18 @@ User* Server::getActiveUser(std::string name)
 
 void Server::storePendingMessage(std::string subject, Stream data)
 {
-    db.execCommit("INSERT INTO pending (name,message,timestamp) VALUES ('"+subject+"','"+data.getSerialized()+"','now()');");
+    db.execCommit("INSERT INTO pending (username,message,timestamp) VALUES ('"+subject+"','"+data.getSerialized()+"','now()');");
 }
 
 std::list<Stream> Server::getPendingMessages ( std::string name )
 {
     std::list<Stream> list;
-    pqxx::result res = db.exec("SELECT message FROM pending WHERE name = '"+name+"' ORDER BY timestamp;");
+    pqxx::result res = db.exec("SELECT message FROM pending WHERE username = '"+name+"' ORDER BY timestamp;");
     for(unsigned int i = 0; i < res.size(); i++) {
         Stream data(res[i][0].c_str());
         list.push_back(data);
     }
-    db.execCommit("DELETE FROM pending WHERE name = '"+name+"';");
+    db.execCommit("DELETE FROM pending WHERE username = '"+name+"';");
     return list;
 }
 
