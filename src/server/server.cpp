@@ -190,7 +190,7 @@ void Server::createGroup ( Stream data )
                 temp.clear();
             }
         }
-        db.execCommit("INSET INTO group_members (username,groupname) VALUES ('"+data.sender+"','"+data.data1+"');");
+        db.execCommit("INSERT INTO group_members (username,groupname) VALUES ('"+data.sender+"','"+data.data1+"');");
         for(auto& username : list) {
             pqxx::result res = getUser(username);
             if(res.size() == 1 && res[0][0].c_str() == username) {
