@@ -19,8 +19,8 @@
  **************************************************************************************
  */
 
-#include "../src/network-interface/connection-manager/connection-manager.hpp"
-#include "../src/network-interface/stream/stream.hpp"
+#include "connection-manager/connection-manager.hpp"
+#include "stream/stream.hpp"
 
 #include <deque>
 

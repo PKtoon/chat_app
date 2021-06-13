@@ -26,7 +26,7 @@
 
 #include <list>
 
-#include "network-interface/netface.hpp"
+#include "../network-interface/netface.hpp"
 
 class Server;
 

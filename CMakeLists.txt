@@ -4,7 +4,7 @@ project(chat_app)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include_directories(include/ external/asio/asio/include/ external/json/single_include/)
+include_directories(external/asio/asio/include/ external/json/single_include/)
 
 add_subdirectory(src/network-interface)
 add_subdirectory(external/sqlite3)

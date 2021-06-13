@@ -16,7 +16,7 @@
 #include <deque>
 
 #include "sqlite3_wrap.h"
-#include "network-interface/netface.hpp"
+#include "../network-interface/netface.hpp"
 /**
  * @todo write docs
  */

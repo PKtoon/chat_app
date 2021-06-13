@@ -12,7 +12,7 @@ set(NETWORK_INTERFACE
     stream/stream.cpp
     connection-manager/connection-manager.hpp
     connection-manager/connection-manager.cpp
-    ${CMAKE_SOURCE_DIR}/include/network-interface/netface.hpp
+    netface.hpp
     netface.cpp
     )
 
