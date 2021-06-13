@@ -1,6 +1,18 @@
 #ifndef STREAM_H
 #define STREAM_H
 
+/**************************************************************************************
+ * Stream represents stream of data in communication
+ *
+ * Author: Pratik Khanke
+ *
+ * Tasks of Stream:
+ *      Provide enumeration for various message types
+ *      Provide serialization and deserialization functions
+ *
+ **************************************************************************************
+ */
+
 #include <vector>
 #include <string>
 
