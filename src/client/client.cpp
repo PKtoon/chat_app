@@ -128,6 +128,7 @@ void Client::processMessage(Stream data)
     std::string subject;
     ContactType type;
     bool result;
+    
     switch (data.head) {
     case Header::message:
         subject = data.sender;
@@ -140,11 +141,13 @@ void Client::processMessage(Stream data)
     default:
         return;
     }
+    
     if(!getContact(subject,result))
     {
         std::cerr<<db.getError();
         return;
     }
+    
     if(!result)
     {
         if(!insertContact(subject,type))
@@ -153,6 +156,7 @@ void Client::processMessage(Stream data)
             return;
         }
     }
+    
     if(!insertMessage(subject,data.sender,data.data1))
     {
         std::cerr<<db.getError();
