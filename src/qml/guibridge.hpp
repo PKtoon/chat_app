@@ -68,7 +68,7 @@ public slots:
     void findContact(QString contactName);
     void findGroup(QString groupName);
     void reader();
-    void writer(int receiver, QString message);
+    void writer(int receiverIndex, QString message);
     void processData(Stream data);
     void processMessage(Stream data);
     void currentUser(int index);

@@ -66,12 +66,12 @@ void GuiBridge::reader()
     });
 }
 
-void GuiBridge::writer(int receiver, QString message)
+void GuiBridge::writer(int receiverIndex, QString message)
 {
     Stream data;
     data.sender = client.name();
-    data.receiver = contactListModel_->getContact(receiver).toStdString();
-    if(contactListModel_->getType(receiver) == "group")
+    data.receiver = contactListModel_->getContact(receiverIndex).toStdString();
+    if(contactListModel_->getType(receiverIndex) == "group")
         data.head = Header::group_message;
     else
         data.head = Header::message;
