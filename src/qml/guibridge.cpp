@@ -26,12 +26,7 @@ void GuiBridge::findContact(QString contactName)
 //        newContactDialog->setInform("Client is not connected");
         return;
     }
-    Stream data;
-    data.head = Header::find_contact;
-    data.sender = client.name();
-    data.receiver = "server";
-    data.data1 = contactName.toStdString();
-    client.queueMessage(data);
+    client.findEntity(contactName.toStdString(), Header::find_contact);
 }
 
 void GuiBridge::findGroup(QString groupName)
@@ -41,12 +36,7 @@ void GuiBridge::findGroup(QString groupName)
 //        newContactDialog->setInform("Client is not connected");
         return;
     }
-    Stream data;
-    data.head = Header::find_group;
-    data.sender = client.name();
-    data.receiver = "server";
-    data.data1 = groupName.toStdString();
-    client.queueMessage(data);
+    client.findEntity(groupName.toStdString(),Header::find_group);
 }
 
 void GuiBridge::reader()

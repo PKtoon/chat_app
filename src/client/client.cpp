@@ -171,6 +171,16 @@ void Client::ping()
     queueMessage(ping);
 }
 
+void Client::findEntity(std::string entityName, Header head)
+{
+    Stream data;
+    data.head = head;
+    data.sender = name_;
+    data.receiver = "server";
+    data.data1 = entityName;
+    queueMessage(data);
+}
+
 void Client::runIOContext()
 {
     io_.restart();

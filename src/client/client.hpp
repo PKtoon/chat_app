@@ -55,6 +55,7 @@ public:
     void processMessage(Stream data);                                                               //Called by Client::processData, processes messages adds unknown contacts to database, insert messages to database
     Client::Error queueMessage(Stream data);                                                        //Queues message to be sent
     void ping();                                                                                    //pings back server
+    void findEntity(std::string entityName, Header head);                                                             //Finds contact
 
     //networking
     void connect(std::string host, std::string port, std::function<void(asio::error_code)> callBack);
