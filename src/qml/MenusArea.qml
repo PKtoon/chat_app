@@ -216,7 +216,7 @@ Item {
     }
     Dialog {
         id: findGroupDialog
-        property Label informFindContact: informFindGroup
+        property Label informFindGroup: informFindGroup
         property Button addGroupButton: addGroupButton
         property TextField findGroupTextField: findGroupTextField
         ColumnLayout {
