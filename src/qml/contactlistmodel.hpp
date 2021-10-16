@@ -19,7 +19,8 @@ public:
     Client* client_;
 
     enum ContactRole {
-        NameRole = Qt::UserRole+1
+        NameRole = Qt::UserRole,
+        TypeRole
     };
 
     explicit ContactListModel(QObject *parent = nullptr);
@@ -53,6 +54,7 @@ protected:
     QHash<int, QByteArray> roleNames() const {
         QHash<int, QByteArray> roles;
         roles[NameRole] = "name";
+        roles[TypeRole] = "type";
         return roles;
     }
 

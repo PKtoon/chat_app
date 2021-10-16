@@ -27,7 +27,8 @@ QVariant ContactListModel::data(const QModelIndex &index, int role) const
         return Qt::AlignCenter;
     case NameRole:
         return contactList_[index.row()].first;
-        break;
+    case TypeRole:
+        return contactList_[index.row()].second;
     }
     return QVariant();
 }
