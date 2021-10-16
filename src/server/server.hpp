@@ -19,7 +19,7 @@
  *
  * Required Tables in PostgreSQL database:
  *      create table users (username text PRIMARY KEY NOT NULL, passwd text NOT NULL);
- *      create table pending (ID integer PRIMARY KEY NOT NULL, username text NOT NULL, message text NOT NULL, timestamp TIMESTAMPTZ NOT NULL);
+ *      create table pending (ID serial PRIMARY KEY NOT NULL, username text NOT NULL, message text NOT NULL, timestamp TIMESTAMPTZ NOT NULL);
  *      create table group_members (ID integer PRIMARY KEY NOT NULL, username text NOT NULL, groupname text NOT NULL);
  *
  *  TODO:
