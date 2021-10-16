@@ -78,15 +78,13 @@ void GuiBridge::processData(Stream data)
     switch(data.head)
     {
         case Header::message:
-            if(!contactListModel_->findContact(data.sender.c_str()))
-                emit resetContactModel();
+            emit resetContactModel();
             processMessage(data);
             emit messageReceivedSignal(data.sender.c_str());
             player.play();
             break;
         case Header::group_message:
-            if(!contactListModel_->findContact(data.receiver.c_str()))
-                 emit resetContactModel();
+            emit resetContactModel();
             processMessage(data);
             emit messageReceivedSignal(data.sender.c_str());
             player.play();

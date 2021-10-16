@@ -227,7 +227,7 @@ void Client::initDB()
             std::string colData{columnData[0]};
             if(colName == "COUNT(name)" && colData == "0")
             {
-                if(!db.queryExec("CREATE TABLE contacts_"+name_+" (name TEXT PRIMARY KEY,type INTEGER);"))
+                if(!db.queryExec("CREATE TABLE contacts_"+name_+" (name TEXT PRIMARY KEY,type INTEGER,latest INTEGER);"))
                     std::cerr<<db.getError();
             }
                 return 0;
@@ -269,7 +269,7 @@ bool Client::getContact(std::string name, bool& result)
 }
 bool Client::getContactList(std::vector<std::pair<std::string, int> > &list)
 {
-    std::string query {"SELECT name,type FROM contacts_"+name_+";"};
+    std::string query {"SELECT name,type FROM contacts_"+name_+" ORDER BY latest DESC;"};
 
     auto func = [&list](int numOfColumns, char **columnData, char **columnName)->int
         {
@@ -297,12 +297,24 @@ bool Client::getMessages(std::string contact, std::vector<std::pair<std::string,
 
 bool Client::insertContact(std::string name, ContactType type)
 {
-    std::string query{"INSERT INTO contacts_"+name_+" VALUES (\""+name+"\",\""+std::to_string(type)+"\");"};
+    auto now = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+    auto intDuration = now.time_since_epoch().count();
+
+    std::string query{"INSERT INTO contacts_"+name_+" VALUES (\""+name+"\","+std::to_string(type)+","+std::to_string(intDuration)+");"};
     return db.queryExec(query);
 }
 
 bool Client::insertMessage(std::string subject, std::string sender, std::string msg)
 {
-    std::string query {"INSERT INTO messages_"+name_+" (contact,sender,message,time) VALUES (\""+subject+"\", \""+sender+"\", \""+msg+"\",datetime(\"now\"));"};
-    return db.queryExec(query);
+    bool result;
+    auto now = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+    auto intDuration = now.time_since_epoch().count();
+
+    std::string query {"INSERT INTO messages_"+name_+" (contact,sender,message,time) VALUES (\""+subject+"\", \""+sender+"\", \""+msg+"\","+std::to_string(intDuration)+");"};
+    result = db.queryExec(query);
+
+    query = "UPDATE contacts_"+name_+" SET latest="+std::to_string(intDuration)+" WHERE name = \""+subject+"\";";
+    result &= db.queryExec(query);
+
+    return result;
 }
