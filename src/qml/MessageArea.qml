@@ -1,11 +1,9 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
-import pkChat.MessageListModel 1.0
 
 Item {
-    property PKMessageList messageList
-    property ListView contactList
+    property ListView messagesListView: messageList
     ColumnLayout {
         anchors.fill: parent
         GroupBox {
@@ -13,8 +11,9 @@ Item {
             Layout.fillHeight: true
             Layout.minimumHeight: 2*Layout.height/3
             ListView {
+                id: messageList
                 anchors.fill: parent
-                model: messageList
+                model: guiB.messageListModel
                 highlightFollowsCurrentItem: true
                 clip: true
                 spacing: 15
@@ -54,8 +53,8 @@ Item {
                     text: "Send"
                     Layout.minimumWidth: parent.width/3
                     onClicked: {
-                        if (contactView.contactList.currentIndex !== -1 && messageField.text !== "" ) {
-                            guiB.writer(contactList.currentIndex, messageField.text)
+                        if (guiB.contactListModel.currentIndex !== -1 && messageField.text !== "" ) {
+                            guiB.writer(guiB.contactListModel.currentIndex, messageField.text)
                         }
                         messageField.text = ""
                     }

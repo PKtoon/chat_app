@@ -282,6 +282,21 @@ bool Client::getContactList(std::vector<std::pair<std::string, int> > &list)
     return db.queryExec(query,func);
 }
 
+bool Client::getContactListAlphaOrder(std::vector<std::pair<std::string, int> > &list)
+{
+    std::string query {"SELECT name,type FROM contacts_"+name_+" ORDER BY name;"};
+
+    auto func = [&list](int numOfColumns, char **columnData, char **columnName)->int
+        {
+            std::string colName {columnName[0]};            //need to store in a string first as columnName[0]=="name" always fails
+            if(colName=="name")
+                list.push_back(std::pair<std::string,int>(std::string(columnData[0]),std::atoi(columnData[1])));
+            return 0;
+        };
+
+    return db.queryExec(query,func);
+}
+
 bool Client::getMessages(std::string contact, std::vector<std::pair<std::string,std::string>>& msg)
 {
     std::string query = "SELECT sender,message FROM messages_"+name_+" WHERE contact=\""+contact+"\";";

@@ -6,7 +6,29 @@
 
 GuiBridge::GuiBridge(QObject *parent) : QObject(parent)
 {
+    QObject::connect(this,&GuiBridge::resetContactModel, &contactListModel_, &ContactListModel::resetModel,Qt::QueuedConnection);
+    contactListModel_.client_ = &client;
+    QObject::connect(this,&GuiBridge::resetMessageModel, &messageListModel_, &MessageListModel::resetModel,Qt::QueuedConnection);
+    messageListModel_.client = &client;
     player.setMedia(QUrl("qrc:/resources/assets/Done_for_You/done-for-you-612.ogg"));
+}
+
+GuiBridge::~GuiBridge()
+{
+    if(ioThread.joinable()){
+        client.disconnect();
+        ioThread.join();
+    }
+}
+
+ContactListModel *GuiBridge::contactListModel()
+{
+    return &contactListModel_;
+}
+
+MessageListModel *GuiBridge::messageListModel()
+{
+    return &messageListModel_;
 }
 
 void GuiBridge::initSignIn(QString userName, QString passwd)
@@ -60,8 +82,8 @@ void GuiBridge::writer(int receiverIndex, QString message)
 {
     Stream data;
     data.sender = client.name();
-    data.receiver = contactListModel_->getContact(receiverIndex).toStdString();
-    if(contactListModel_->getType(receiverIndex) == "group")
+    data.receiver = contactListModel_.getContact(receiverIndex).toStdString();
+    if(contactListModel_.getType(receiverIndex) == Client::ContactType::group)
         data.head = Header::group_message;
     else
         data.head = Header::message;
@@ -93,7 +115,7 @@ void GuiBridge::processData(Stream data)
         case Header::signup|Header::ack:
             emit setSignInUpInformSignal(QString("Successfully authenticated"));
             emit resetContactModel();
-            emit contactListModelChanged(contactListModel_);
+            emit contactListModelChanged(&contactListModel_);
             break;
         case Header::signin|Header::error:
         case Header::signup|Header::error:
@@ -123,7 +145,7 @@ void GuiBridge::processMessage(Stream data)
 
 void GuiBridge::currentUser(int index)
 {
-    emit resetMessageModel(contactListModel_->getContact(index));
+    emit resetMessageModel(contactListModel_.getContact(index));
 }
 
 void GuiBridge::insertContact(QString name)
@@ -136,17 +158,6 @@ void GuiBridge::insertGroup(QString name)
 {
     client.insertContact(name.toStdString(),Client::ContactType::group);
     emit resetContactModel();
-}
-
-void GuiBridge::setContactListModel(ContactListModel *contactListModel)
-{
-    if (contactListModel_ == contactListModel)
-        return;
-
-    contactListModel_ = contactListModel;
-    contactListModel_->client_ = &client;
-    QObject::connect(this,&GuiBridge::resetContactModel, contactListModel_, &ContactListModel::resetModel,Qt::QueuedConnection);
-    emit contactListModelChanged(contactListModel_);
 }
 
 void GuiBridge::connect(QString host, QString port)

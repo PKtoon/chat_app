@@ -68,7 +68,8 @@ public:
     std::string getDBError();                                                                               //Returns SQLite3 error message
     void initDB();                                                                                          //Initializes database for specific user
     bool getContact(std::string name, bool& result);                                                        //Checks if contact exists
-    bool getContactList(std::vector<std::pair<std::string, int> > &list);                                   //Get list of pair of contact and its type
+    bool getContactList(std::vector<std::pair<std::string, int> > &list);                                   //Get list of pair of contact and its type in latest update order
+    bool getContactListAlphaOrder(std::vector<std::pair<std::string, int> > &list);                         //Get list of pair of contact and its type in alphabetic order
     bool getMessages(std::string subject, std::vector<std::pair<std::string,std::string>>& msg);            //Gets sender and message pair for specific contact
     bool insertContact(std::string name, ContactType type);                                                 //Insert contact with type into database
     bool insertMessage(std::string subject, std::string sender, std::string msg);                           //Insert message into database

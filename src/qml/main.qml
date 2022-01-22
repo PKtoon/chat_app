@@ -2,8 +2,6 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.12
 import pkChat.GuiBridge 1.0
-import pkChat.ContactListModel 1.0
-import pkChat.MessageListModel 1.0
 
 ApplicationWindow {
     width: 640
@@ -12,17 +10,9 @@ ApplicationWindow {
 
     menuBar: MenusArea{}
 
-    PKContact {
-        id: pkContactList
-    }
-    PKMessageList {
-        id: pkMessageList
-    }
-
     PKGui {
         id: guiB
-        contactListModel: pkContactList
-        messageListModel: pkMessageList
+
         onSetConnectInformSignal: menuBar.informConnect.text = text
         onSetSignInUpInformSignal: menuBar.informSignInUp.text = text
         onFindContactSuccessSignal: {
@@ -44,9 +34,10 @@ ApplicationWindow {
 
         onFindGroupFailureSignal: menuBar.informFindGroup.text = error
         onMessageReceivedSignal: {
-            if (contactView.contactList.currentUser === name)
-                guiB.currentUser(contactView.contactList.currentIndex)
-                contactView.contactList.positionViewAtEnd()
+            if (contactView.currentUser === name)
+            {
+                guiB.currentUser(contactView.currentIndex)
+            }
         }
     }
 
@@ -57,11 +48,9 @@ ApplicationWindow {
             id: contactView
             Layout.fillHeight: true
             Layout.minimumWidth: parent.width/3
-            listModel: pkContactList
         }
         MessageArea {
-            messageList: pkMessageList
-            contactList: contactView.contactList
+            id: messageView
             Layout.fillHeight: true
             Layout.fillWidth: true
             Layout.minimumWidth: 2*parent.width/3

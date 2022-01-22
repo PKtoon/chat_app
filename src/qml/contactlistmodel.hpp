@@ -13,7 +13,7 @@ class ContactListModel : public QAbstractListModel
     QML_ELEMENT
 #endif
 
-    QVector<QPair<QString,QString>> contactList_;
+    QVector<QPair<QString,int>> contactList_;
 
 public:
     Client* client_;
@@ -40,7 +40,7 @@ public:
     QString getContact(int index){
         return contactList_[index].first;
     }
-    QString getType(int index) {
+    int getType(int index) {
         return contactList_[index].second;
     }
     bool findContact(QString name);
@@ -51,7 +51,7 @@ public slots:
 private:
 
 protected:
-    QHash<int, QByteArray> roleNames() const {
+    QHash<int, QByteArray> roleNames() const override {
         QHash<int, QByteArray> roles;
         roles[NameRole] = "name";
         roles[TypeRole] = "type";

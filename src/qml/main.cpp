@@ -10,9 +10,9 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
+    qmlRegisterType<ContactListModel>("pkChat.ContactListModel",1,0,"ContactListModel");
+    qmlRegisterType<MessageListModel>("pkChat.MessageListModel",1,0,"MessageListModel");
     qmlRegisterType<GuiBridge>("pkChat.GuiBridge",1,0,"PKGui");
-    qmlRegisterType<ContactListModel>("pkChat.ContactListModel",1,0,"PKContact");
-    qmlRegisterType<MessageListModel>("pkChat.MessageListModel",1,0,"PKMessageList");
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));

@@ -34,6 +34,11 @@ Item {
         text: "&Find Group"
         onTriggered: findGroupDialog.open()
     }
+    Action {
+        id: createGroupAction
+        text: "Create Group"
+        onTriggered: createGroupDialog.open()
+    }
 
     MenuBar {
         Layout.fillWidth: true
@@ -49,6 +54,7 @@ Item {
             title: "&Message"
             MenuItem { action: findContactAction }
             MenuItem { action: findGroupAction }
+            MenuItem { action: createGroupAction }
         }
     }
 
@@ -252,4 +258,46 @@ Item {
         }
     }
 
+    Dialog {
+        id: createGroupDialog
+        width: 500
+        height: 500
+        ColumnLayout
+        {
+            anchors.fill: parent
+            Label {
+                text: "Create group"
+                Layout.alignment: Qt.AlignHCenter
+            }
+
+        GroupBox {
+            //implicitHeight: parent.height * 2/3
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            ListView {
+                model: guiB.contactListModel
+                anchors.fill: parent
+                delegate: ItemDelegate {
+                    width: ListView.width
+                    visible: (type == 1) ? true : false
+                    RowLayout{
+                        CheckBox {
+                            checked: false
+                        }
+                        Label {
+                            text: name
+                        }
+                    }
+                }
+            }
+        }
+}
+
+        /*height: 500
+        width: 500
+            GroupList {
+                anchors.fill: parent
+                contactList: contactList
+            }*/
+    }
 }

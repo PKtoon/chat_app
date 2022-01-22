@@ -56,7 +56,7 @@ void ContactListModel::resetList()
     beginResetModel();
     contactList_.clear();
     for(auto& a : vlist){
-        contactList_.push_back(QPair<QString,QString>(a.first.c_str(),std::to_string(a.second).c_str()));
+        contactList_.push_back(QPair<QString,int>(a.first.c_str(),a.second));
     }
     endResetModel();
 }
