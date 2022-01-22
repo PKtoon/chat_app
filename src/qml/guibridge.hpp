@@ -14,26 +14,14 @@ class GuiBridge : public QObject
 #if (QT_VERSION > QT_VERSION_CHECK(5, 12, 10))
     QML_ELEMENT
 #endif
-    Q_PROPERTY(MessageListModel* messageListModel READ messageListModel WRITE setMessageListModel NOTIFY messageListModelChanged)
-    Q_PROPERTY(ContactListModel* contactListModel READ contactListModel WRITE setContactListModel NOTIFY contactListModelChanged)
+    Q_PROPERTY(MessageListModel* messageListModel READ messageListModel NOTIFY messageListModelChanged)
+    Q_PROPERTY(ContactListModel* contactListModel READ contactListModel NOTIFY contactListModelChanged)
 public:
     explicit GuiBridge(QObject *parent = nullptr);
-    ~GuiBridge(){
-        if(ioThread.joinable()){
-            client.disconnect();
-            ioThread.join();
-        }
-    }
+    ~GuiBridge();
 
-    ContactListModel* contactListModel() const
-    {
-        return contactListModel_;
-    }
-
-    MessageListModel* messageListModel() const
-    {
-        return messageListModel_;
-    }
+    ContactListModel* contactListModel();
+    MessageListModel* messageListModel();
 
 signals:
     void setConnectInformSignal(QString text);
@@ -46,19 +34,16 @@ signals:
     void resetContactModel();
     void resetMessageModel(QString subject);
     void contactListModelChanged(ContactListModel* contactList);
-
     void messageListModelChanged(MessageListModel* messageListModel);
 
 private:
     Client client{};
     std::thread ioThread;
     bool isThreadRunning{false};
-//    QString contactName;
     QMediaPlayer player;
 
-    ContactListModel* contactListModel_;
-
-    MessageListModel* messageListModel_;
+    ContactListModel contactListModel_;
+    MessageListModel messageListModel_;
 
 public slots:
     //client.h
@@ -74,19 +59,6 @@ public slots:
     void currentUser(int index);
     void insertContact(QString name);
     void insertGroup(QString name);
-
-    //gui
-    void setContactListModel(ContactListModel* contactListModel);
-    void setMessageListModel(MessageListModel* messageListModel)
-    {
-        if (messageListModel_ == messageListModel)
-            return;
-
-        messageListModel_ = messageListModel;
-        messageListModel_->client = &client;
-        QObject::connect(this,&GuiBridge::resetMessageModel, messageListModel_, &MessageListModel::resetModel,Qt::QueuedConnection);
-        emit messageListModelChanged(messageListModel_);
-    }
 };
 
 #endif // GUIBRIDGE_HPP

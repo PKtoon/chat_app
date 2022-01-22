@@ -2,22 +2,20 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.12
 import QtQml.Models 2.12
-import pkChat.ContactListModel 1.0
 
 Item {
-    property PKContact listModel
-    property ListView contactList: contactList
+    property string currentUser
+    property int currentIndex
     RowLayout {
         anchors.fill: parent
         Frame {
             Layout.fillHeight: true
             Layout.fillWidth: true
             ListView {
-                id: contactList
-                model: listModel
+                id: contactListView
+                model: guiB.contactListModel
                 anchors.fill: parent
                 clip: true
-                property string currentUser
                 delegate: ItemDelegate {
                     width: ListView.view.width
                     highlighted: ListView.isCurrentItem
@@ -29,8 +27,8 @@ Item {
                     }
                     text: name
                     onClicked: {
-                        contactList.currentIndex = index
-                        contactList.currentUser = name
+                        currentIndex = index
+                        currentUser = name
                         guiB.currentUser(index)
                     }
                 }
