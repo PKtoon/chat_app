@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.14)
 
 project(ChatAppGui LANGUAGES CXX)
 
-include_directories(${CMAKE_SOURCE_DIR}/external/SQLite/)
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
@@ -26,32 +24,16 @@ if(ANDROID)
     endif()
 endif()
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick Multimedia REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick Multimedia REQUIRED)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Quick REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Quick REQUIRED)
 
 if(ANDROID)
     add_library(ChatAppGui SHARED
-        main.cpp
-        messagelistmodel.cpp
-        messagelistmodel.hpp
-        contactlistmodel.cpp
-        contactlistmodel.hpp
-        guibridge.hpp
-        guibridge.cpp
-        ../client/client.hpp
         qml.qrc
         ../../resources.qrc
     )
 else()
     add_executable(ChatAppGui
-      main.cpp
-      messagelistmodel.cpp
-      messagelistmodel.hpp
-      contactlistmodel.cpp
-      contactlistmodel.hpp
-      guibridge.hpp
-      guibridge.cpp
-      ../client/client.hpp
       qml.qrc
       ../../resources.qrc
     )
@@ -59,5 +41,4 @@ endif()
 
 target_compile_definitions(ChatAppGui
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
-target_link_libraries(ChatAppGui
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::Multimedia clientlib)
+target_link_libraries(ChatAppGui PRIVATE guibridge)

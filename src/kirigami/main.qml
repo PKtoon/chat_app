@@ -1,90 +1,60 @@
-import QtQuick 2.0
-import QtQuick.Dialogs 1.2
-import org.kde.kirigami 2.12 as Kirigami
+import QtQuick 2.12
+import QtQuick.Controls 2.5
+import QtQuick.Layouts 1.12
 import pkChat.GuiBridge 1.0
-import pkChat.ContactListModel 1.0
-import pkChat.MessageListModel 1.0
+import org.kde.kirigami 2.12 as Kirigami
 
-Kirigami.ApplicationWindow {
-    id: root
-    property ContactListView contactList
+ApplicationWindow {
+    width: 640
+    height: 480
+    visible: true
 
-    color: Kirigami.Theme.Window
-
-    globalDrawer: MenuArea{}
-    PKContact {
-        id: pkContactList
-    }
-    PKMessageList {
-        id: pkMessageList
-    }
-
-
+    menuBar: MenusArea{}
 
     PKGui {
         id: guiB
-        contactListModel: pkContactList
-        messageListModel: pkMessageList
-        onSetConnectInformSignal: {
-            messageDialog.title="Connection Inform"
-            messageDialog.text=text
-            messageDialog.open()
-            //            pageStack.pop()
-        }
-        onSetSignInUpInformSignal: {
-            messageDialog.title="Auth Info"
-            messageDialog.text=text
-            messageDialog.open()
-            //            pageStack.push(contactList)
-        }
+
+        onSetConnectInformSignal: menuBar.informConnect.text = text
+        onSetSignInUpInformSignal: menuBar.informSignInUp.text = text
         onFindContactSuccessSignal: {
-            messageDialog.title="Find Info"
-            messageDialog.text="Added Contact"
-            guiB.insertContact(text)
-            messageDialog.open()
+            if(menuBar.findContactTextField.text === text)
+            {
+                menuBar.addButton.enabled=true
+                menuBar.informFindContact.text = text+" found"
+            }
         }
-        onFindContactFailureSignal: {
-            messageDialog.title="Find Info"
-            messageDialog.text=error
-            messageDialog.open()
+
+        onFindContactFailureSignal: menuBar.informFindContact.text = error
+        onFindGroupSuccessSignal: {
+            if(menuBar.findGroupTextField.text === text)
+            {
+                menuBar.addGroupButton.enabled=true
+                menuBar.informFindGroup.text = text+" found"
+            }
         }
+
+        onFindGroupFailureSignal: menuBar.informFindGroup.text = error
         onMessageReceivedSignal: {
-            if (root.contactList.contactView.currentUser === name)
-                guiB.currentUser(root.contactList.contactView.currentIndex)
-            root.contactList.contactView.positionViewAtEnd()
+            if (contactView.currentUser === name)
+            {
+                guiB.currentUser(contactView.currentIndex)
+            }
         }
     }
 
-    pageStack.initialPage: ContactListView {
-        id: contactList
-        title:"Contacts"
-        Component.onCompleted: root.contactList=contactList
-        contactModel: pkContactList
-    }
-
-//    Component {
-//        id: contactList
-//        Kirigami.Page {
-//            title: "Contacts"
-//            property ListView list: contactListView
-//            ContactListView {
-//                id: contactListView
-//                anchors.fill: parent
-//                model: pkContactList
-//            }
-//        }
-//    }
-
-    Component {
-        id: messageArea
+    RowLayout {
+        anchors.fill: parent
+        anchors.topMargin: 50
+        ContactList {
+            id: contactView
+            Layout.fillHeight: true
+            Layout.minimumWidth: parent.width/3
+        }
         MessageArea {
-            messageListModel: pkMessageList
-            contactList: root.contactList.contactView
+            id: messageView
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            Layout.minimumWidth: 2*parent.width/3
         }
     }
-
-    MessageDialog {
-        id: messageDialog
-    }
-
 }
