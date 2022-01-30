@@ -59,6 +59,8 @@ public slots:
     void currentUser(int index);
     void insertContact(QString name);
     void insertGroup(QString name);
+    void createGroup(QString groupName);
+    void setCheck(int index, bool state);
 };
 
 #endif // GUIBRIDGE_HPP

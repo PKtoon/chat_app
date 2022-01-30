@@ -56,7 +56,7 @@ public:
     Client::Error queueMessage(Stream data);                                                        //Queues message to be sent
     void ping();                                                                                    //pings back server
     void findEntity(std::string entityName, Header head);                                                             //Finds contact
-
+    void createGroup(std::string groupName, std::vector<std::string> contactList);
     //networking
     void connect(std::string host, std::string port, std::function<void(asio::error_code)> callBack);
     void disconnect();

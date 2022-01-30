@@ -160,6 +160,23 @@ void GuiBridge::insertGroup(QString name)
     emit resetContactModel();
 }
 
+void GuiBridge::createGroup(QString groupName)
+{
+    std::vector<std::string> list;
+    int size = contactListModel_.rowCount(QModelIndex());
+
+    for(int i = 0; i < size; i++) {
+        if(contactListModel_.check(i))
+           list.push_back(contactListModel_.getContact(i).toStdString());
+    }
+    client.createGroup(groupName.toStdString(),list);
+}
+
+void GuiBridge::setCheck(int index, bool state)
+{
+    contactListModel_.check(index,state);
+}
+
 void GuiBridge::connect(QString host, QString port)
 {
     if(host.isEmpty() || port.isEmpty())

@@ -44,6 +44,14 @@ public:
     int getType(int index) {
         return std::get<1>(contactList_[index]);
     }
+    bool check(int index)
+    {
+        return std::get<2>(contactList_[index]);
+    }
+    void check(int index, bool state)
+    {
+        std::get<2>(contactList_[index]) = state;
+    }
     bool findContact(QString name);
 
 public slots:

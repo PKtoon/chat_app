@@ -181,6 +181,27 @@ void Client::findEntity(std::string entityName, Header head)
     queueMessage(data);
 }
 
+void Client::createGroup(std::string groupName, std::vector<std::string> contactList)
+{
+    if(contactList.empty())
+        return;
+    std::string list;
+    list += contactList[0];
+
+    for(int i = 1; i < contactList.size(); i++) {
+        list += ";"+contactList[i];
+    }
+    list += ";";
+    Stream stream;
+    stream.sender = name_;
+    stream.receiver = "server";
+    stream.head = Header::group_create;
+    stream.data1 = groupName;
+    stream.data2 = list;
+
+    queueMessage(stream);
+}
+
 void Client::runIOContext()
 {
     io_.restart();

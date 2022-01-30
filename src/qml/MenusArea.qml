@@ -284,11 +284,33 @@ Item {
                             anchors.fill: parent
                             CheckBox {
                                 checked: check
-                                onCheckStateChanged: check = checked
+//                                onCheckStateChanged: check = checked
+                                onCheckedChanged: guiB.setCheck(index,checked)
                             }
                             Label {
                                 text: name
                             }
+                        }
+                    }
+                }
+            }
+            GroupBox {
+                Layout.fillWidth: true
+                Layout.minimumHeight: Layout.height/3
+                RowLayout {
+                    anchors.fill: parent
+                    TextField {
+                        id: groupNameField
+                        Layout.fillWidth: true
+                    }
+                    Button {
+                        text: "Create"
+                        Layout.minimumWidth: parent.width/3
+                        onClicked: {
+                            if (groupNameField.text !== "" ) {
+                                guiB.createGroup(groupNameField.text)
+                            }
+                            groupNameField.text = ""
                         }
                     }
                 }
