@@ -13,14 +13,15 @@ class ContactListModel : public QAbstractListModel
     QML_ELEMENT
 #endif
 
-    QVector<QPair<QString,int>> contactList_;
+    QVector<std::tuple<QString,int,bool>> contactList_;
 
 public:
     Client* client_;
 
     enum ContactRole {
         NameRole = Qt::UserRole,
-        TypeRole
+        TypeRole,
+        CheckRole
     };
 
     explicit ContactListModel(QObject *parent = nullptr);
@@ -38,10 +39,10 @@ public:
 
     void resetList();
     QString getContact(int index){
-        return contactList_[index].first;
+        return std::get<0>(contactList_[index]);
     }
     int getType(int index) {
-        return contactList_[index].second;
+        return std::get<1>(contactList_[index]);
     }
     bool findContact(QString name);
 
@@ -55,6 +56,7 @@ protected:
         QHash<int, QByteArray> roles;
         roles[NameRole] = "name";
         roles[TypeRole] = "type";
+        roles[CheckRole] = "check";
         return roles;
     }
 

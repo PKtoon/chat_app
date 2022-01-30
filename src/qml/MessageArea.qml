@@ -54,7 +54,7 @@ Item {
                     Layout.minimumWidth: parent.width/3
                     onClicked: {
                         if (guiB.contactListModel.currentIndex !== -1 && messageField.text !== "" ) {
-                            guiB.writer(guiB.contactListModel.currentIndex, messageField.text)
+                            guiB.writer(guiB.contactView.currentIndex, messageField.text)
                         }
                         messageField.text = ""
                     }

@@ -13,6 +13,9 @@ ApplicationWindow {
     PKGui {
         id: guiB
 
+        property ContactList contactView: contactView
+        property MessageArea messageView: messageView
+
         onSetConnectInformSignal: menuBar.informConnect.text = text
         onSetSignInUpInformSignal: menuBar.informSignInUp.text = text
         onFindContactSuccessSignal: {

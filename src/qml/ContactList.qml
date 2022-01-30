@@ -5,7 +5,7 @@ import QtQml.Models 2.12
 
 Item {
     property string currentUser
-    property int currentIndex
+    property int currentIndex: contactListView.currentIndex
     RowLayout {
         anchors.fill: parent
         Frame {

@@ -26,9 +26,11 @@ QVariant ContactListModel::data(const QModelIndex &index, int role) const
     case Qt::TextAlignmentRole:
         return Qt::AlignCenter;
     case NameRole:
-        return contactList_[index.row()].first;
+        return std::get<0>(contactList_[index.row()]);
     case TypeRole:
-        return contactList_[index.row()].second;
+        return std::get<1>(contactList_[index.row()]);
+    case CheckRole:
+        return std::get<2>(contactList_[index.row()]);
     }
     return QVariant();
 }
@@ -38,6 +40,7 @@ bool ContactListModel::insertRows(int row, int count, const QModelIndex &parent)
     beginInsertRows(parent, row, row + count - 1);
     // FIXME: Implement me!
     endInsertRows();
+    return true;
 }
 
 bool ContactListModel::removeRows(int row, int count, const QModelIndex &parent)
@@ -45,6 +48,7 @@ bool ContactListModel::removeRows(int row, int count, const QModelIndex &parent)
     beginRemoveRows(parent, row, row + count - 1);
     // FIXME: Implement me!
     endRemoveRows();
+    return true;
 }
 
 void ContactListModel::resetList()
@@ -56,7 +60,7 @@ void ContactListModel::resetList()
     beginResetModel();
     contactList_.clear();
     for(auto& a : vlist){
-        contactList_.push_back(QPair<QString,int>(a.first.c_str(),a.second));
+        contactList_.push_back({a.first.c_str(),a.second,false});
     }
     endResetModel();
 }
@@ -64,7 +68,7 @@ void ContactListModel::resetList()
 bool ContactListModel::findContact(QString name)
 {
     for(auto& a : contactList_) {
-        if(a.first == name)
+        if(std::get<0>(a) == name)
             return true;
     }
     return false;

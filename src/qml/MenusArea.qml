@@ -270,34 +270,29 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
             }
 
-        GroupBox {
-            //implicitHeight: parent.height * 2/3
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            ListView {
-                model: guiB.contactListModel
-                anchors.fill: parent
-                delegate: ItemDelegate {
-                    width: ListView.width
-                    visible: (type == 1) ? true : false
-                    RowLayout{
-                        CheckBox {
-                            checked: false
-                        }
-                        Label {
-                            text: name
+            GroupBox {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                ListView {
+                    model: guiB.contactListModel
+                    anchors.fill: parent
+                    clip: true
+                    delegate: ItemDelegate {
+                        width: ListView.view.width
+                        visible: (type == 0) ? true : false
+                        RowLayout{
+                            anchors.fill: parent
+                            CheckBox {
+                                checked: check
+                                onCheckStateChanged: check = checked
+                            }
+                            Label {
+                                text: name
+                            }
                         }
                     }
                 }
             }
         }
-}
-
-        /*height: 500
-        width: 500
-            GroupList {
-                anchors.fill: parent
-                contactList: contactList
-            }*/
     }
 }
