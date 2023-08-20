@@ -13,6 +13,6 @@ int main(int argc, char* argv[])
     std::cerr<<"This is debug build! Only for testing purpose!\n";
 #endif
     Server s(std::atoi(argv[1]), argv[2]);
-
+    s.run();
     return 0;
 }

@@ -210,3 +210,10 @@ pqxx::result Server::getGroup(std::string groupName)
     return db.exec("SELECT groupname FROM group_members WHERE groupname = '"+groupName+"';");
 }
 
+void Server::initDB()
+{
+    db.execCommit("CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY NOT NULL, passwd TEXT NOT NULL);");
+    db.execCommit("CREATE TABLE IF NOT EXISTS pending (ID SERIAL PRIMARY KEY NOT NULL, username TEXT NOT NULL, message TEXT NOT NULL, timestamp TIMESTAMPTZ NOT NULL);");
+    db.execCommit("CREATE TABLE IF NOT EXISTS group_members (ID INTEGER PRIMARY KEY NOT NULL, username TEXT NOT NULL, groupname TEXT NOT NULL);");
+}
+

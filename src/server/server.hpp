@@ -56,12 +56,15 @@ class Server
 
 public:
     Server(unsigned short port, std::string dbUri) : endpoint{asio::ip::tcp::v6(),port}, acceptor{io,endpoint}, db{dbUri}
+    {}
+  
+    asio::io_context::count_type run()
     {
+        initDB();
         accept();
         deliveryScheduler();
-        io.run();
+        return io.run();
     }
-  
     User* getActiveUser(std::string);                                   //Gives User pointer of currently active user
     void removeMe(User*);                                               //Users call this function when they disconnects from client which removes them from active users list and destroys them
     void queueDelivery(Stream);                                         //queues the message to deliveryList of server which later delivers it
@@ -76,6 +79,7 @@ public:
     std::list<std::string> getGroupMembers(std::string groupName);      //Retrieves a list of members belonging to a particular group
     void createGroup(Stream data);                                      //Creates a group
     pqxx::result getGroup(std::string groupName);                       //Get name of group from database
+    void initDB();
 };
 
 #endif // SERVER_H
