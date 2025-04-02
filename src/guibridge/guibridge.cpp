@@ -10,7 +10,11 @@ GuiBridge::GuiBridge(QObject *parent) : QObject(parent)
     contactListModel_.client_ = &client;
     QObject::connect(this,&GuiBridge::resetMessageModel, &messageListModel_, &MessageListModel::resetModel,Qt::QueuedConnection);
     messageListModel_.client = &client;
+#if (QT_VERSION_MAJOR < 6)
     player.setMedia(QUrl("qrc:/resources/assets/Done_for_You/done-for-you-612.ogg"));
+#else
+    player.setSource(QUrl("qrc:/resources/assets/Done_for_You/done-for-you-612.ogg"));
+#endif
 }
 
 GuiBridge::~GuiBridge()
