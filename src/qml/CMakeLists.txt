@@ -39,6 +39,8 @@ else()
     )
 endif()
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
 target_compile_definitions(ChatAppGui
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 target_link_libraries(ChatAppGui PRIVATE guibridge)
