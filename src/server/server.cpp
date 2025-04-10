@@ -1,6 +1,11 @@
 #include "server.hpp"
 #include "user.hpp"
 
+enum GroupPrivilege {
+    admin,
+    member
+};
+
 void Server::accept()
 {
     acceptor.async_accept([this](asio::error_code error, asio::ip::tcp::socket socket)
@@ -214,6 +219,6 @@ void Server::initDB()
 {
     db.execCommit("CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY NOT NULL, passwd TEXT NOT NULL);");
     db.execCommit("CREATE TABLE IF NOT EXISTS pending (ID SERIAL PRIMARY KEY NOT NULL, username TEXT NOT NULL, message TEXT NOT NULL, timestamp TIMESTAMPTZ NOT NULL);");
-    db.execCommit("CREATE TABLE IF NOT EXISTS group_members (ID INTEGER PRIMARY KEY NOT NULL, username TEXT NOT NULL, groupname TEXT NOT NULL);");
+    db.execCommit("CREATE TABLE IF NOT EXISTS group_members (ID INTEGER PRIMARY KEY NOT NULL, username TEXT NOT NULL, groupname TEXT NOT NULL, privilege INTEGER NOT NULL);");
 }
 

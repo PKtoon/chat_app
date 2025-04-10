@@ -20,7 +20,7 @@
  * Required Tables in PostgreSQL database:
  *      create table users (username text PRIMARY KEY NOT NULL, passwd text NOT NULL);
  *      create table pending (ID serial PRIMARY KEY NOT NULL, username text NOT NULL, message text NOT NULL, timestamp TIMESTAMPTZ NOT NULL);
- *      create table group_members (ID integer PRIMARY KEY NOT NULL, username text NOT NULL, groupname text NOT NULL);
+ *      create table group_members (ID integer PRIMARY KEY NOT NULL, username text NOT NULL, groupname text NOT NULL, privilege INTEGER NOT NULL);
  *
  *  TODO:
  *      1. In createGroup(), usernames are separated using ';', so prevent use of that symbol in username or do something to avoid potential error in username.
