@@ -5,9 +5,14 @@
 #endif
 #include "mainwindow.hpp"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
+    center(this),
+    contactsListWidget(&center),
+    message(&center),
+    msgIn(&center),
+    sendButt("Send", &center)
 {
-    setCentralWidget(center);
+    setCentralWidget(&center);
     createMenuBar();
     decorate();
 }
@@ -26,49 +31,49 @@ void MainWindow::createMenuBar()
     QMenu *connMenu = menuBar()->addMenu(tr("&Connect"));
 
     const QIcon connIcon = QIcon::fromTheme("network-wireless");
-    QAction *connAct = new QAction(connIcon,tr("&Connect"),this);
-    connect(connAct,&QAction::triggered,this,&MainWindow::initConnect);
+    QAction *connAct = new QAction(connIcon, tr("&Connect"), this);
+    connect(connAct, &QAction::triggered, this, &MainWindow::initConnect);
     connMenu->addAction(connAct);
     
-    QAction *disConnAct = new QAction(connIcon,tr("&Disconnect"),this);
-    connect(disConnAct,&QAction::triggered,this,&MainWindow::disConnect);
+    QAction *disConnAct = new QAction(connIcon, tr("&Disconnect"), this);
+    connect(disConnAct, &QAction::triggered, this, &MainWindow::disConnect);
     connMenu->addAction(disConnAct);
 
     QMenu* userMenu = menuBar()->addMenu(tr("&User"));
 
-    QAction *signInAct = new QAction(connIcon,tr("Sign &In"),this);
-    connect(signInAct,&QAction::triggered,this,&MainWindow::initSignIn);
+    QAction *signInAct = new QAction(connIcon, tr("Sign &In"), this);
+    connect(signInAct, &QAction::triggered, this, &MainWindow::initSignIn);
     userMenu->addAction(signInAct);
 
-    QAction *signUpAct = new QAction(connIcon,tr("Sign &Up"),this);
-    connect(signUpAct,&QAction::triggered,this,&MainWindow::initSignUp);
+    QAction *signUpAct = new QAction(connIcon, tr("Sign &Up"), this);
+    connect(signUpAct, &QAction::triggered, this, &MainWindow::initSignUp);
     userMenu->addAction(signUpAct);
     
     QMenu* msgMenu = menuBar()->addMenu(tr("&Message"));
     
-    QAction *newContact = new QAction(connIcon,tr("&New Contact"),this);
-    connect(newContact,&QAction::triggered,this,&MainWindow::newContact);
+    QAction *newContact = new QAction(connIcon, tr("&New Contact"), this);
+    connect(newContact, &QAction::triggered, this, &MainWindow::newContact);
     msgMenu->addAction(newContact);
 }
 
 void MainWindow::decorate()
 {
-    QGridLayout* mainLayout = new QGridLayout(center);
+    QGridLayout* mainLayout = new QGridLayout(&center);
 
-    message->setReadOnly(true);
+    message.setReadOnly(true);
     
-    mainLayout->addWidget(contactsListWidget,0,0,2,1);
-    mainLayout->addWidget(message,0,1,1,2);
-    mainLayout->addWidget(msgIn,1,1);
-    mainLayout->addWidget(sendButt,1,2);
+    mainLayout->addWidget(&contactsListWidget, 0, 0, 2, 1);
+    mainLayout->addWidget(&message, 0, 1, 1, 2);
+    mainLayout->addWidget(&msgIn, 1, 1);
+    mainLayout->addWidget(&sendButt, 1, 2);
     
     
-    connect(contactsListWidget,&QListWidget::itemChanged,this,&MainWindow::displayMessage);
-    connect(contactsListWidget,&QListWidget::itemClicked,this,&MainWindow::displayMessage);
-    connect(sendButt,&QPushButton::clicked,this,&MainWindow::sendMessage);
-    connect(this,&MainWindow::insertText,message,&QTextEdit::insertPlainText);
+    connect(&contactsListWidget, &QListWidget::itemChanged, this, &MainWindow::displayMessage);
+    connect(&contactsListWidget, &QListWidget::itemClicked, this, &MainWindow::displayMessage);
+    connect(&sendButt, &QPushButton::clicked, this, &MainWindow::sendMessage);
+    connect(this, &MainWindow::insertText, &message, &QTextEdit::insertPlainText);
     
-    center->setLayout(mainLayout);
+    center.setLayout(mainLayout);
 }
 
 void MainWindow::setContactList()
@@ -79,18 +84,18 @@ void MainWindow::setContactList()
         qInfo()<<client.getDBError().c_str();
 
     //Experimental:
-    contactsListWidget->clear();
+    contactsListWidget.clear();
 
     //TODO: possible memory leak
     for(auto& a : list)
-        new QListWidgetItem(a.first.c_str(),contactsListWidget);
+        new QListWidgetItem(a.first.c_str(), &contactsListWidget);
     if(!list.empty())
-        emit contactsListWidget->itemClicked(contactsListWidget->item(0));
+        emit contactsListWidget.itemClicked(contactsListWidget.item(0));
 }
 
 QListWidgetItem* MainWindow::makeContact(const QString& text)
 {
-    return new QListWidgetItem(text,contactsListWidget);
+    return new QListWidgetItem(text, &contactsListWidget);
 }
 
 void MainWindow::processMessage(Stream data)
@@ -99,26 +104,26 @@ void MainWindow::processMessage(Stream data)
     if(!user)
         user = makeContact(data.sender.c_str());
 
-    emit contactsListWidget->itemChanged(user);
+    emit contactsListWidget.itemChanged(user);
 }
 
 void MainWindow::initUserAuth(bool flag)
 {
-    connDialog = new ConnDialog(this);
+    authDialog = new ConnDialog(this);      // this dialog will delete itself after closing
     if(flag)
-        connDialog->setWindowTitle("Sign Up");
+        authDialog->setWindowTitle("Sign Up");
     else
-        connDialog->setWindowTitle("Sign In");
-    connDialog->userAuthBox(flag);
+        authDialog->setWindowTitle("Sign In");
+    authDialog->userAuthBox(flag);
 
-    connect(connDialog,&ConnDialog::doUserAuth, this, &MainWindow::doUserAuth);
+    connect(authDialog, &ConnDialog::doUserAuth, this, &MainWindow::doUserAuth);
 
-    connDialog->show();
+    authDialog->show();
 }
 
 QListWidgetItem* MainWindow::getUser(QString user)
 {
-    auto list = contactsListWidget->findItems(user,Qt::MatchExactly);
+    auto list = contactsListWidget.findItems(user, Qt::MatchExactly);
     if(!list.isEmpty())
         return (*(list.begin()));
     return nullptr;
@@ -155,18 +160,18 @@ void MainWindow::processData(Stream data)
             processMessage(data);
             break;
         case Header::signin|Header::ack:
-            connDialog->setCancelButtonText("Close");
-            connDialog->setInform("Signed In Successfully");
+            authDialog->setCancelButtonText("Close");
+            authDialog->setInform("Signed In Successfully");
             setContactList();
             break;
         case Header::signup|Header::ack:
-            connDialog->setCancelButtonText("Close");
-            connDialog->setInform("Signed Up Successfully");
+            authDialog->setCancelButtonText("Close");
+            authDialog->setInform("Signed Up Successfully");
             setContactList();
             break;
         case Header::signin|Header::error:
         case Header::signup|Header::error:
-            connDialog->setInform(data.data1.c_str());
+            authDialog->setInform(data.data1.c_str());
             break;
         case Header::find_contact|Header::ack:
             if(newContactDialog->text().toStdString() == data.data1){
@@ -187,7 +192,7 @@ void MainWindow::initConnect()
     connDialog = new ConnDialog(this);
     connDialog->setWindowTitle("Connect");
     connDialog->connectBox();
-    connect(connDialog,&ConnDialog::doConnect, this, &MainWindow::doConnect);
+    connect(connDialog, &ConnDialog::doConnect, this, &MainWindow::doConnect);
     
 #ifndef NDEBUG
     //values below are for testing purpose
@@ -205,7 +210,7 @@ void MainWindow::doConnect(const QString host, const QString port)
         return;
     }
 
-    client.connect(host.toStdString(),port.toStdString(),[this](asio::error_code error)
+    client.connect(host.toStdString(), port.toStdString(), [this](asio::error_code error)
     {
         if(error)
         {
@@ -242,12 +247,12 @@ void MainWindow::disConnect()
 
 void MainWindow::displayMessage(QListWidgetItem* item)
 {
-    message->clear();
-    contactsListWidget->setCurrentItem(item);
+    message.clear();
+    contactsListWidget.setCurrentItem(item);
     
     std::vector<std::pair<std::string,std::string>> messages;
 
-    if(!client.getMessages(item->text().toStdString(),messages))
+    if(!client.getMessages(item->text().toStdString(), messages))
         qInfo()<<client.getDBError().c_str();
 
     for(auto& a : messages)
@@ -256,12 +261,12 @@ void MainWindow::displayMessage(QListWidgetItem* item)
         emit insertText(msg);
     }
 
-    message->ensureCursorVisible();
+    message.ensureCursorVisible();
 }
 
 void MainWindow::sendMessage()
 {
-    if(msgIn->text().isEmpty() || !(contactsListWidget->currentItem()) || client.name().empty())
+    if(msgIn.text().isEmpty() || !(contactsListWidget.currentItem()) || client.name().empty())
     {
         return;
     }
@@ -269,22 +274,22 @@ void MainWindow::sendMessage()
     Stream data;
     data.head = Header::message;
     data.sender = client.name();
-    data.receiver = contactsListWidget->currentItem()->text().toStdString();
-    data.data1 = msgIn->text().toStdString();
-    QListWidgetItem* user = contactsListWidget->currentItem();
+    data.receiver = contactsListWidget.currentItem()->text().toStdString();
+    data.data1 = msgIn.text().toStdString();
+    QListWidgetItem* user = contactsListWidget.currentItem();
     client.queueMessage(data);
 #ifndef NDEBUG
     std::cerr<<"queued:   "<<data.getSerialized()<<std::endl;
 #endif
-    emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution else it will fail in runtime with 'unable to create child' error
-    msgIn->clear();
+    emit contactsListWidget.itemChanged(user);             //emit to display message using main thread of execution else it will fail in runtime with 'unable to create child' error
+    msgIn.clear();
 }
 
 void MainWindow::newContact()
 {
-    newContactDialog = new NewContactDialog(this);
-    connect(newContactDialog,&NewContactDialog::createContact,this,&MainWindow::createContact);
-    connect(newContactDialog,&NewContactDialog::findContact,this,&MainWindow::findContact);
+    newContactDialog = new NewContactDialog(this);      // this dialog will automatically delete itself after closing
+    connect(newContactDialog, &NewContactDialog::createContact, this, &MainWindow::createContact);
+    connect(newContactDialog, &NewContactDialog::findContact, this, &MainWindow::findContact);
 
     newContactDialog->show();
 }
@@ -299,7 +304,7 @@ void MainWindow::createContact(const QString& text)
     }
 
     newContactDialog->close();      
-    emit contactsListWidget->itemChanged(user);             //emit to display message using main thread of execution
+    emit contactsListWidget.itemChanged(user);             //emit to display message using main thread of execution
 }
 
 void MainWindow::findContact(const QString &text)
@@ -334,16 +339,16 @@ void MainWindow::doUserAuth(const QString userName, const QString passWD, const 
 {
     if(userName.isEmpty() || passWD.isEmpty())
     {
-        connDialog->setInform("All fields are necessary");
+        authDialog->setInform("All fields are necessary");
         return;
     }
     if(!client.getSocket()->is_open())
     {
-        connDialog->setInform("Client is not connected");
+        authDialog->setInform("Client is not connected");
         return;
     }
     if(flag)
-        initialize(userName,passWD,Header::signup);
+        initialize(userName, passWD, Header::signup);
     else
-        initialize(userName,passWD,Header::signin);
+        initialize(userName, passWD, Header::signin);
 }

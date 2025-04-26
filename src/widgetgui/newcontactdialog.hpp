@@ -7,13 +7,13 @@ class NewContactDialog : public QDialog
 {
     Q_OBJECT
     
-    QGridLayout* gridMsg = new QGridLayout(this);
+    QGridLayout gridMsg;
 
-    QLabel* conLabel = new QLabel("Name: ", this);
-    QLineEdit* conInput = new QLineEdit(this);
-    QPushButton* createCon = new QPushButton("Create",this);
-    QPushButton* findCon = new QPushButton("Find",this);
-    QLabel* informLabel = new QLabel(this);
+    QLabel conLabel;
+    QLineEdit conInput;
+    QPushButton createCon;
+    QPushButton findCon;
+    QLabel informLabel;
     
 public:
     NewContactDialog(QWidget *parent = nullptr);

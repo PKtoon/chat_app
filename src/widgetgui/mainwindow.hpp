@@ -36,16 +36,17 @@ private:
     Client client{};
     std::thread ioThread;
     bool isThreadRunning{false};
-    
+
     // GUI components
     ConnDialog* connDialog;
+    ConnDialog* authDialog;
     NewContactDialog* newContactDialog;
-    
-    QWidget* center = new QWidget(this);
-    QListWidget* contactsListWidget  = new QListWidget(center);
-    QTextEdit* message = new QTextEdit(center);
-    QLineEdit* msgIn = new QLineEdit(center);
-    QPushButton* sendButt = new QPushButton("Send",center);
+
+    QWidget center;
+    QListWidget contactsListWidget;
+    QTextEdit message;
+    QLineEdit msgIn;
+    QPushButton sendButt;
     
     void createMenuBar();
     void decorate();

@@ -2,23 +2,26 @@
 #define CONNDIALOG_H
 
 #include <QtWidgets>
+#ifndef NDEBUG
+#include <iostream>
+#endif
 
 class ConnDialog : public QDialog
 {
     Q_OBJECT
     
-    QGridLayout* grid = new QGridLayout(this);
-    QLabel* name = new QLabel("Name:",this);
-    QLineEdit* nameInput = new QLineEdit(this);
-    QLabel* passwd = new QLabel("Password:",this);
-    QLineEdit* passwdInput = new QLineEdit(this);
-    QLabel* hostLabel = new QLabel("Host:",this);
-    QLineEdit* hostInput = new QLineEdit(this);
-    QLabel* portLabel = new QLabel("Port:",this);
-    QLineEdit* portInput = new QLineEdit(this);
-    QPushButton* connButton = new QPushButton("Connect",this);
-    QPushButton* cancel = new QPushButton("Cancel",this);
-    QLabel* inform = new QLabel(this);
+    QGridLayout grid;
+    QLabel name;
+    QLineEdit nameInput;
+    QLabel passwd;
+    QLineEdit passwdInput;
+    QLabel hostLabel;
+    QLineEdit hostInput;
+    QLabel portLabel;
+    QLineEdit portInput;
+    QPushButton connButton;
+    QPushButton cancel;
+    QLabel inform;
     
     void decorate();
     
