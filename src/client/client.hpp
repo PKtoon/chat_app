@@ -63,6 +63,7 @@ public:
     void runIOContext();                                                                                    //Runs the 'default' executor
     asio::ip::tcp::socket* getSocket();
     void newSocket();
+    bool isConnectedToServer();
 
     //db
     std::string getDBError();                                                                               //Returns SQLite3 error message

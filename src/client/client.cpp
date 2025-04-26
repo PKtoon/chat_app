@@ -354,3 +354,8 @@ bool Client::insertMessage(std::string subject, std::string sender, std::string 
 
     return result;
 }
+
+bool Client::isConnectedToServer()
+{
+    return isConnected;
+}
