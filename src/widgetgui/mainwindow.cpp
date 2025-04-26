@@ -15,6 +15,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     setCentralWidget(&center);
     createMenuBar();
     decorate();
+#if (QT_VERSION_MAJOR < 6)
+    player.setMedia(QUrl("qrc:/resources/assets/Done_for_You/done-for-you-612.ogg"));
+#else
+    player.setSource(QUrl("qrc:/resources/assets/Done_for_You/done-for-you-612.ogg"));
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -158,6 +163,7 @@ void MainWindow::processData(Stream data)
     {
         case Header::message:
             processMessage(data);
+            player.play();
             break;
         case Header::signin|Header::ack:
             authDialog->setCancelButtonText("Close");
@@ -232,6 +238,20 @@ void MainWindow::doConnect(const QString host, const QString port)
             client.runIOContext();
             //isThreadRunning = false;
         });
+    }
+    else if(!client.isConnectedToServer())
+    {
+        if(ioThread.joinable())
+        {
+            ioThread.join();
+            isThreadRunning = false;
+            ioThread = std::thread([this]()
+            {
+                isThreadRunning = true;
+                client.runIOContext();
+                //isThreadRunning = false;
+            });
+        }
     }
 }
 

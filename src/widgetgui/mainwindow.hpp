@@ -4,6 +4,7 @@
 #include "../client/client.hpp"
 
 #include <QMainWindow>
+#include <QtMultimedia/QMediaPlayer>
 
 #include "conndialog.hpp"
 #include "newcontactdialog.hpp"
@@ -47,6 +48,7 @@ private:
     QTextEdit message;
     QLineEdit msgIn;
     QPushButton sendButt;
+    QMediaPlayer player;
     
     void createMenuBar();
     void decorate();
